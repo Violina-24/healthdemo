@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Login to MBBS Counselling</title>
+    <link rel="stylesheet" type="text/css" href="/css/styles.css">
+
+</head>
+<body class="container">
+    <div class="card">
+        <h2 class="heading">LogIn Your MBBS Councelling</h2>
+        <form id="loginform">
+            <div>
+                <label class="label-login">Email</label>
+                <input type="text" name="email" required
+                       class="input-field-login"/>
+            </div>
+            <br>
+        <div>
+            <label class="label-login">Password</label>
+            <input type="password" name="password" required
+                   class="input-field-login"/>
+        </div>
+        <button type="submit"
+                class="submit">Sign In</button>
+    </form>
+<div>
+    <p class="label-bottom-login" style="margin-left:20%; display: block;
+      font-size: 1rem;
+      font-weight: 500;">Don't have an account? <a href="/register" class="link-login">Register here</a>
+    </p>
+</div>
+</div>
+    <script>
+        document.getElementById("loginform").addEventListener("submit", function(event) {
+    event.preventDefault(); // Prevent page reload
+
+    // Get form values
+    const formData = {
+        email: document.querySelector("input[name='email']").value,
+        password: document.querySelector("input[name='password']").value
+    };
+
+    // Send POST request
+    fetch("http://localhost:8082/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())  // Expect JSON response
+    .then(data => {
+        if (data.message === "Login Successful") {
+            alert("Login Successful!");
+            window.location.href = "/home"; // Redirect to home
+        } else {
+            alert("Invalid email or password!");
+        }
+    })
+    .catch(error => {
+        console.error("Error:", error);
+        alert("An error occurred. Please try again.");
+    });
+});
+    </script>
+
+</body>
+</html>
