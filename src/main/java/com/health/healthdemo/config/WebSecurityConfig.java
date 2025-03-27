@@ -13,19 +13,19 @@ public class WebSecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(AbstractHttpConfigurer::disable) // Disable CSRF for testing
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/css/**", "/js/**", "/images/**",
-                                "/api/login", "/register", "/login", "/home",
-                                "/favicon.ico", "/studentform", "/qualification","/application/qualification",
-                                "/application/api/user" ,"api/user", "/api/get-user-details", "/save-student-form"
-                                ,"/api/categories","application/parentsinfo","/parentsinfo", "/index"// Allow user API
-                        ).permitAll()
+                        .requestMatchers("/css/**", "/js/**", "/images/**").permitAll() // ✅ Allow static files
+                        .requestMatchers("/", "/api/login", "/register", "/login", "/home",
+                                "/favicon.ico", "/studentform", "/qualification", "/application/qualification",
+                                "/application/api/user", "api/user", "/api/get-user-details", "/save-student-form",
+                                "/api/categories", "application/parentsinfo", "/parentsinfo", "/index")
+                        .permitAll()
                         .requestMatchers("/api/get-user-details").authenticated()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED) // ✅ Keep session active
+                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                 )
                 .formLogin(login -> login
                         .loginPage("/login")
@@ -40,4 +40,5 @@ public class WebSecurityConfig {
 
         return http.build();
     }
+
 }

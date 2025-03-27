@@ -257,8 +257,8 @@ background-color:blue;
 
 /* Custom styles */
 .emblem {
-    height: 64px;
-    width: auto;
+    height: 20px;
+    width: 20px;
 }
 
 /* Hover effects for buttons */
@@ -276,9 +276,9 @@ background-color:blue;
 }
 
 /* Responsive adjustments */
-@media (max-width: 768px) {
+@media (max-width: 500px) {
     .emblem {
-        height: 48px;
+        height: 28px;
     }
 
     h1 {
