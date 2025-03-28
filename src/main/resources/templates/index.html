@@ -10,95 +10,151 @@
 </head>
 <body class="min-vh-100 bg-light">
 <!-- Header -->
-<header class="bg-white shadow-sm">
-  <div class="container py-4">
-    <div class="d-flex align-items-center gap-4">
-      <img src="/images/National-Emblem.png" alt="National Emblem" class="emblem"/>
-      <div>
-        <h1 class="fs-3 fw-bold text-dark mb-1">
-          Meghalaya State Counselling Authority for Medical Education
+<header class="shadow-sm" style="background-color: darkblue;">
+  <div class="ind-container pt-3 mb-0 w-100">
+    <div class="d-flex align-items-start gap-4">
+      <img src="/images/emblem.png" alt="National Emblem" class="emblem"/>
+      <div class="w-100">
+        <h1 class="fs-5 fw-semibold text-light mb-1">
+          MEGHALAYA STATE COUNSELLING AUTHORITY FOR MEDICAL EDUCATION
         </h1>
-        <p class="text-secondary mb-0">Government of Meghalaya</p>
+        <p class=" mb-0 text-light fs-6 fw-medium">GOVERNMENT OF MEGHALAYA</p>
+
+        <!-- Links instead of buttons -->
+          <div class="mt-2 w-100 ">
+            <div class="d-flex w-100 justify-content-start gap-3">
+              <a href="javascript:location.reload();" class="text-light text-decoration-none fs-6">
+                Home
+              </a>
+              <a href="login.html" class="text-light text-decoration-none fs-6">
+                Login
+              </a>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
 </header>
 
+
 <!-- Navigation -->
 <nav class="bg-primary shadow">
-  <div class="container">
-    <div class="d-flex justify-content-center gap-3 py-3">
-      <button class="btn btn-light d-flex align-items-center gap-2">
-        <i class="bi bi-house-door"></i>
-        Home
-      </button>
-      <button class="btn btn-light d-flex align-items-center gap-2">
-        <i class="bi bi-box-arrow-in-right"></i>
-        Login
-      </button>
-      <button class="btn btn-light d-flex align-items-center gap-2">
-        <i class="bi bi-person-plus"></i>
-        Register
-      </button>
+  <div class="ind-container-2">
+    <div class="d-flex align-items-center py-3">
+      <p class="mb-0 me-5">
+        To continue further, please login to the portal. If not registered, create an account.
+      </p>
+      <div class="d-flex gap-3">
+        <button class="btn btn-success btn-sm d-flex align-items-center gap-2" onclick="window.location.href='/login'">
+          <i class="bi bi-box-arrow-in-right"></i>
+          Login
+        </button>
+        <button class="btn btn-primary btn-sm d-flex align-items-center gap-2" onclick="window.location.href='/register'">
+          <i class="bi bi-person-plus"></i>
+          Register
+        </button>
+      </div>
     </div>
   </div>
 </nav>
 
+
+
 <!-- Main Content -->
-<main class="container py-5">
-  <div class="row g-4">
+<main class="container-main py-5">
+  <div class="row g-5 px-5">
+    <!-- Ongoing Admissions Section -->
     <div class="col-md-6">
-      <div class="bg-white p-4 rounded shadow-sm">
-        <h2 class="fs-3 fw-semibold text-dark mb-4">Welcome to Medical Counselling</h2>
-        <p class="text-secondary mb-4">
-          The Meghalaya State Counselling Authority provides a streamlined process for medical education admissions
-          in the state. We ensure transparent and fair allocation of medical seats to eligible candidates.
-        </p>
-        <div class="bg-light p-4 rounded">
-          <h3 class="fs-5 fw-semibold text-primary mb-3">Important Dates</h3>
-          <ul class="list-unstyled mb-0">
-            <li class="mb-2">• Registration Start Date: March 15, 2025</li>
-            <li class="mb-2">• Last Date for Registration: April 15, 2025</li>
-            <li class="mb-2">• Document Verification: April 20-25, 2025</li>
-            <li class="mb-2">• Counselling Round 1: May 1-5, 2025</li>
-          </ul>
+      <div class="bg-white p-4 rounded shadow-sm w-100">
+        <h2 class="fs-5 fw-semibold text-dark mb-4">ONGOING ADMISSIONS</h2>
+        <div id="ongoing-admissions" class="d-flex flex-column gap-3">
+          <!-- Dynamic content will be inserted here -->
         </div>
       </div>
     </div>
 
+    <!-- Notifications Section -->
     <div class="col-md-6">
-      <div class="bg-white p-4 rounded shadow-sm">
-        <img src="https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?auto=format&fit=crop&q=80"
-             alt="Medical Students"
-             class="w-100 rounded object-fit-cover mb-4"
-             style="height: 200px;">
-        <h3 class="fs-4 fw-semibold text-dark mb-3">Latest Announcements</h3>
-        <div class="d-flex flex-column gap-3">
-          <div class="border-start border-4 border-primary ps-3">
-            <p class="mb-1">NEET Counselling 2025 Schedule Released</p>
-            <small class="text-secondary">Posted on: March 1, 2025</small>
-          </div>
-          <div class="border-start border-4 border-primary ps-3">
-            <p class="mb-1">Updated Merit List Guidelines</p>
-            <small class="text-secondary">Posted on: February 28, 2025</small>
-          </div>
-          <div class="border-start border-4 border-primary ps-3">
-            <p class="mb-1">Document Verification Process Changes</p>
-            <small class="text-secondary">Posted on: February 25, 2025</small>
-          </div>
+      <div class="bg-white p-4 rounded shadow-sm w-100">
+        <h2 class="fs-5 fw-semibold text-dark mb-4">NOTIFICATIONS</h2>
+        <div id="notifications" class="d-flex flex-column gap-3">
+          <!-- Dynamic content will be inserted here -->
         </div>
       </div>
     </div>
   </div>
 </main>
 
+<script>
+  async function fetchAndDisplayDocuments(dtype) {
+    try {
+      const response = await fetch(`/api/documents/${dtype}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch documents");
+      }
+      const documents = await response.json();
+
+      const container = document.getElementById(dtype === 'Advertisement' ? 'ongoing-admissions' : 'notifications');
+      container.innerHTML = '';
+
+      documents.forEach(doc => {
+        const docNumber = doc.dno || "N/A";
+        const docDesc = doc.ddesc || "No description available";
+        const docDate = doc.ddate ? new Date(doc.ddate).toLocaleDateString() : "Invalid Date";
+
+        // Remove extra double quotes from the file path
+        const docFile = doc.dfile ? doc.dfile.replace(/^"|"$/g, '') : "#";
+
+        const docElement = `
+          <div class="border-start border-4 border-primary ps-3 mb-2">
+            <p class="mb-1">No. ${docNumber} - ${docDesc} <br>
+              <a href="${docFile}" target="_blank" class="text-primary fw-semibold">View ${dtype}</a>,
+              <br><small class="text-secondary">Dated on: ${docDate}</small>
+            </p>
+          </div>
+        `;
+        container.insertAdjacentHTML('beforeend', docElement);
+      });
+    } catch (error) {
+      console.error('Error fetching documents:', error);
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    fetchAndDisplayDocuments('Advertisement');
+    fetchAndDisplayDocuments('Notification');
+  });
+</script>
+
+
+<div class="w-100">
+  <hr>
+</div>
+<div class="col-12 py-2 px-lg-2">
+  <h5 class="py-2 text-center fw-semibold fs-4 bg-dark text-light"> About Us</h5>
+  <div style="text-align: justify text-indent: 4rem"></div>
+  <p> Welcome to Online Addmission Portal of Meghalaya State Counselling Authority for Medical Education, your trusted partner in streamlining and managing admission processes. As an integral part of our recruitment portal, we specialize in handling admissions for medical courses, ensuring a seamless and transparent experience for both institutions and applicants.
+  </p>
+
+  <p>Our platform is designed to cater to the unique requirements of institutions, while providing applicants with an easy and efficient way to navigate through the admission process. With a strong emphasis on merit-based selection, adherence to state and national guidelines, and a commitment to transparency, we are dedicated to supporting educational excellence and accessibility.
+  </p>
+
+  <p> By leveraging advanced technology and aligning with regulatory frameworks, we ensure that every step of the admission process is organized and hassle-free. Whether you are an institution looking to optimize your admissions or a student seeking guidance through your application, Online Addmission Portal of Meghalaya State Counselling Authority for Medical Education is here to support you.
+  </p>
+</div>
 <!-- Footer -->
 <footer class="bg-dark text-white mt-auto py-4">
-  <div class="container text-center">
+  <div class="text-center">
     <p class="mb-1">© 2025 Meghalaya State Counselling Authority. All rights reserved.</p>
     <p class="text-secondary mb-0">For technical support: support@meghalayamedical.gov.in</p>
   </div>
 </footer>
+
+
+
+
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>

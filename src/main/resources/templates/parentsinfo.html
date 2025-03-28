@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Parent/Guardian Information</title>
+  <link rel="stylesheet" type="text/css" href="/css/styles.css">
+</head>
+<body>
+<div class="application-container">
+  <div class="application-card">
+    <div class="application-card-header">
+      <h2 class="application-card-title">Parent/Guardian Information</h2>
+    </div>
+
+    <form id="parentInfoForm" action="/save-parent-info" method="POST">
+      <!-- Parent/Guardian Details -->
+      <div class="custom-class">
+        <h3 class="custom-text">Parent/Guardian Details</h3>
+        <div class="custom-grid">
+          <div>
+            <label for="fatherName">Father's Name:</label>
+            <input type="text" id="fatherName" name="fatherName" required />
+          </div>
+
+          <div>
+            <label for="motherName">Mother's Name:</label>
+            <input type="text" id="motherName" name="motherName" required />
+          </div>
+
+          <div>
+            <label for="guardianName">Guardian's Name (if applicable):</label>
+            <input type="text" id="guardianName" name="guardianName" />
+          </div> <br>
+          <div>
+            <h2 class="custom-text">Parent's or Guardian's Occupation Details</h2>
+
+            <label for="Occupation">Parent's or Guardian's Occupation</label>
+            <input type="text" id="Occupation" name="Occupation" /> <br>
+            <label for="Officename">Name Of Office</label>
+            <input type="text" id="Officename" name="Officename" /> <br>
+            <label for="OfficeAddress">Office Address</label>
+            <input type="text" id="OfficeAddress" name="OfficeAddress" />
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Parent's Employment Type (For General Category Only) -->
+      <div id="employmentTypeDiv">
+        <h3 class="custom-text">Employment Type (For General Category Only)</h3>
+        <label class="custom-label">Parent's Employment Type:</label>
+        <select name="employmentType" id="employmentType" class="custom-input" disabled>
+          <option value="">Select Employment Type</option>
+          <option value="Government">Government</option>
+          <option value="Private">Private</option>
+          <option value="Self-Employed">Self-Employed</option>
+        </select>
+      </div>
+
+      <!-- Submit Button -->
+      <div class="button-container">
+        <button class="nav-btn" type="button" onclick="goBack()">Previous</button>
+        <button class="nav-btn" type="submit">Save</button>
+        <button id="nextBtn" class="nav-btn" type="button">Next</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function goBack() {
+      window.history.back();
+  }
+</SCRIPT>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+      // Get the category value from the URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const category = urlParams.get("category");
+
+      // Get the employment type dropdown
+      const employmentDropdown = document.getElementById("employmentType");
+
+      // Enable only if category is "General"
+      if (category === "General") {
+          employmentDropdown.removeAttribute("disabled");
+      }
+  });
+</script>
+
+</body>
+</html>

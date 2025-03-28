@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Qualification Form</title>
+  <link rel="stylesheet" type="text/css" href="/css/styles.css">
+</head>
+<body>
+<h2>Qualification Details</h2>
+<form action="/application/submit-qualification" method="post">
+  <label for="physics">Physics Percentage:</label>
+  <input type="number" id="physics" name="physics_Score" step="0.01" required><br>
+
+  <label for="chemistry">Chemistry Percentage:</label>
+  <input type="number" id="chemistry" name="chemistry_Score" step="0.01" required><br>
+
+  <label for="biology">Biology/Biotech Percentage:</label>
+  <input type="number" id="biology" name="biology_Biotech_Score" step="0.01" required><br>
+
+  <label for="subjectChoice">Select Subject:</label>
+  <select id="subjectChoice" name="subjectChoice">
+    <option value="Biology">Biology</option>
+    <option value="Biotechnology">Biotechnology</option>
+  </select><br>
+
+  <label for="neet">NEET Score:</label>
+  <input type="number" id="neet" name="NEET_SCORE" min="-180" max="720" required><br>
+
+  <div class="button-container">
+    <form id="studentForm" action="/application/save-student-form" method="post">
+      <!-- Your form fields go here -->
+
+      <button class="nav-btn " type="button" onclick="goBack()">Previous</button>
+      <button class="nav-btn " type="submit">Save</button>
+      <button class="nav-btn " type="button" onclick="goNext()">Next</button>
+    </form>
+  </div>
+  <script>
+    function goBack() {
+        window.history.back(); // Goes to the previous page
+    }
+
+    function goNext() {
+        window.location.href = "/application/qualification"; // Redirect to next page
+    }
+  </script>
+</form>
+</body>
+</html>

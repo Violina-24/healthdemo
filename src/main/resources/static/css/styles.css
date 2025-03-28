@@ -257,8 +257,8 @@ background-color:blue;
 
 /* Custom styles */
 .emblem {
-    height: 20px;
-    width: 20px;
+    height: 75px;
+    width: 55px;
 }
 
 /* Hover effects for buttons */
@@ -290,5 +290,24 @@ background-color:blue;
         padding-right: 1rem;
     }
 }
+.ind-container{
+    display: flex;
+    align-items: left;
+    margin-bottom: 24px;
+    margin-left: 20px;
+    background-color: darkblue;
+
+}
+
+.ind-container-2{
+background-color: #f3f4f6;
+    display: flex
+;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 24px;
+
+}
+
 
  }
