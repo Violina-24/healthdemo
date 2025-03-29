@@ -14,6 +14,8 @@ import org.springframework.ui.Model;
 //import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -71,7 +73,6 @@ public class UserController {
         return "studentform"; // This will load application-form.html
     }
 
-
     @GetMapping("/get-user-details")
     public ResponseEntity<?> getUserDetails(Authentication authentication) {
         if (authentication == null || authentication.getName() == null) {
@@ -94,6 +95,15 @@ public class UserController {
 
         return ResponseEntity.ok(userData); // Ensures JSON response
     }
-}
+
+//    @GetMapping("/user")
+//        public ResponseEntity<Map<String, String>> getUserDetails(Principal principal) {
+//            Map<String, String> userDetails = new HashMap<>();
+//            userDetails.put("name", principal.getName()); // Fetch user's name
+//            return ResponseEntity.ok(userDetails);
+//        }
+    }
+
+
 
 
