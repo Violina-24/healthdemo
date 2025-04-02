@@ -296,6 +296,7 @@ background-color:blue;
     margin-bottom: 24px;
     margin-left: 20px;
     background-color: darkblue;
+    padding-bottom: 5px;
 
 }
 
@@ -308,6 +309,22 @@ background-color: #f3f4f6;
     margin-bottom: 24px;
 
 }
+footer {
+    position: relative;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 1rem 0;
+}
+
+.user-info {
+            position: absolute;
+            bottom: 10px; /* Moves to bottom */
+            right: 20px; /* Moves to right */
+            display: flex;
+            align-items: center;
+             gap: 8px;
+             }
 
 
  }

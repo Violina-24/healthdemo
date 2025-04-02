@@ -17,7 +17,7 @@ public class MUsers {
     private String email;
     private String phone;  // Changed from int to String
     private String password; // Added password field
-
+    private String dob;
     public Long getUid() {
         return uid;
     }
@@ -56,6 +56,14 @@ public class MUsers {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getDob() {
+        return dob;
+    }
+
+    public void setDob(String dob) {
+        this.dob = dob;
     }
 }
 

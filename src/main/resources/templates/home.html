@@ -5,11 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meghalaya State Counselling Authority</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        function toggleButton() {
+            const checkboxes = document.querySelectorAll('.form-check-input');
+            const continueButton = document.getElementById('continueBtn');
+            const isChecked = Array.from(checkboxes).some(checkbox => checkbox.checked);
+            continueButton.disabled = !isChecked;
+        }
+        document.addEventListener('DOMContentLoaded', toggleButton);
+    </script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="/css/styles.css">
 </head>
-<body class="min-vh-100 bg-light">
-
+<style>
+    .nav-link:hover { color: #e2e8f0; }
+    .footer-text { color: #cbd5e1; }
+</style>
+<body class="bg-gray-50">
 <!-- Header -->
 <header class="shadow-sm" style="background-color: darkblue;">
     <div class="ind-container pt-3 mb-0 w-100">
@@ -20,89 +33,56 @@
                     MEGHALAYA STATE COUNSELLING AUTHORITY FOR MEDICAL EDUCATION
                 </h1>
                 <p class="mb-0 text-light fs-6 fw-medium">GOVERNMENT OF MEGHALAYA</p>
-                <div class="mt-2 w-100">
-                    <div class="d-flex w-100 justify-content-start gap-3">
-                        <a href="javascript:location.reload();" class="text-light text-decoration-none fs-6">Home</a>
-                        <a href="login.html" class="text-light text-decoration-none fs-6">Login</a>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
 </header>
-
-<div class="container py-5">
-    <h2 id="welcomeMessage" class="text-center mb-4">WELCOME, ${username}</h2>
-    <div class="card shadow-sm p-4">
-        <div class="row">
-            <div class="col-md-6">
-                <h4>Choose Course</h4>
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="mbbs-smc">
-                    <label class="form-check-label" for="mbbs-smc">MBBS-SMC</label>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="mbbs-pimc">
-                    <label class="form-check-label" for="mbbs-pimc">MBBS-PIMC</label>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="bams-pimc">
-                    <label class="form-check-label" for="bams-pimc">BAMS-PIMC</label>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <h4>Choose Category</h4>
-                <select class="form-select mb-2" id="category-smc" disabled>
-                    <option>Select Category</option>
-                </select>
-                <select class="form-select mb-2" id="category-pimc" disabled>
-                    <option>Select Category</option>
-                </select>
-                <select class="form-select" id="category-bams" disabled>
-                    <option>Select Category</option>
-                </select>
+<div class="navbar d-flex justify-content-start ps-3 shadow" style="margin-top: 0; padding-top: 0; padding-bottom:0; background-color: #004f98;">
+    <a href="index" class="text-light fs-6 mx-2 text-decoration-none">Home</a>
+    <a href="login" class="text-light fs-6 mx-2 text-decoration-none">Login</a>
+</div>
+<main class="container my-4">
+    <div class="row flex-column align-items-center">
+        <div class="col-lg-8">
+            <div class="bg-white p-4 rounded shadow mb-4 text-center">
+                <h2>Welcome, User!</h2>
+                <p>Please select your preferred courses and categories below.</p>
             </div>
         </div>
-        <div class="text-center mt-4">
-            <button id="nextButton" class="btn btn-primary" disabled>Next</button>
+        <div class="col-lg-8">
+            <div class="bg-white p-4 rounded shadow text-center">
+                <h3>Choose Course</h3>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="mbbs-smc" onchange="toggleButton()">
+                    <label class="form-check-label" for="mbbs-smc">MBBS - State Medical College</label>
+                    <select class="form-select mt-2">
+                        <option>Select Category</option>
+                    </select>
+                </div>
+                <div class="form-check mt-3">
+                    <input class="form-check-input" type="checkbox" id="mbbs-pimc" onchange="toggleButton()">
+                    <label class="form-check-label" for="mbbs-pimc">MBBS - Private Institute</label>
+                    <select class="form-select mt-2">
+                        <option>Select Category</option>
+                    </select>
+                </div>
+                <div class="form-check mt-3">
+                    <input class="form-check-input" type="checkbox" id="bams-pimc" onchange="toggleButton()">
+                    <label class="form-check-label" for="bams-pimc">BAMS - Private Institute</label>
+                    <select class="form-select mt-2">
+                        <option>Select Category</option>
+                    </select>
+                </div>
+                <button id="continueBtn" class="btn btn-primary mt-3" disabled>Continue to Application</button>
+            </div>
         </div>
     </div>
-</div>
-
-<!-- Footer -->
-<footer class="bg-dark text-white mt-auto py-4">
+</main>
+<footer class="footer bg-dark text-white mt-auto py-4">
     <div class="text-center">
         <p class="mb-1">© 2025 Meghalaya State Counselling Authority. All rights reserved.</p>
         <p class="text-secondary mb-0">For technical support: support@meghalayamedical.gov.in</p>
     </div>
 </footer>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    async function fetchUsername() {
-      try {
-        const response = await fetch('/api/get-user-details');
-        if (!response.ok) {
-          throw new Error('Failed to fetch username');
-        }
-        const user = await response.json();
-        document.getElementById('welcomeMessage').textContent = `WELCOME, ${user.name}`;
-      } catch (error) {
-        console.error('Error fetching username:', error);
-      }
-    }
-    document.addEventListener('DOMContentLoaded', fetchUsername);
-      document.addEventListener("DOMContentLoaded", function() {
-          const nextButton = document.getElementById("nextButton");
-          const checkboxes = document.querySelectorAll(".form-check-input");
-
-          checkboxes.forEach(checkbox => {
-              checkbox.addEventListener("change", function() {
-                  const checked = Array.from(checkboxes).some(cb => cb.checked);
-                  nextButton.disabled = !checked;
-              });
-          });
-      });
-</script>
 </body>
 </html>

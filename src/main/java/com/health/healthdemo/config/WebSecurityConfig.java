@@ -1,5 +1,6 @@
 package com.health.healthdemo.config;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -20,7 +21,7 @@ public class WebSecurityConfig {
                                 "/favicon.ico", "/studentform", "/qualification", "/application/qualification",
                                 "/application/api/user", "/api/user", "/get-user-details", "/save-student-form",
                                 "/api/categories", "/application/parentsinfo", "/parentsinfo", "/index",
-                                "/api/documents/**", "/api/documents*", "/api/documents")  // Allow access to API endpoints for documents
+                                "/api/documents/**", "/api/documents*", "/api/documents", "/username") // Allow API endpoints
                         .permitAll()
                         .anyRequest().authenticated() // Authenticate all other requests
                 )
@@ -36,6 +37,14 @@ public class WebSecurityConfig {
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/login?logout")
                         .permitAll()
+                )
+                // Custom AuthenticationEntryPoint for API responses
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setContentType("application/json");
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.getWriter().write("{\"error\": \"User not logged in\"}");
+                        })
                 )
                 .cors(cors -> cors.disable()); // Disable CORS to allow cross-origin requests
 

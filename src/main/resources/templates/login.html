@@ -2,10 +2,33 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Login to MBBS Counselling</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="/css/styles.css">
 
 </head>
-<body class="container">
+<body>
+<!-- Header Section -->
+<header class="shadow-sm" style="background-color: darkblue;">
+    <div class="ind-container pt-3 mb-0 w-100">
+        <div class="d-flex align-items-start gap-4">
+            <img src="/images/emblem.png" alt="National Emblem" class="emblem"/>
+            <div class="w-100">
+                <h1 class="fs-5 fw-semibold text-light mb-1">
+                    MEGHALAYA STATE COUNSELLING AUTHORITY FOR MEDICAL EDUCATION
+                </h1>
+                <p class="mb-0 text-light fs-6 fw-medium">GOVERNMENT OF MEGHALAYA</p>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Navbar -->
+<div class="navbar d-flex justify-content-start ps-3 shadow" style="margin-top: 0; padding-top: 0; padding-bottom:0; background-color: #004f98; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+    <a href="index" class="text-light fs-6 mx-2 text-decoration-none">Home</a>
+    <a href="login" class="text-light fs-6 mx-2 text-decoration-none">Login</a>
+</div>
+<div class="container">
     <div class="card">
         <h2 class="heading">LogIn Your MBBS Councelling</h2>
         <form id="loginform">
@@ -30,6 +53,13 @@
     </p>
 </div>
 </div>
+</div>
+<footer class=" footer bg-dark text-white mt-auto py-4">
+    <div class="text-center">
+        <p class="mb-1">© 2025 Meghalaya State Counselling Authority. All rights reserved.</p>
+        <p class="text-secondary mb-0">For technical support: support@meghalayamedical.gov.in</p>
+    </div>
+</footer>
     <script>
         document.getElementById("loginform").addEventListener("submit", function(event) {
     event.preventDefault(); // Prevent page reload
@@ -61,6 +91,6 @@
     });
 });
     </script>
-
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
