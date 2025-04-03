@@ -11,7 +11,6 @@ import java.util.Optional;
 public class UsersService {
     @Autowired
     private MUsersRepository userRepository;
-
     public MUsers saveUser(MUsers users) {
         return userRepository.save(users);
     }
@@ -21,7 +20,21 @@ public class UsersService {
     }
 
     public String getUsernameByEmail(String email) {
-        Optional<MUsers> user = userRepository.findByEmail(email);
-        return user.map(MUsers::getName).orElse("Unknown User");
+        try {
+            Optional<MUsers> user = userRepository.findByEmail(email);
+            if (user.isPresent()) {
+                System.out.println("User found: " + user.get().getName()); // Debug line
+                return user.get().getName();
+            } else {
+                System.out.println("User not found for email: " + email); // Debug line
+                return "User";
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "User";
+        }
     }
+
+
+
 }

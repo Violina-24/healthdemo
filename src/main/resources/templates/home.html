@@ -5,25 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meghalaya State Counselling Authority</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        function toggleButton() {
-            const checkboxes = document.querySelectorAll('.form-check-input');
-            const continueButton = document.getElementById('continueBtn');
-            const isChecked = Array.from(checkboxes).some(checkbox => checkbox.checked);
-            continueButton.disabled = !isChecked;
-        }
-        document.addEventListener('DOMContentLoaded', toggleButton);
-    </script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="/css/styles.css">
 </head>
-<style>
-    .nav-link:hover { color: #e2e8f0; }
-    .footer-text { color: #cbd5e1; }
-</style>
-<body class="bg-gray-50">
-<!-- Header -->
+<body class="min-vh-100 bg-light">
+<!-- Header Section -->
 <header class="shadow-sm" style="background-color: darkblue;">
     <div class="ind-container pt-3 mb-0 w-100">
         <div class="d-flex align-items-start gap-4">
@@ -37,52 +23,143 @@
         </div>
     </div>
 </header>
-<div class="navbar d-flex justify-content-start ps-3 shadow" style="margin-top: 0; padding-top: 0; padding-bottom:0; background-color: #004f98;">
+
+<!-- Navbar -->
+<div class="navbar d-flex justify-content-start ps-3 shadow" style="margin-top: 0; padding-top: 0; padding-bottom:0; background-color: #004f98; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
     <a href="index" class="text-light fs-6 mx-2 text-decoration-none">Home</a>
     <a href="login" class="text-light fs-6 mx-2 text-decoration-none">Login</a>
 </div>
-<main class="container my-4">
-    <div class="row flex-column align-items-center">
-        <div class="col-lg-8">
-            <div class="bg-white p-4 rounded shadow mb-4 text-center">
-                <h2>Welcome, User!</h2>
-                <p>Please select your preferred courses and categories below.</p>
+
+
+<!-- Navigation -->
+<nav class="bg-primary shadow">
+    <div class="ind-container-2">
+        <div class="d-flex align-items-center justify-content-between py-3">
+            <div id="welcome-message" class="text-light fs-5 fw-medium"></div>
+        </div>
+    </div>
+</nav>
+
+<script>
+    async function fetchUserName() {
+      try {
+        const response = await fetch('/api/'); // Adjust API endpoint as needed
+        if (response.ok) {
+          const user = await response.json();
+          const userName = user.name || "User";
+          document.getElementById("welcome-message").textContent = `Welcome, ${userName}!`;
+        } else {
+          document.getElementById("welcome-message").textContent = "Welcome, Guest!";
+        }
+      } catch (error) {
+        console.error("Error fetching user name:", error);
+        document.getElementById("welcome-message").textContent = "Welcome, Guest!";
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", fetchUserName);
+</script>
+
+
+<!-- Main Content -->
+<main class="container-main py-5">
+    <div class="row g-5 px-5">
+        <!-- Ongoing Admissions Section -->
+        <div class="col-md-6">
+            <div class="bg-white p-4 rounded shadow-sm w-100">
+                <h2 class="fs-5 fw-semibold text-dark mb-4">ONGOING ADMISSIONS</h2>
+                <div id="ongoing-admissions" class="d-flex flex-column gap-3">
+                    <!-- Dynamic content will be inserted here -->
+                </div>
             </div>
         </div>
-        <div class="col-lg-8">
-            <div class="bg-white p-4 rounded shadow text-center">
-                <h3>Choose Course</h3>
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="mbbs-smc" onchange="toggleButton()">
-                    <label class="form-check-label" for="mbbs-smc">MBBS - State Medical College</label>
-                    <select class="form-select mt-2">
-                        <option>Select Category</option>
-                    </select>
+
+        <!-- Notifications Section -->
+        <div class="col-md-6">
+            <div class="bg-white p-4 rounded shadow-sm w-100">
+                <h2 class="fs-5 fw-semibold text-dark mb-4">NOTIFICATIONS</h2>
+                <div id="notifications" class="d-flex flex-column gap-3">
+                    <!-- Dynamic content will be inserted here -->
                 </div>
-                <div class="form-check mt-3">
-                    <input class="form-check-input" type="checkbox" id="mbbs-pimc" onchange="toggleButton()">
-                    <label class="form-check-label" for="mbbs-pimc">MBBS - Private Institute</label>
-                    <select class="form-select mt-2">
-                        <option>Select Category</option>
-                    </select>
-                </div>
-                <div class="form-check mt-3">
-                    <input class="form-check-input" type="checkbox" id="bams-pimc" onchange="toggleButton()">
-                    <label class="form-check-label" for="bams-pimc">BAMS - Private Institute</label>
-                    <select class="form-select mt-2">
-                        <option>Select Category</option>
-                    </select>
-                </div>
-                <button id="continueBtn" class="btn btn-primary mt-3" disabled>Continue to Application</button>
             </div>
         </div>
     </div>
 </main>
-<footer class="footer bg-dark text-white mt-auto py-4">
+
+<script>
+    async function fetchAndDisplayDocuments(dtype) {
+     try {
+       const response = await fetch(`/api/documents/${dtype}`);
+       if (!response.ok) {
+         throw new Error("Failed to fetch documents");
+       }
+       const documents = await response.json();
+
+       const container = document.getElementById(dtype === 'Advertisement' ? 'ongoing-admissions' : 'notifications');
+       container.innerHTML = '';
+
+       documents.forEach(doc => {
+         const docNumber = doc.dno || "N/A";
+         const docDesc = doc.ddesc || "No description available";
+         const docDate = doc.ddate ? new Date(doc.ddate).toLocaleDateString() : "Invalid Date";
+
+         // Remove extra double quotes from the file path
+         const docFile = doc.dfile ? doc.dfile.replace(/^"|"$/g, '') : "#";
+
+         // Conditionally render the "Apply Now" button only for admissions
+         const applyButton = dtype === 'Advertisement' ? `
+           <button class="btn btn-primary btn-sm" onclick="location.href='/login'">Apply Now</button>
+         ` : '';
+
+         const docElement = `
+           <div class="border-start border-4 border-primary ps-3 mb-2">
+             <p class="mb-1">No. ${docNumber} - ${docDesc} <br>
+               <a href="${docFile}" target="_blank" class="text-primary fw-semibold">View ${dtype}</a>,
+               <br><small class="text-secondary">Dated on: ${docDate}</small>
+             </p>
+             ${applyButton}
+           </div>
+         `;
+         container.insertAdjacentHTML('beforeend', docElement);
+       });
+     } catch (error) {
+       console.error('Error fetching documents:', error);
+     }
+   }
+
+   document.addEventListener("DOMContentLoaded", () => {
+     fetchAndDisplayDocuments('Advertisement');
+     fetchAndDisplayDocuments('Notification');
+   });
+</script>
+
+
+<div class="w-100">
+    <hr>
+</div>
+<div class="col-12 py-2 px-lg-2">
+    <h5 class="py-2 text-center fw-semibold fs-4 bg-dark text-light"> About Us</h5>
+    <div style="text-align: justify text-indent: 4rem"></div>
+    <p> Welcome to Online Addmission Portal of Meghalaya State Counselling Authority for Medical Education, your trusted partner in streamlining and managing admission processes. As an integral part of our recruitment portal, we specialize in handling admissions for medical courses, ensuring a seamless and transparent experience for both institutions and applicants.
+    </p>
+
+    <p>Our platform is designed to cater to the unique requirements of institutions, while providing applicants with an easy and efficient way to navigate through the admission process. With a strong emphasis on merit-based selection, adherence to state and national guidelines, and a commitment to transparency, we are dedicated to supporting educational excellence and accessibility.
+    </p>
+
+    <p> By leveraging advanced technology and aligning with regulatory frameworks, we ensure that every step of the admission process is organized and hassle-free. Whether you are an institution looking to optimize your admissions or a student seeking guidance through your application, Online Addmission Portal of Meghalaya State Counselling Authority for Medical Education is here to support you.
+    </p>
+</div>
+<!-- Footer -->
+<footer class=" footer bg-dark text-white mt-auto py-4">
     <div class="text-center">
         <p class="mb-1">© 2025 Meghalaya State Counselling Authority. All rights reserved.</p>
         <p class="text-secondary mb-0">For technical support: support@meghalayamedical.gov.in</p>
     </div>
 </footer>
+
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

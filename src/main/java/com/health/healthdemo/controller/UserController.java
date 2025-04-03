@@ -66,11 +66,31 @@ public class UserController {
 //    usersRepository.save(newUser);
 //    return ResponseEntity.ok("Account created successfully!");
 //}
+@GetMapping("/home")
+public String homePage(Principal principal, Model model) {
+    try {
+        if (principal == null) {
+            System.out.println("Principal is null");
+            model.addAttribute("userName", "User");
+            return "home";
+        }
 
-    @GetMapping("/home")
-    public String homePage() {
-        return "home"; // This will load home.html
+        String email = principal.getName();
+        System.out.println("Email from Principal: " + email); // Debug line
+
+        String username = usersService.getUsernameByEmail(email);
+        System.out.println("Fetched Username: " + username); // Debug line
+
+        model.addAttribute("userName", username);
+        return "home";
+    } catch (Exception e) {
+        e.printStackTrace(); // Print the error for more insights
+        model.addAttribute("userName", "User");
+        return "home";
     }
+}
+
+
 
     @GetMapping("/studentform")
     public String studentForm() {

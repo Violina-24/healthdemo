@@ -60,7 +60,7 @@
     <!-- Ongoing Admissions Section -->
     <div class="col-md-6">
       <div class="bg-white p-4 rounded shadow-sm w-100">
-        <h2 class="fs-5 fw-semibold text-dark mb-4">ONGOING ADMISSIONS</h2>
+        <h2 class="fs-5 fw-semibold text-dark mb-4 justify-content-center">ONGOING ADMISSIONS</h2>
         <div id="ongoing-admissions" class="d-flex flex-column gap-3">
           <!-- Dynamic content will be inserted here -->
         </div>
@@ -81,43 +81,49 @@
 
 <script>
   async function fetchAndDisplayDocuments(dtype) {
-    try {
-      const response = await fetch(`/api/documents/${dtype}`);
-      if (!response.ok) {
-        throw new Error("Failed to fetch documents");
-      }
-      const documents = await response.json();
+   try {
+     const response = await fetch(`/api/documents/${dtype}`);
+     if (!response.ok) {
+       throw new Error("Failed to fetch documents");
+     }
+     const documents = await response.json();
 
-      const container = document.getElementById(dtype === 'Advertisement' ? 'ongoing-admissions' : 'notifications');
-      container.innerHTML = '';
+     const container = document.getElementById(dtype === 'Advertisement' ? 'ongoing-admissions' : 'notifications');
+     container.innerHTML = '';
 
-      documents.forEach(doc => {
-        const docNumber = doc.dno || "N/A";
-        const docDesc = doc.ddesc || "No description available";
-        const docDate = doc.ddate ? new Date(doc.ddate).toLocaleDateString() : "Invalid Date";
+     documents.forEach(doc => {
+       const docNumber = doc.dno || "N/A";
+       const docDesc = doc.ddesc || "No description available";
+       const docDate = doc.ddate ? new Date(doc.ddate).toLocaleDateString() : "Invalid Date";
 
-        // Remove extra double quotes from the file path
-        const docFile = doc.dfile ? doc.dfile.replace(/^"|"$/g, '') : "#";
+       // Remove extra double quotes from the file path
+       const docFile = doc.dfile ? doc.dfile.replace(/^"|"$/g, '') : "#";
 
-        const docElement = `
-          <div class="border-start border-4 border-primary ps-3 mb-2">
-            <p class="mb-1">No. ${docNumber} - ${docDesc} <br>
-              <a href="${docFile}" target="_blank" class="text-primary fw-semibold">View ${dtype}</a>,
-              <br><small class="text-secondary">Dated on: ${docDate}</small>
-            </p>
-          </div>
-        `;
-        container.insertAdjacentHTML('beforeend', docElement);
-      });
-    } catch (error) {
-      console.error('Error fetching documents:', error);
-    }
-  }
+       // Conditionally render the "Apply Now" button only for admissions
+       const applyButton = dtype === 'Advertisement' ? `
+         <button class="btn btn-primary btn-sm" onclick="location.href='/login'">Apply Now</button>
+       ` : '';
 
-  document.addEventListener("DOMContentLoaded", () => {
-    fetchAndDisplayDocuments('Advertisement');
-    fetchAndDisplayDocuments('Notification');
-  });
+       const docElement = `
+         <div class="border-start border-4 border-primary ps-3 mb-2">
+           <p class="mb-1">No. ${docNumber} - ${docDesc} <br>
+             <a href="${docFile}" target="_blank" class="text-primary fw-semibold">View ${dtype}</a>,
+             <br><small class="text-secondary">Dated on: ${docDate}</small>
+           </p>
+           ${applyButton}
+         </div>
+       `;
+       container.insertAdjacentHTML('beforeend', docElement);
+     });
+   } catch (error) {
+     console.error('Error fetching documents:', error);
+   }
+ }
+
+ document.addEventListener("DOMContentLoaded", () => {
+   fetchAndDisplayDocuments('Advertisement');
+   fetchAndDisplayDocuments('Notification');
+ });
 </script>
 
 
