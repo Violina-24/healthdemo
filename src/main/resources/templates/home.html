@@ -35,56 +35,32 @@
 <nav class="bg-primary shadow">
     <div class="ind-container-2">
         <div class="d-flex align-items-center justify-content-between py-3">
-            <div id="welcome-message" class="text-light fs-5 fw-medium"></div>
+            <div id="welcome-message" class="text-info fs-5 fw-semibold"></div>
         </div>
     </div>
 </nav>
+<button onclick="logout()" class="btn btn-danger">Logout</button>
 
-<script>
-    async function fetchUserName() {
-      try {
-        const response = await fetch('/api/'); // Adjust API endpoint as needed
-        if (response.ok) {
-          const user = await response.json();
-          const userName = user.name || "User";
-          document.getElementById("welcome-message").textContent = `Welcome, ${userName}!`;
-        } else {
-          document.getElementById("welcome-message").textContent = "Welcome, Guest!";
-        }
-      } catch (error) {
-        console.error("Error fetching user name:", error);
-        document.getElementById("welcome-message").textContent = "Welcome, Guest!";
-      }
-    }
 
-    document.addEventListener("DOMContentLoaded", fetchUserName);
-</script>
+
 
 
 <!-- Main Content -->
 <main class="container-main py-5">
-    <div class="row g-5 px-5">
+    <div class="row g-5 px-5 justify-content-center">
         <!-- Ongoing Admissions Section -->
-        <div class="col-md-6">
-            <div class="bg-white p-4 rounded shadow-sm w-100">
+        <div class="col-md-10"> <!-- Increased column width -->
+            <div class="bg-white p-4 rounded shadow-sm w-100 text-center"> <!-- Centered text -->
                 <h2 class="fs-5 fw-semibold text-dark mb-4">ONGOING ADMISSIONS</h2>
-                <div id="ongoing-admissions" class="d-flex flex-column gap-3">
-                    <!-- Dynamic content will be inserted here -->
-                </div>
-            </div>
-        </div>
-
-        <!-- Notifications Section -->
-        <div class="col-md-6">
-            <div class="bg-white p-4 rounded shadow-sm w-100">
-                <h2 class="fs-5 fw-semibold text-dark mb-4">NOTIFICATIONS</h2>
-                <div id="notifications" class="d-flex flex-column gap-3">
+                <div id="ongoing-admissions" class="d-flex flex-column gap-3 align-items-center">
                     <!-- Dynamic content will be inserted here -->
                 </div>
             </div>
         </div>
     </div>
 </main>
+
+
 
 <script>
     async function fetchAndDisplayDocuments(dtype) {
@@ -108,7 +84,10 @@
 
          // Conditionally render the "Apply Now" button only for admissions
          const applyButton = dtype === 'Advertisement' ? `
-           <button class="btn btn-primary btn-sm" onclick="location.href='/login'">Apply Now</button>
+<!--           <button class="btn btn-primary btn-sm" onclick="location.href='/studentform'">Apply Now</button>-->
+ <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#applyModel">
+     Apply Now
+    </button>
          ` : '';
 
          const docElement = `
@@ -133,7 +112,29 @@
    });
 </script>
 
-
+<div class="modal fade" id="applyModel" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+<div class="modal-dialog">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title" id="modalLabel">Enter Your Details</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <form>
+                <div class="mb-3">
+                    <label class="form-label">Name</label>
+                    <input type="text" class="form-control" id="appusername">
+                </div>
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="email" placeholder="Enter your email">
+                </div>
+                <button type="submit" class="btn btn-success">Submit</button>
+            </form>
+        </div>
+    </div>
+</div>
+</div>
 <div class="w-100">
     <hr>
 </div>
@@ -159,6 +160,64 @@
 
 
 
+<script>
+
+    function fetchUserDetails() {
+    debugger;
+    fetch("http://localhost:8082/api/get-loginuser-details", {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include"  // Include session cookies
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Unauthorized access");
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Log the entire response data to the console
+            console.log("Response Data:", data);
+             if (data.userName) {
+                // Display the email in the welcome message div
+                document.getElementById("welcome-message").innerText = `Welcome, ${data.userName}`;
+                document.getElementById("appusername").value=data.userName;
+            } else {
+                console.log("User not logged in or details not found.");
+            }
+        })
+        .catch(error => {
+            console.error("Error fetching user details:", error);
+        });
+}
+
+// Call this function when the page loads
+document.addEventListener("DOMContentLoaded", fetchUserDetails);
+
+
+
+
+</script>
+
+<script>
+    function logout() {
+    fetch("http://localhost:8082/api/logout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include"  // Include session cookies
+    })
+        .then(response => response.json())
+        .then(data => {
+            alert(data.message);
+            window.location.href = "/login";
+        })
+        .catch(error => {
+            console.error("Error during logout:", error);
+            alert("An error occurred while logging out.");
+        });
+}
+</script>
+</script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>

@@ -3,7 +3,9 @@ package com.health.healthdemo.controller;
 
 import com.health.healthdemo.entity.MUsers;
 import com.health.healthdemo.repository.MUsersRepository;
+import com.health.healthdemo.services.DocumentsService;
 import com.health.healthdemo.services.UsersService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 //import org.springframework.http.HttpStatus;
 //import org.springframework.http.ResponseEntity;
@@ -29,21 +31,74 @@ public class UserController {
     @Autowired
     private UsersService usersService;
 
+    @Autowired
+    private DocumentsService documentService;
+
     @GetMapping("/login")
     public String loginPage() {
         return "login"; // Matches login.html inside templates/
     }
 
     @PostMapping("/api/login")
-    public ResponseEntity<?> loginUser(@RequestBody MUsers user) {
+    public ResponseEntity<?> loginUser(@RequestBody MUsers user, HttpSession session) {
         Optional<MUsers> foundUser = usersRepository.findByEmailAndPassword(user.getEmail(), user.getPassword());
 
         if (foundUser.isPresent()) {
+            MUsers loggedInUser = foundUser.get();
+
+            // Store the entire user object in the session
+            session.setAttribute("loggedInUser", loggedInUser);
+            System.out.println("User logged in: " + loggedInUser.getEmail());
+
             return ResponseEntity.ok().body("{\"message\": \"Login Successful\"}");
         } else {
             return ResponseEntity.status(401).body("{\"message\": \"Invalid credentials\"}");
         }
     }
+    @PostMapping("/api/logout")
+    public ResponseEntity<?> logoutUser(HttpSession session) {
+        // Invalidate the session to log out the user
+        session.invalidate();
+        return ResponseEntity.ok().body("{\"message\": \"Logout Successful\"}");
+    }
+
+
+//@PostMapping("/api/login")
+//public ResponseEntity<?> loginUser(@RequestBody MUsers user, HttpSession session) {
+//    Optional<MUsers> foundUser = usersRepository.findByEmailAndPassword(user.getEmail(), user.getPassword());
+//    if (foundUser.isPresent()) {
+//        MUsers loggedInUser = foundUser.get();
+//
+//        // Store the entire user object in the session
+//        session.setAttribute("loggedInUser", loggedInUser);
+//        System.out.println("User logged in: " + loggedInUser.getEmail());
+//
+//        return ResponseEntity.ok().body("{\"message\": \"Login Successful\"}");
+//    } else {
+//        return ResponseEntity.status(401).body("{\"message\": \"Invalid credentials\"}");
+//    }
+//}
+
+    @GetMapping("/api/get-loginuser-details")
+    public ResponseEntity<?> getUserDetails(HttpSession session) {
+        MUsers user = (MUsers) session.getAttribute("loggedInUser");
+
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "User not authenticated"));
+        }
+
+        Map<String, String> userData = Map.of(
+                "userId", String.valueOf(user.getUid()),   // Assuming getId() returns user ID
+                "userName", user.getName(),
+                "email", user.getEmail(),
+                "phone", user.getPhone(),
+                    "dob",user.getDob());
+
+
+        return ResponseEntity.ok(userData);
+    }
+
 
 
     @GetMapping("/register")
@@ -66,29 +121,30 @@ public class UserController {
 //    usersRepository.save(newUser);
 //    return ResponseEntity.ok("Account created successfully!");
 //}
-@GetMapping("/home")
-public String homePage(Principal principal, Model model) {
-    try {
-        if (principal == null) {
-            System.out.println("Principal is null");
-            model.addAttribute("userName", "User");
-            return "home";
+@GetMapping("/api/home")
+@ResponseBody
+public Map<String, Object> homepage(Authentication authentication) {
+    Map<String, Object> response = new HashMap<>();
+
+    if (authentication != null) {
+        String email = authentication.getName();
+        System.out.println("Authenticated user: " + email);
+        MUsers user = usersService.findByEmail(email);
+
+        if (user != null) {
+            response.put("name", user.getName());
+            response.put("advertisements", documentService.getDocumentsByType("Advertisement"));
+            System.out.println("User found: " + user.getName());
+        } else {
+            response.put("name", "Guest");
         }
-
-        String email = principal.getName();
-        System.out.println("Email from Principal: " + email); // Debug line
-
-        String username = usersService.getUsernameByEmail(email);
-        System.out.println("Fetched Username: " + username); // Debug line
-
-        model.addAttribute("userName", username);
-        return "home";
-    } catch (Exception e) {
-        e.printStackTrace(); // Print the error for more insights
-        model.addAttribute("userName", "User");
-        return "home";
+    } else {
+        response.put("name", "Guest");
     }
+
+    return response;
 }
+
 
 
 
@@ -127,19 +183,29 @@ public String homePage(Principal principal, Model model) {
 //            return ResponseEntity.ok(userDetails);
 //        }
 
-    @GetMapping("/username")
-    public ResponseEntity<Map<String, String>> getUsername(Principal principal) {
-        try {
-            String email = principal.getName(); // Assuming the principal name is the email
-            String username = usersService.getUsernameByEmail(email);
-            Map<String, String> response = new HashMap<>();
-            response.put("name", username);
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Collections.singletonMap("error", "Failed to fetch username"));
+
+    @GetMapping("/api/userdetails")
+    @ResponseBody
+    public ResponseEntity<Map<String, String>> getUserDetails(Principal principal) {
+        Map<String, String> response = new HashMap<>();
+
+        if (principal != null) {
+            String email = principal.getName();
+            MUsers user = usersService.findByEmail(email);
+            if (user != null) {
+                response.put("name", user.getName());
+                response.put("email", user.getEmail());
+                response.put("phone", user.getPhone());
+                response.put("dob", user.getDob());
+                return ResponseEntity.ok(response);
+            }
         }
+
+        response.put("name", "Guest");
+        return ResponseEntity.ok(response);
     }
+
+
 
 }
 

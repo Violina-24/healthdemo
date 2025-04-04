@@ -7,6 +7,12 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.security.web.session.SessionManagementFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
 
 @Configuration
 public class WebSecurityConfig {
@@ -15,18 +21,19 @@ public class WebSecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)  // Disable CSRF for simplicity (not recommended for production)
+                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Enable CORS with proper configuration
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/css/**", "/js/**", "/images/**", "/uploads/**").permitAll() // Allow static files
+                        .requestMatchers("/css/**", "/js/**", "/images/**", "/uploads/**", "/favicon.ico").permitAll() // Allow static files
                         .requestMatchers("/", "/api/login", "/register", "/login", "/home",
                                 "/favicon.ico", "/studentform", "/qualification", "/application/qualification",
                                 "/application/api/user", "/api/user", "/get-user-details", "/save-student-form",
                                 "/api/categories", "/application/parentsinfo", "/parentsinfo", "/index",
-                                "/api/documents/**", "/api/documents*", "/api/documents", "/username") // Allow API endpoints
+                                "/api/documents/**", "/userdetails", "/api/home", "/api/getUserLoginDetails","/api/get-loginuser-details","/api/logout") // Allow API endpoints
                         .permitAll()
                         .anyRequest().authenticated() // Authenticate all other requests
                 )
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.ALWAYS) // Ensure session is created
+                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)  // Ensure session creation when needed
                 )
                 .formLogin(login -> login
                         .loginPage("/login") // Correct login page URL
@@ -45,9 +52,23 @@ public class WebSecurityConfig {
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                             response.getWriter().write("{\"error\": \"User not logged in\"}");
                         })
-                )
-                .cors(cors -> cors.disable()); // Disable CORS to allow cross-origin requests
+                );
 
         return http.build();
     }
+
+    // CORS configuration to handle cross-origin requests
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:8082"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowCredentials(true);  // Essential for maintaining session
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type"));
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
+
 }

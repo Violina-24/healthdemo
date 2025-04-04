@@ -33,28 +33,64 @@
 </div>
 
 <!-- Register Form Section -->
-<section class="flex-grow flex items-center justify-center p-6">
-    <div class="w-full max-w-md bg-white rounded-lg shadow border border-gray-300 dark:border-gray-700 p-6 space-y-4">
-        <div class="text-center">
-            <i class="fa-duotone fa-solid fa-circle-user"></i>
-            <h1 class="text-xl font-bold text-gray-900 dark:text-white">Register</h1>
+<!-- Register Form Section -->
+<section class="d-flex justify-content-center align-items-center min-vh-100 p-4">
+    <div class="card p-4 shadow-lg" style="max-width: 400px; width: 100%;">
+        <div class="text-center mb-4">
+            <i class="bi bi-person-circle fs-1 text-primary"></i>
+            <h2 class="fw-semibold">Register</h2>
         </div>
-        <form id="registerForm" method="post" class="space-y-4">
-            <div class="grid grid-cols-2 gap-4">
-                <input type="text" id="firstName" placeholder="First Name" required class="border p-2 rounded w-full">
-                <input type="text" id="lastName" placeholder="Last Name" required class="border p-2 rounded w-full">
-            </div>
-            <div class="grid grid-cols-2 gap-4">
-                <input type="date" id="dob" placeholder="Date of Birth" required class="border p-2 rounded w-full">
-                <input type="tel" id="phone" placeholder="Mobile Number" required class="border p-2 rounded w-full">
-            </div>
-            <input type="email" id="email" placeholder="Your Email" required class="border p-2 rounded w-full">
-            <input type="password" id="password" placeholder="Password" required class="border p-2 rounded w-full">
-            <button type="submit" class="w-full bg-blue-600 text-white p-2 rounded">Sign Up</button>
-        </form>
-        <p class="text-sm text-center">Already registered? <a th:href="@{/login}" class="text-blue-600">Login here</a></p>
+            <form id="registerForm">
+                <div class="mb-3">
+                    <label for="name" class="form-label">Full Name</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-person"></i></span>
+                        <input type="text" id="name" placeholder="Full Name" required class="form-control">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="dob" class="form-label">Date of Birth</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-calendar-event"></i></span>
+                        <input type="date" id="dob" required class="form-control">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="phone" class="form-label">Mobile Number</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                        <input type="tel" id="phone" placeholder="Mobile Number" required class="form-control">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                        <input type="email" id="email" placeholder="Your Email" required class="form-control">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                        <input type="password" id="password" placeholder="Password" required class="form-control">
+                    </div>
+                </div>
+                <!-- CAPTCHA Section -->
+                <div class="mb-3">
+                    <div class="input-group">
+                        <div id="captchaText" class="form-control text-center fw-bold outline-secondary" style="letter-spacing: 3px; background-color: lightgray"></div>
+                        <button type="button" class="btn btn-outline-secondary" onclick="generateCaptcha()">⟳</button>
+                    </div>
+                    <input type="text" id="captchaInput" class="form-control mt-2" placeholder="Enter captcha" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Sign Up</button>
+                <p class="text-center mt-3">Already registered? <a href="/login">Login here</a></p>
+            </form>
+        </div>
     </div>
 </section>
+
 
 <!-- Footer -->
 <footer class=" footer bg-dark text-white mt-auto py-4">
@@ -65,35 +101,57 @@
 </footer>
 
 <script>
-    document.getElementById("registerForm").addEventListener("submit", function(event) {
-        event.preventDefault();
+    // Generate random CAPTCHA
+ function generateCaptcha() {
+     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+     let captcha = '';
+     for (let i = 0; i < 6; i++) {
+         captcha += characters.charAt(Math.floor(Math.random() * characters.length));
+     }
+     document.getElementById('captchaText').textContent = captcha;
+ }
 
-        const formData = {
-            firstName: document.getElementById("firstName").value,
-            lastName: document.getElementById("lastName").value,
-            dob: document.getElementById("dob").value,
-            phone: document.getElementById("phone").value,
-            email: document.getElementById("email").value,
-            password: document.getElementById("password").value
-        };
+ // On form submission
+ document.getElementById("loginform").addEventListener("submit", function(event) {
+     event.preventDefault();
 
-        fetch("http://localhost:8082/register", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(formData)
-        })
-        .then(response => {
-            if (response.ok) {
-                alert("Registration Successful!");
-                window.location.href = "/login";
-            } else {
-                alert("Registration Failed!");
-            }
-        })
-        .catch(error => console.error("Error:", error));
-    });
+     const userCaptcha = document.getElementById("captchaInput").value;
+     const generatedCaptcha = document.getElementById("captchaText").textContent;
+
+     if (userCaptcha !== generatedCaptcha) {
+         alert("Captcha does not match. Please try again.");
+         generateCaptcha();
+         return;
+     }
+document.getElementById("registerForm").addEventListener("submit", function(event) {
+    event.preventDefault();
+
+    const formData = {
+        firstName: document.getElementById("firstName").value,
+        lastName: document.getElementById("lastName").value,
+        dob: document.getElementById("dob").value,
+        phone: document.getElementById("phone").value,
+        email: document.getElementById("email").value,
+        password: document.getElementById("password").value
+    };
+
+    fetch("http://localhost:8082/register", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(formData)
+    })
+    .then(response => {
+        if (response.ok) {
+            alert("Registration Successful!");
+            window.location.href = "/login";
+        } else {
+            alert("Registration Failed!");
+        }
+    })
+    .catch(error => console.error("Error:", error));
+});
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>

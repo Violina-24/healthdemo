@@ -15,7 +15,7 @@ public class CategoryController {
     @Autowired
     private CategoryService categoryService;
 
-    @GetMapping
+    @GetMapping()
     public List<MCategory> getAllCategories() { // Fix method name
         return categoryService.getAllCategories();
     }
