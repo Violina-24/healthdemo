@@ -34,12 +34,13 @@
 <!-- Navigation -->
 <nav class="bg-primary shadow">
     <div class="ind-container-2">
-        <div class="d-flex align-items-center justify-content-between py-3">
+        <div class="d-flex align-items-center justify-content-between py-3 gap-4">
             <div id="welcome-message" class="text-info fs-5 fw-semibold"></div>
+            <button onclick="logout()" class="btn btn-danger">Logout</button>
         </div>
     </div>
 </nav>
-<button onclick="logout()" class="btn btn-danger">Logout</button>
+
 
 
 
@@ -50,8 +51,13 @@
     <div class="row g-5 px-5 justify-content-center">
         <!-- Ongoing Admissions Section -->
         <div class="col-md-10"> <!-- Increased column width -->
-            <div class="bg-white p-4 rounded shadow-sm w-100 text-center"> <!-- Centered text -->
+            <div class="bg-lightgray p-4 rounded shadow-sm w-100 text-center"> <!-- Centered text -->
                 <h2 class="fs-5 fw-semibold text-dark mb-4">ONGOING ADMISSIONS</h2>
+
+                <div id="admission-dates" class="mb-4 text-muted fw-semibold">
+                    <!-- Dates will be dynamically inserted here -->
+                </div>
+
                 <div id="ongoing-admissions" class="d-flex flex-column gap-3 align-items-center">
                     <!-- Dynamic content will be inserted here -->
                 </div>
@@ -64,53 +70,68 @@
 
 <script>
     async function fetchAndDisplayDocuments(dtype) {
-     try {
-       const response = await fetch(`/api/documents/${dtype}`);
-       if (!response.ok) {
-         throw new Error("Failed to fetch documents");
-       }
-       const documents = await response.json();
+      try {
+        const response = await fetch(`/api/documents/${dtype}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch documents");
+        }
 
-       const container = document.getElementById(dtype === 'Advertisement' ? 'ongoing-admissions' : 'notifications');
-       container.innerHTML = '';
+        const documents = await response.json();
 
-       documents.forEach(doc => {
-         const docNumber = doc.dno || "N/A";
-         const docDesc = doc.ddesc || "No description available";
-         const docDate = doc.ddate ? new Date(doc.ddate).toLocaleDateString() : "Invalid Date";
+        const container = document.getElementById('ongoing-admissions');
+        const datesContainer = document.getElementById('admission-dates');
+        container.innerHTML = '';
+        datesContainer.innerHTML = '';
 
-         // Remove extra double quotes from the file path
-         const docFile = doc.dfile ? doc.dfile.replace(/^"|"$/g, '') : "#";
+        documents.forEach(doc => {
+          const docNumber = doc.dno || "N/A";
+          const docDesc = doc.ddesc || "No description available";
+          const docDate = doc.ddate ? new Date(doc.ddate).toLocaleDateString() : "Invalid Date";
+          const docFile = doc.dfile ? doc.dfile.replace(/^"|"$/g, '') : "#";
+          const openDate = doc.opendate ? new Date(doc.opendate).toLocaleString() : "N/A";
+          const endDate = doc.enddate ? new Date(doc.enddate).toLocaleString() : "N/A";
 
-         // Conditionally render the "Apply Now" button only for admissions
-         const applyButton = dtype === 'Advertisement' ? `
-<!--           <button class="btn btn-primary btn-sm" onclick="location.href='/studentform'">Apply Now</button>-->
- <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#applyModel">
-     Apply Now
-    </button>
-         ` : '';
 
-         const docElement = `
-           <div class="border-start border-4 border-primary ps-3 mb-2">
-             <p class="mb-1">No. ${docNumber} - ${docDesc} <br>
-               <a href="${docFile}" target="_blank" class="text-primary fw-semibold">View ${dtype}</a>,
-               <br><small class="text-secondary">Dated on: ${docDate}</small>
-             </p>
-             ${applyButton}
-           </div>
-         `;
-         container.insertAdjacentHTML('beforeend', docElement);
-       });
-     } catch (error) {
-       console.error('Error fetching documents:', error);
-     }
-   }
+<!--          // Open and End Date-->
+<!--          const openDate = doc.opendate ? new Date(doc.opendate).toLocaleString() : "N/A";-->
+<!--          const endDate = doc.enddate ? new Date(doc.enddate).toLocaleString() : "N/A";-->
+<!--          // Only set admission dates once (on first doc)-->
+<!--          if (datesContainer.innerHTML === '') {-->
+<!--            datesContainer.innerHTML = `-->
+<!--              <div>Form fill-up starts: <strong>${openDate}</strong></div>-->
+<!--              <div>Form fill-up ends: <strong>${endDate}</strong></div>-->
+<!--            `;-->
+<!--          }-->
 
-   document.addEventListener("DOMContentLoaded", () => {
-     fetchAndDisplayDocuments('Advertisement');
-     fetchAndDisplayDocuments('Notification');
-   });
+          const applyButton = `
+            <button type="button" class="btn btn-primary mt-2" data-bs-toggle="modal" data-bs-target="#applyModel">
+              Apply Now
+            </button>
+          `;
+
+          const docElement = `
+            <div class="border-start border-4 border-primary ps-3 mb-2 w-75 text-start">
+              <p class="mb-1">No. ${docNumber} - ${docDesc}<br>
+                <a href="${docFile}" target="_blank" class="text-primary fw-semibold">View Advertisement</a><br>
+                <small class="text-secondary">Dated on: ${docDate}</small>
+              </p>
+              <div>Form fill-up starts: <strong style ="color: green">${openDate}</strong></div>
+                 <div>Form fill-up ends: <strong style ="color: red">${endDate}</strong></div>
+              ${applyButton}
+            </div>
+          `;
+          container.insertAdjacentHTML('beforeend', docElement);
+        });
+      } catch (error) {
+        console.error('Error fetching documents:', error);
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      fetchAndDisplayDocuments('Advertisement'); // Removed Notification part
+    });
 </script>
+
 
 <div class="modal fade" id="applyModel" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
 <div class="modal-dialog">
@@ -135,21 +156,7 @@
     </div>
 </div>
 </div>
-<div class="w-100">
-    <hr>
-</div>
-<div class="col-12 py-2 px-lg-2">
-    <h5 class="py-2 text-center fw-semibold fs-4 bg-dark text-light"> About Us</h5>
-    <div style="text-align: justify text-indent: 4rem"></div>
-    <p> Welcome to Online Addmission Portal of Meghalaya State Counselling Authority for Medical Education, your trusted partner in streamlining and managing admission processes. As an integral part of our recruitment portal, we specialize in handling admissions for medical courses, ensuring a seamless and transparent experience for both institutions and applicants.
-    </p>
 
-    <p>Our platform is designed to cater to the unique requirements of institutions, while providing applicants with an easy and efficient way to navigate through the admission process. With a strong emphasis on merit-based selection, adherence to state and national guidelines, and a commitment to transparency, we are dedicated to supporting educational excellence and accessibility.
-    </p>
-
-    <p> By leveraging advanced technology and aligning with regulatory frameworks, we ensure that every step of the admission process is organized and hassle-free. Whether you are an institution looking to optimize your admissions or a student seeking guidance through your application, Online Addmission Portal of Meghalaya State Counselling Authority for Medical Education is here to support you.
-    </p>
-</div>
 <!-- Footer -->
 <footer class=" footer bg-dark text-white mt-auto py-4">
     <div class="text-center">

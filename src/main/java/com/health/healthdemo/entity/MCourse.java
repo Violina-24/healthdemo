@@ -11,6 +11,7 @@ public class MCourse {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long Courseid;
     private String Coursename;
+    private String institute;
 
     public Long getCourseid() {
         return Courseid;
@@ -26,5 +27,13 @@ public class MCourse {
 
     public void setCoursename(String coursename) {
         Coursename = coursename;
+    }
+
+    public String getInstitute() {
+        return institute;
+    }
+
+    public void setInstitute(String institute) {
+        this.institute = institute;
     }
 }

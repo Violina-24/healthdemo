@@ -16,6 +16,8 @@ public class MDocuments {
     private String dNo;
     private Date dDate;
     private String dFile;
+    private Date opendate;
+    private Date enddate;
 
         // Getters and Setters
 
@@ -66,5 +68,21 @@ public class MDocuments {
         public void setDFile(String dFile) {
             this.dFile = dFile;
         }
-    }
+
+         public Date getOpendate() {
+        return opendate;
+        }
+
+        public void setOpendate(Date opendate) {
+        this.opendate = opendate;
+        }
+
+        public Date getEnddate() {
+        return enddate;
+        }
+
+        public void setEnddate(Date enddate) {
+        this.enddate = enddate;
+        }
+}
 
