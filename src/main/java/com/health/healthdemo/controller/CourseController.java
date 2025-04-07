@@ -79,6 +79,14 @@ public class CourseController {
         return "home";
     }
 
+    @GetMapping("/api/course/details/{id}")
+    @ResponseBody
+    public ResponseEntity<MCourse> getCourseDetailsById(@PathVariable Long id) {
+        Optional<MCourse> course = mCourseRepository.findById(id);
+        return course.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+
 }
 
 

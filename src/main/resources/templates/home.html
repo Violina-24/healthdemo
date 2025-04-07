@@ -77,13 +77,14 @@
         }
 
         const documents = await response.json();
-
         const container = document.getElementById('ongoing-admissions');
-        const datesContainer = document.getElementById('admission-dates');
         container.innerHTML = '';
-        datesContainer.innerHTML = '';
 
         documents.forEach(doc => {
+          const courseId = doc.courseid || 0;
+          const courseName = encodeURIComponent(doc.courseName || "MBBS");
+          const institute = encodeURIComponent(doc.institute || "SMC");
+
           const docNumber = doc.dno || "N/A";
           const docDesc = doc.ddesc || "No description available";
           const docDate = doc.ddate ? new Date(doc.ddate).toLocaleDateString() : "Invalid Date";
@@ -91,71 +92,67 @@
           const openDate = doc.opendate ? new Date(doc.opendate).toLocaleString() : "N/A";
           const endDate = doc.enddate ? new Date(doc.enddate).toLocaleString() : "N/A";
 
-
-<!--          // Open and End Date-->
-<!--          const openDate = doc.opendate ? new Date(doc.opendate).toLocaleString() : "N/A";-->
-<!--          const endDate = doc.enddate ? new Date(doc.enddate).toLocaleString() : "N/A";-->
-<!--          // Only set admission dates once (on first doc)-->
-<!--          if (datesContainer.innerHTML === '') {-->
-<!--            datesContainer.innerHTML = `-->
-<!--              <div>Form fill-up starts: <strong>${openDate}</strong></div>-->
-<!--              <div>Form fill-up ends: <strong>${endDate}</strong></div>-->
-<!--            `;-->
-<!--          }-->
-
-          const applyButton = `
-            <button type="button" class="btn btn-primary mt-2" data-bs-toggle="modal" data-bs-target="#applyModel">
-              Apply Now
-            </button>
-          `;
-
-          const docElement = `
-            <div class="border-start border-4 border-primary ps-3 mb-2 w-75 text-start">
-              <p class="mb-1">No. ${docNumber} - ${docDesc}<br>
-                <a href="${docFile}" target="_blank" class="text-primary fw-semibold">View Advertisement</a><br>
-                <small class="text-secondary">Dated on: ${docDate}</small>
-              </p>
-              <div>Form fill-up starts: <strong style ="color: green">${openDate}</strong></div>
-                 <div>Form fill-up ends: <strong style ="color: red">${endDate}</strong></div>
-              ${applyButton}
+          const cardHTML = `
+            <div class="card mb-3 shadow-sm">
+              <div class="card-body">
+                <h5 class="card-title text-primary">${decodeURIComponent(courseName)} - ${decodeURIComponent(institute)}</h5>
+                <p class="card-text">
+                  <strong>Ad No:</strong> ${docNumber}<br>
+                  <strong>Description:</strong> ${docDesc}<br>
+                  <a href="${docFile}" target="_blank" class="text-success">View Advertisement</a><br>
+                  <small class="text-muted">Dated: ${docDate}</small><br>
+                  <strong>Start:</strong> ${openDate}<br>
+                  <strong>End:</strong> ${endDate}
+                </p>
+                <button class="btn btn-primary" onclick="applyNow(${courseId}, '${courseName}', '${institute}')">Apply Now</button>
+              </div>
             </div>
           `;
-          container.insertAdjacentHTML('beforeend', docElement);
+
+          container.insertAdjacentHTML('beforeend', cardHTML);
         });
       } catch (error) {
         console.error('Error fetching documents:', error);
+        document.getElementById('ongoing-admissions').innerHTML = '<p class="text-danger">Failed to load admission details.</p>';
       }
     }
 
+    function applyNow(courseId, courseName, institute) {
+      window.location.href = `/studentform?courseid=${courseId}&coursename=${courseName}&institute=${institute}`;
+    }
+
     document.addEventListener("DOMContentLoaded", () => {
-      fetchAndDisplayDocuments('Advertisement'); // Removed Notification part
+      fetchAndDisplayDocuments('Advertisement');
     });
 </script>
 
 
-<div class="modal fade" id="applyModel" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
-<div class="modal-dialog">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h5 class="modal-title" id="modalLabel">Enter Your Details</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-            <form>
-                <div class="mb-3">
-                    <label class="form-label">Name</label>
-                    <input type="text" class="form-control" id="appusername">
-                </div>
-                <div class="mb-3">
-                    <label for="email" class="form-label">Email</label>
-                    <input type="email" class="form-control" id="email" placeholder="Enter your email">
-                </div>
-                <button type="submit" class="btn btn-success">Submit</button>
-            </form>
-        </div>
-    </div>
-</div>
-</div>
+
+
+
+<!--<div class="modal fade" id="applyModel" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">-->
+<!--<div class="modal-dialog">-->
+<!--    <div class="modal-content">-->
+<!--        <div class="modal-header">-->
+<!--            <h5 class="modal-title" id="modalLabel">Enter Your Details</h5>-->
+<!--            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>-->
+<!--        </div>-->
+<!--        <div class="modal-body">-->
+<!--            <form>-->
+<!--                <div class="mb-3">-->
+<!--                    <label class="form-label">Name</label>-->
+<!--                    <input type="text" class="form-control" id="appusername">-->
+<!--                </div>-->
+<!--                <div class="mb-3">-->
+<!--                    <label for="email" class="form-label">Email</label>-->
+<!--                    <input type="email" class="form-control" id="email" placeholder="Enter your email">-->
+<!--                </div>-->
+<!--                <button type="submit" class="btn btn-success">Submit</button>-->
+<!--            </form>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</div>-->
+<!--</div>-->
 
 <!-- Footer -->
 <footer class=" footer bg-dark text-white mt-auto py-4">
@@ -170,7 +167,6 @@
 <script>
 
     function fetchUserDetails() {
-    debugger;
     fetch("http://localhost:8082/api/get-loginuser-details", {
         method: "GET",
         headers: { "Content-Type": "application/json" },
@@ -224,7 +220,12 @@ document.addEventListener("DOMContentLoaded", fetchUserDetails);
         });
 }
 </script>
-</script>
+<!--<script>-->
+<!--    function applyNow(courseId) {-->
+<!--      window.location.href = `/studentform?courseid=${courseId}`;-->
+<!--    }-->
+<!--</script>-->
+
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>

@@ -33,11 +33,12 @@
 
 <div class="application-container">
     <div class="application-card">
-        <div class="application-card-header">
-                <h2 class="application-card-title">MBBS Counselling Application</h2>
-            </div>
+        <div id="course-info" class="alert alert-info fw-semibold text-center">
+            Loading course information...
+        </div>
 
-            <form action="/submit-application" method="POST">
+
+        <form action="/submit-application" method="POST">
                 <!-- User Info Section -->
                 <div class="bg-gray-50 p-4 rounded-md mb-6">
                     <h3 class="text-lg font-medium text-gray-900 mb-4">User Information</h3>
@@ -119,20 +120,20 @@
     </div>
 </footer>
 
-</body>
-<script>
-    document.addEventListener("DOMContentLoaded", async function () {
-        try {
-            const response = await fetch('/api/getStudentById/{id}'); // Adjust API endpoint based on your backend
-            const user = await response.json();
 
-            if (user && user.name) {
-                document.getElementById('name').value = user.name;
-            }
-        } catch (error) {
-            console.error('Error fetching user data:', error);
-        }
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const courseName = decodeURIComponent(urlParams.get("coursename") || "");
+      const institute = decodeURIComponent(urlParams.get("institute") || "");
+
+      document.getElementById("courseInfo").innerText = `You are applying for ${courseName} at ${institute}`;
     });
 </script>
+
+<p id="courseInfo" class="fw-bold text-success mt-3"></p>
+
+
+</body>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </html>
