@@ -19,7 +19,11 @@ public class MDocuments {
     private Date opendate;
     private Date enddate;
 
-        // Getters and Setters
+    @ManyToOne
+    @JoinColumn(name = "courseid")
+    private MCourse course;
+
+    // Getters and Setters
 
     public Long getDid() {
         return Did;
@@ -84,5 +88,14 @@ public class MDocuments {
         public void setEnddate(Date enddate) {
         this.enddate = enddate;
         }
+
+        public void setCourse(MCourse course) {
+        this.course = course;
+        }
+
+        public MCourse getCourse() {
+        return course;
+        }
+
 }
 

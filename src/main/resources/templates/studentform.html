@@ -33,9 +33,39 @@
 
 <div class="application-container">
     <div class="application-card">
-        <div id="course-info" class="alert alert-info fw-semibold text-center">
-            Loading course information...
-        </div>
+        <h4 id="course-info"></h4>
+
+        <script>
+            const urlParams = new URLSearchParams(window.location.search);
+            const coursename = decodeURIComponent(urlParams.get("coursename") || "");
+            const institute = decodeURIComponent(urlParams.get("institute") || "");
+            const uid = urlParams.get("uid");
+
+            if (coursename && institute) {
+                document.getElementById("course-info").innerText = `You are applying for ${coursename} at ${institute}`;
+            }
+
+            if (uid) {
+                fetch(`http://localhost:8082/api/get-loginuser-details`, {
+                    method: "GET",
+                    headers: { "Content-Type": "application/json" },
+                    credentials: "include"
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data && data.uid == uid) {
+                        document.getElementById("name").value = data.userName;
+                        document.getElementById("email").value = data.email;
+                        document.getElementById("phone").value = data.phone;
+                        document.getElementById("dob").value = data.dob;
+                    } else {
+                        console.warn("UID mismatch or data missing");
+                    }
+                })
+                .catch(err => console.error("Error fetching user details", err));
+            }
+        </script>
+
 
 
         <form action="/submit-application" method="POST">
@@ -45,17 +75,14 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Name</label>
-                            <input type="text" name="name" value= "name" disabled class="input-field"/>
+                            <input type="text" id="name" name="name" class="input-field" disabled />
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Email</label>
-                            <input type="email" name="email" value="${user.email}" disabled
-                                   class="input-field"/>
-                        </div>
+                            <input type="email" id="email" name="email" class="input-field" disabled />
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Phone</label>
-                            <input type="tel" name="phone" value="${user.phone}" disabled
-                                   class="input-field"/>
+                            <input type="tel" id="phone" name="phone" class="input-field" disabled />
                         </div>
                     </div>
                 </div>
@@ -64,8 +91,7 @@
                 <div class="space-y-6">
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Date of Birth</label>
-                        <input type="date" name="dob" required
-                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"/>
+                        <<input type="date" id="dob" name="dob" class="input-field" />
                     </div>
 
                     <div>
@@ -108,6 +134,7 @@
                         Submit Application
                     </button>
                 </div>
+                </div>
             </form>
         </div>
     </div>
@@ -120,18 +147,6 @@
     </div>
 </footer>
 
-
-<script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const urlParams = new URLSearchParams(window.location.search);
-      const courseName = decodeURIComponent(urlParams.get("coursename") || "");
-      const institute = decodeURIComponent(urlParams.get("institute") || "");
-
-      document.getElementById("courseInfo").innerText = `You are applying for ${courseName} at ${institute}`;
-    });
-</script>
-
-<p id="courseInfo" class="fw-bold text-success mt-3"></p>
 
 
 </body>

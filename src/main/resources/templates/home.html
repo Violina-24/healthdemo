@@ -71,7 +71,8 @@
 <script>
     async function fetchAndDisplayDocuments(dtype) {
       try {
-        const response = await fetch(`/api/documents/${dtype}`);
+        const response = await fetch(`/api/documents/with-course/${dtype}`);
+
         if (!response.ok) {
           throw new Error("Failed to fetch documents");
         }
@@ -118,8 +119,25 @@
     }
 
     function applyNow(courseId, courseName, institute) {
-      window.location.href = `/studentform?courseid=${courseId}&coursename=${courseName}&institute=${institute}`;
-    }
+    fetch("http://localhost:8082/api/get-loginuser-details", {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include"
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data && data.uid) {
+            const uid = data.uid;
+            window.location.href = `/studentform?courseid=${courseId}&coursename=${courseName}&institute=${institute}&uid=${uid}`;
+        } else {
+            alert("User not logged in. Please login first.");
+        }
+    })
+    .catch(err => {
+        console.error("Error fetching user ID:", err);
+        alert("Something went wrong while redirecting to the application form.");
+    });
+}
 
     document.addEventListener("DOMContentLoaded", () => {
       fetchAndDisplayDocuments('Advertisement');
@@ -221,9 +239,26 @@ document.addEventListener("DOMContentLoaded", fetchUserDetails);
 }
 </script>
 <!--<script>-->
-<!--    function applyNow(courseId) {-->
-<!--      window.location.href = `/studentform?courseid=${courseId}`;-->
-<!--    }-->
+<!--    function applyNow(courseId, courseName, institute) {-->
+<!--    fetch("http://localhost:8082/api/get-loginuser-details", {-->
+<!--        method: "GET",-->
+<!--        headers: { "Content-Type": "application/json" },-->
+<!--        credentials: "include"-->
+<!--    })-->
+<!--    .then(response => response.json())-->
+<!--    .then(data => {-->
+<!--        if (data && data.uid) {-->
+<!--            const uid = data.uid;-->
+<!--            window.location.href = `/studentform?courseid=${courseId}&coursename=${courseName}&institute=${institute}&uid=${uid}`;-->
+<!--        } else {-->
+<!--            alert("User not logged in. Please login first.");-->
+<!--        }-->
+<!--    })-->
+<!--    .catch(err => {-->
+<!--        console.error("Error fetching user ID:", err);-->
+<!--        alert("Something went wrong while redirecting to the application form.");-->
+<!--    });-->
+<!--}-->
 <!--</script>-->
 
 
