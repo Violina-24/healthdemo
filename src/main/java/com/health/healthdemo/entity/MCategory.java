@@ -15,8 +15,13 @@ public class MCategory {
     public int getCid() { return cid; }
     public void setCid(int cid) { this.cid = cid; }
 
-    public String getCategoryname() { return categoryname; } // Ensure this getter is correct
-    public void setCategoryname(String categoryname) { this.categoryname = categoryname; }
+    public String getCategoryname() {
+        return categoryname;
+    }
+
+    public void setCategoryname(String categoryname) {
+        this.categoryname = categoryname;
+    }
 }
 
 

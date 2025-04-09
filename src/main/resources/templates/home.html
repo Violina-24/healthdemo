@@ -126,8 +126,8 @@
     })
     .then(response => response.json())
     .then(data => {
-        if (data && data.uid) {
-            const uid = data.uid;
+        if (data && data.userId) {
+            const uid = data.userId;
             window.location.href = `/studentform?courseid=${courseId}&coursename=${courseName}&institute=${institute}&uid=${uid}`;
         } else {
             alert("User not logged in. Please login first.");
@@ -138,6 +138,7 @@
         alert("Something went wrong while redirecting to the application form.");
     });
 }
+
 
     document.addEventListener("DOMContentLoaded", () => {
       fetchAndDisplayDocuments('Advertisement');

@@ -28,7 +28,8 @@ public class WebSecurityConfig {
                                 "/favicon.ico", "/studentform", "/qualification", "/application/qualification",
                                 "/application/api/user", "/api/user", "/get-user-details", "/save-student-form",
                                 "/api/categories", "/application/parentsinfo", "/parentsinfo", "/index",
-                                "/api/documents/**", "/userdetails", "/api/home", "/api/getUserLoginDetails","/api/get-loginuser-details","/api/logout", "api/documents/with-course/{dtype}") // Allow API endpoints
+                                "/api/documents/**", "/userdetails", "/api/home", "/api/getUserLoginDetails","/api/get-loginuser-details","/api/logout", "api/documents/with-course/{dtype}", "api/categories/fetched_categories",
+                                "/fileupload", "/category")// Allow API endpoints
                         .permitAll()
                         .anyRequest().authenticated() // Authenticate all other requests
                 )
