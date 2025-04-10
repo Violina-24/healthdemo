@@ -24,31 +24,40 @@ public class CategoryController {
 
     @GetMapping("/categories")
     public ResponseEntity<?> getCategories(
-            HttpSession session,
             @RequestParam String domicile,
             @RequestParam String state,
             @RequestParam String institute) {
 
-        Object uid = session.getAttribute("uid");
-        if (uid == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Collections.singletonMap("error", "User not logged in"));
-        }
-
         List<MCategory> categories;
 
-        if ("nri".equalsIgnoreCase(domicile) && "PIMC".equalsIgnoreCase(institute)) {
-            categories = mCategoryRepository.findByCategoryname("NRI");
-        } else if ("indian".equalsIgnoreCase(domicile) && "other".equalsIgnoreCase(state) && "PIMC".equalsIgnoreCase(institute)) {
-            categories = mCategoryRepository.findByCategoryname("Management");
-        } else if ("indian".equalsIgnoreCase(domicile) && "meghalaya".equalsIgnoreCase(state)) {
-            categories = mCategoryRepository.findAll();
+        // Only show NRI and Management for PIMC
+        if ("PIMC".equalsIgnoreCase(institute)) {
+            if ("nri".equalsIgnoreCase(domicile)) {
+                categories = mCategoryRepository.findByCategoryname("NRI");
+            } else if ("indian".equalsIgnoreCase(domicile) && "other".equalsIgnoreCase(state)) {
+                categories = mCategoryRepository.findByCategoryname("Management");
+            } else if ("indian".equalsIgnoreCase(domicile) && "meghalaya".equalsIgnoreCase(state)) {
+                categories = mCategoryRepository.findAll();
+            } else {
+                categories = Collections.emptyList();
+            }
+        } else if ("SMC".equalsIgnoreCase(institute)) {
+            // Exclude NRI and Management for SMC
+            if ("indian".equalsIgnoreCase(domicile) && "meghalaya".equalsIgnoreCase(state)) {
+                categories = mCategoryRepository.findAll()
+                        .stream()
+                        .filter(c -> !c.getCategoryname().equalsIgnoreCase("NRI") && !c.getCategoryname().equalsIgnoreCase("Management"))
+                        .toList();
+            } else {
+                categories = Collections.emptyList();
+            }
         } else {
             categories = Collections.emptyList();
         }
 
         return ResponseEntity.ok(categories);
     }
+
 
     @PostMapping("/create")
     public MCategory createCategory(@RequestBody MCategory category) {

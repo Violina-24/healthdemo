@@ -31,76 +31,88 @@
   <a href="login" class="text-light fs-6 mx-2 text-decoration-none">Login</a>
 </div>
 
-<div class="container mt-5 p-4 bg-white rounded-2xl shadow-lg max-w-3xl mx-auto">
-  <h2 class="text-center text-2xl font-bold mb-4">Upload Your Documents</h2>
+<!-- Form Container -->
+<div class="container">
 
-  <form action="/submitDocuments" method="post" enctype="multipart/form-data">
-    <div class="row g-3">
-      <!-- Passport Photo -->
-      <div class="col-12">
-        <label class="form-label fw-semibold">Passport Size Photo</label>
-        <input type="file" class="form-control" name="passportPhoto" required>
+  <div class="bg-white rounded-3 shadow p-4 mx-auto" style="max-width: 800px;">
+    <h2 class="text-center fw-bold mb-4 text-primary">Upload Your Documents</h2>
+
+    <form action="/submitDocuments" method="post" enctype="multipart/form-data">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Aadhaar Linked Phone Number</label>
+          <input type="tel" class="form-control" name="aadhaarPhone" pattern="[6-9]{1}[0-9]{9}" maxlength="10" minlength="10" placeholder="Enter 10-digit mobile number" required>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Passport Size Photo</label>
+          <input type="file" class="form-control" name="passportPhoto" required>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-semibold"> Birth Certificate or Other age proof</label>
+          <input type="file" class="form-control" name="ageProof" required>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Class X and XII Marksheet</label>
+          <input type="file" class="form-control" name="class10and12Marksheet" accept="application/pdf" required>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Class X and XII Pass Certificate</label>
+          <input type="file" class="form-control" name="class10and12certificate" accept="application/pdf" required>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">NEET Result Sheet</label>
+          <input type="file" class="form-control" name="neetResult" required>
+        </div>
+
+        <div class="col-md-6" id="casteCertificateSection">
+          <label class="form-label fw-semibold">ST/SC/OST Certificate <small class="text-muted">(If applicable)</small></label>
+          <input type="file" class="form-control" name="casteCertificate">
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Permanent Residence Certificate (PRC)</label>
+          <input type="file" class="form-control" name="prc" required>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Character Certificate</label>
+          <input type="file" class="form-control" name="characterCertificate" required>
+        </div>
+        <div class="col-md-6" id="pwdCertificateSection">
+          <label class="form-label fw-semibold">PWD Certificate <small class="text-muted">(If applicable)</small></label>
+          <input type="file" class="form-control" name="pwdCertificate">
+        </div>
       </div>
 
-      <!-- Age Proof -->
-      <div class="col-12">
-        <label class="form-label fw-semibold">Age Proof</label>
-        <input type="file" class="form-control" name="ageProof" required>
-      </div>
 
-      <!-- Class 12 Marksheet -->
-      <div class="col-12">
-        <label class="form-label fw-semibold">Class 12 Marksheet</label>
-        <input type="file" class="form-control" name="class12Marksheet" required>
+      <!-- Button Section -->
+      <div class="d-flex justify-content-between align-items-center mt-4">
+        <button type="button" class="btn btn-secondary">Previous</button>
+        <div>
+          <button type="button" class="btn btn-info text-white me-2">Preview</button>
+          <button type="submit" class="btn btn-success me-2">Submit</button>
+          <button type="button" class="btn btn-primary">Next</button>
+        </div>
       </div>
-
-      <!-- ST/SC/OST Certificate (conditionally required) -->
-      <div class="col-12" id="casteCertificateSection">
-        <label class="form-label fw-semibold">ST/SC/OST Certificate <small class="text-muted">(Not needed for General)</small></label>
-        <input type="file" class="form-control" name="casteCertificate">
-      </div>
-
-      <!-- PRC -->
-      <div class="col-12">
-        <label class="form-label fw-semibold">Permanent Residence Certificate (PRC)</label>
-        <input type="file" class="form-control" name="prc" required>
-      </div>
-
-      <!-- NEET Result Certificate -->
-      <div class="col-12">
-        <label class="form-label fw-semibold">NEET Result Sheet</label>
-        <input type="file" class="form-control" name="neetResult" required>
-      </div>
-
-      <!-- Character Certificate -->
-      <div class="col-12">
-        <label class="form-label fw-semibold">Character Certificate</label>
-        <input type="file" class="form-control" name="characterCertificate" required>
-      </div>
-
-      <!-- PWD Certificate (conditionally required) -->
-      <div class="col-12" id="pwdCertificateSection">
-        <label class="form-label fw-semibold">PWD Certificate <small class="text-muted">(Only if physically challenged)</small></label>
-        <input type="file" class="form-control" name="pwdCertificate">
-      </div>
-    </div>
-
-    <!-- Buttons -->
-    <div class="d-flex justify-between justify-content-between mt-4">
-      <button type="button" class="btn btn-secondary">Previous</button>
-      <div>
-        <button type="button" class="btn btn-info text-white me-2">Preview</button>
-        <button type="submit" class="btn btn-success me-2">Submit</button>
-        <button type="button" class="btn btn-primary">Next</button>
-      </div>
-    </div>
-  </form>
+    </form>
+  </div>
 </div>
 
+
+<footer class=" footer bg-dark text-white mt-auto py-4">
+  <div class="text-center">
+    <p class="mb-1">© 2025 Meghalaya State Counselling Authority. All rights reserved.</p>
+    <p class="text-secondary mb-0">For technical support: support@meghalayamedical.gov.in</p>
+  </div>
+</footer>
+
+
 <script>
-  // Example values from backend or session
-  const userCategory = 'General'; // Replace dynamically
-  const isPhysicallyChallenged = false; // Replace dynamically
+  const userCategory = 'General'; // Replace with dynamic value
+  const isPhysicallyChallenged = false; // Replace with dynamic value
 
   if (userCategory === 'General') {
     document.getElementById('casteCertificateSection').style.display = 'none';
@@ -109,6 +121,5 @@
     document.getElementById('pwdCertificateSection').style.display = 'none';
   }
 </script>
-
 </body>
 </html>
