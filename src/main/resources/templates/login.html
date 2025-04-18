@@ -116,14 +116,15 @@
                     <input type="password" name="password" class="form-control" placeholder="Enter your password" required >
                 </div>
             </div>
-            <!-- CAPTCHA Section -->
+            <!-- CAPTCHA Section with Canvas -->
             <div class="mb-3">
-                <div class="input-group">
-                    <div id="captchaText" class="form-control text-center fw-bold outline-secondary" style="letter-spacing: 3px; background-color: lightgray"></div>
-                    <button type="button" class="btn btn-outline-secondary" onclick="generateCaptcha()">⟳</button>
+                <div class="d-flex align-items-center mb-2 w-100">
+                    <canvas id="captchaCanvas" height="30" class="form-control p-0 me-2" style="flex: 1;"></canvas>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="generateCaptcha()">⟳</button>
                 </div>
-                <input type="text" id="captchaInput" class="form-control mt-2" placeholder="Enter captcha" required>
+                <input type="text" id="captchaInput" class="form-control" placeholder="Enter captcha" required>
             </div>
+
 
             <button type="submit" class="btn btn-primary w-100 mt-3">
                 <i class="bi bi-box-arrow-in-right"></i> Sign In
@@ -146,63 +147,80 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-     // Generate random CAPTCHA
-     function generateCaptcha() {
-         const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-         let captcha = '';
-         for (let i = 0; i < 6; i++) {
-             captcha += characters.charAt(Math.floor(Math.random() * characters.length));
-         }
-         document.getElementById('captchaText').textContent = captcha;
-     }
-// On form submission
-document.getElementById("loginform").addEventListener("submit", function(event) {
-    event.preventDefault();
+    // CAPTCHA with background lines
+    function generateCaptcha() {
+        const canvas = document.getElementById("captchaCanvas");
+        const ctx = canvas.getContext("2d");
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "#f0f0f0";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    const userCaptcha = document.getElementById("captchaInput").value;
-    const generatedCaptcha = document.getElementById("captchaText").textContent;
+        // Draw random lines
+        for (let i = 0; i < 5; i++) {
+            ctx.strokeStyle = `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(
+                Math.random() * 255
+            )}, ${Math.floor(Math.random() * 255)}, 0.7)`;
+            ctx.beginPath();
+            ctx.moveTo(Math.random() * canvas.width, Math.random() * canvas.height);
+            ctx.lineTo(Math.random() * canvas.width, Math.random() * canvas.height);
+            ctx.stroke();
+        }
 
-    if (userCaptcha !== generatedCaptcha) {
-        alert("Captcha does not match. Please try again.");
-        generateCaptcha();
-        return;
+        // Generate and draw CAPTCHA
+        const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        let captcha = "";
+        for (let i = 0; i < 6; i++) {
+            captcha += characters.charAt(Math.floor(Math.random() * characters.length));
+        }
+        ctx.font = "24px Arial";
+        ctx.fillStyle = "#000";
+        ctx.textBaseline = "middle";
+        ctx.fillText(captcha, 50, canvas.height / 2);
+        canvas.setAttribute("data-captcha", captcha);
     }
 
-    const formData = {
-        email: document.querySelector("input[name='email']").value,
-        password: document.querySelector("input[name='password']").value
-    };
+    document.getElementById("loginform").addEventListener("submit", function (event) {
+        event.preventDefault();
 
-    fetch("http://localhost:8082/api/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-        credentials: "include"  // Include credentials to maintain session
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error("Login failed");
+        const userCaptcha = document.getElementById("captchaInput").value;
+        const generatedCaptcha = document.getElementById("captchaCanvas").getAttribute("data-captcha");
+
+        if (userCaptcha !== generatedCaptcha) {
+            alert("Captcha does not match. Please try again.");
+            generateCaptcha();
+            return;
         }
-        return response.json();
-    })
-    .then(data => {
-        if (data.message === "Login Successful") {
-            alert("Login Successful!");
-            window.location.href = "/home";
-        } else {
-            alert("Invalid email or password!");
-        }
-    })
-    .catch(error => {
-        console.error("Error:", error);
-        alert("An error occurred. Please try again.");
+
+        const formData = {
+            email: document.querySelector("input[name='email']").value,
+            password: document.querySelector("input[name='password']").value
+        };
+
+        fetch("http://localhost:8082/api/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(formData),
+            credentials: "include"
+        })
+        .then(response => {
+            if (!response.ok) throw new Error("Login failed");
+            return response.json();
+        })
+        .then(data => {
+            if (data.message === "Login Successful") {
+                alert("Login Successful!");
+                window.location.href = "/home";
+            } else {
+                alert("Invalid email or password!");
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            alert("An error occurred. Please try again.");
+        });
     });
-});
 
-
-
-     // Initialize CAPTCHA on page load
-     window.onload = generateCaptcha;
+    window.onload = generateCaptcha;
 </script>
 </body>
 
