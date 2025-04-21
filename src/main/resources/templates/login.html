@@ -115,9 +115,13 @@
                     </span>
                     <input type="password" name="password" class="form-control" placeholder="Enter your password" required >
                 </div>
+                <a href="forgotpassword.html"class="text-decoration-none fs-6"> Forgot Password?</a>
             </div>
             <!-- CAPTCHA Section with Canvas -->
             <div class="mb-3">
+                <label class="form-label fw-semibold">
+                    <i class="bi bi-lock-fill me-2"></i>Captcha
+                </label>
                 <div class="d-flex align-items-center mb-2 w-100">
                     <canvas id="captchaCanvas" height="30" class="form-control p-0 me-2" style="flex: 1;"></canvas>
                     <button type="button" class="btn btn-outline-secondary btn-sm" onclick="generateCaptcha()">⟳</button>

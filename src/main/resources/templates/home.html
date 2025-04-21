@@ -32,11 +32,17 @@
 
 
 <!-- Navigation -->
-<nav class="bg-primary shadow">
+<!-- Floating Welcome Bar -->
+<nav class="bg-white shadow rounded-3 mx-3 mt-3" style="margin-top: 1.5rem !important;">
     <div class="ind-container-2">
-        <div class="d-flex align-items-center justify-content-between py-3 gap-4">
-            <i class="bi bi-person me-2 fs-5"></i> <div id="welcome-message" class="text-info fs-5 fw-semibold"></div>
-            <button onclick="logout()" class="btn btn-danger"><i class="bi bi-box-arrow-right me-1"></i>Logout</button>
+        <div class="d-flex align-items-center justify-content-between py-3 px-4 gap-4">
+            <div class="d-flex align-items-center text-primary fs-5 fw-semibold">
+                <i class="bi bi-person-circle me-2 fs-4"></i>
+                <div id="welcome-message" class="text-info"></div>
+            </div>
+            <button onclick="logout()" class="btn btn-danger ms-auto">
+                <i class="bi bi-box-arrow-right me-1"></i>Logout
+            </button>
         </div>
     </div>
 </nav>

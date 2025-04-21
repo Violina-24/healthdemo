@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/html">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -29,52 +29,62 @@
   <a href="index" class="text-light fs-6 mx-2 text-decoration-none">Home</a>
   <a href="login" class="text-light fs-6 mx-2 text-decoration-none">Login</a>
 </div>
-<h2>Qualification Details</h2>
-<form action="/application/submit-qualification" method="post">
-  <label for="physics">Physics Percentage:</label>
-  <input type="number" id="physics" name="physics_Score" step="0.01" required><br>
+<div class="container py-5">
+  <div class="bg-light p-4 rounded shadow-sm mx-auto" style="max-width: 850px;">
+    <h3 class="text-center fw-bold mb-4">Qualification Details</h3>
 
-  <label for="chemistry">Chemistry Percentage:</label>
-  <input type="number" id="chemistry" name="chemistry_Score" step="0.01" required><br>
+    <form action="/application/submit-qualification" method="post">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label for="physics" class="form-label">Physics Percentage</label>
+          <input type="number" id="physics" name="physics_Score" class="form-control" required min="0" max="100" step="0.01" />
+        </div>
+        <div class="col-md-6">
+          <label for="chemistry" class="form-label">Chemistry Percentage</label>
+          <input type="number" id="chemistry" name="chemistry_Score" class="form-control" required min="0" max="100" step="0.01" />
+        </div>
 
-  <label for="biology">Biology/Biotech Percentage:</label>
-  <input type="number" id="biology" name="biology_Biotech_Score" step="0.01" required><br>
+        <div class="col-md-6">
+          <label for="biology" class="form-label">Biology/Biotech Percentage</label>
+          <input type="number" id="biology" name="biology_Biotech_Score" class="form-control" required min="0" max="100" step="0.01" />
+        </div>
+        <div class="col-md-6">
+          <label for="subjectChoice" class="form-label">Select Subject</label>
+          <select id="subjectChoice" name="subjectChoice" class="form-select">
+            <option value="Biology">Biology</option>
+            <option value="Biotechnology">Biotechnology</option>
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label for="neet" class="form-label">NEET Score</label>
+          <input type="number" id="neet" name="NEET_SCORE" class="form-control" required min="-180" max="720" />
+        </div>
 
-  <label for="subjectChoice">Select Subject:</label>
-  <select id="subjectChoice" name="subjectChoice">
-    <option value="Biology">Biology</option>
-    <option value="Biotechnology">Biotechnology</option>
-  </select><br>
+      </div>
 
-  <label for="neet">NEET Score:</label>
-  <input type="number" id="neet" name="NEET_SCORE" min="-180" max="720" required><br>
-
-  <div class="button-container">
-    <form id="studentForm" action="/application/save-student-form" method="post">
-      <!-- Your form fields go here -->
-
-      <button class="nav-btn " type="button" onclick="goBack()">Previous</button>
-      <button class="nav-btn " type="submit">Save</button>
-      <button class="nav-btn " type="button" onclick="goNext()">Next</button>
+      <div class="d-flex justify-content-end gap-2 mt-4">
+        <button type="button" onclick="goBack()" class="btn btn-secondary px-4">Previous</button>
+        <button type="submit" class="btn btn-primary">Save</button>
+        <button type="button" class="btn btn-success" onclick="goNext()">Next</button>
+      </div>
     </form>
   </div>
+</div>
 
-  <footer class=" footer bg-dark text-white mt-auto py-4">
-    <div class="text-center">
-      <p class="mb-1">© 2025 Meghalaya State Counselling Authority. All rights reserved.</p>
-      <p class="text-secondary mb-0">For technical support: support@meghalayamedical.gov.in</p>
-    </div>
-  </footer>
-  <script>
-    function goBack() {
-        window.history.back(); // Goes to the previous page
-    }
 
-    function goNext() {
-        window.location.href = "/quota"; // Redirect to next page
-    }
-  </script>
-</form>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+<footer class="footer bg-dark text-white mt-5 py-3">
+  <div class="text-center">
+    <p class="mb-1">© 2025 Meghalaya State Counselling Authority. All rights reserved.</p>
+    <p class="text-secondary mb-0">For technical support: support@meghalayamedical.gov.in</p>
+  </div>
+</footer>
+
+<script>
+  function goBack() {
+    window.history.back();
+  }
+
+  function goNext() {
+    window.location.href = "/fileupload";
+  }
+</script>
