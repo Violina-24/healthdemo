@@ -54,13 +54,13 @@
 
 <!-- Main Content -->
 <main class="container-main py-5">
-    <div class="row g-5 px-5 justify-content-center">
+    <div class="row g-4 px-4 justify-content-center">
         <!-- Ongoing Admissions Section -->
-        <div class="col-md-10"> <!-- Increased column width -->
-            <div class="bg-lightgray p-4 rounded shadow-sm w-100 text-center"> <!-- Centered text -->
-                <h2 class="fs-5 fw-semibold text-dark mb-4">ONGOING ADMISSIONS</h2>
+        <div class="col-md-10">
+            <div class="bg-white p-5 rounded-3 shadow-lg w-100 border border-gray-200 text-center">
+                <h2 class="fs-4 fw-bold text-primary mb-3 tracking-wide">Ongoing Admissions</h2>
 
-                <div id="admission-dates" class="mb-4 text-muted fw-semibold">
+                <div id="admission-dates" class="mb-3 text-secondary fw-medium fs-6">
                     <!-- Dates will be dynamically inserted here -->
                 </div>
 
@@ -71,6 +71,7 @@
         </div>
     </div>
 </main>
+
 
 
 
@@ -106,10 +107,13 @@
                 <p class="card-text">
                   <strong>Ad No:</strong> ${docNumber}<br>
                   <strong>Description:</strong> ${docDesc}<br>
-                  <a href="${docFile}" target="_blank" class="text-success">View Advertisement</a><br>
+                 <a href="${docFile}" target="_blank" class="fw-bold text-primary">View Advertisement</a><br>
                   <small class="text-muted">Dated: ${docDate}</small><br>
-                  <strong>Start:</strong> ${openDate}<br>
-                  <strong>End:</strong> ${endDate}
+                  <div id="admission-dates" class="mb-3 text-secondary fw-medium fs-6">
+                    <span class="text-success fw-semibold">Start: <span class="text-success">${openDate}</span></span><br>
+                    <span class="text-danger fw-semibold">End: <span class="text-danger">${endDate}</span></span>
+                </div>
+
                 </p>
                 <button class="btn btn-primary" onclick="applyNow(${courseId}, '${courseName}', '${institute}')">Apply Now</button>
               </div>

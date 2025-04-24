@@ -77,7 +77,9 @@ public class ApplicationController {
    return "redirect:/login";
   }
 
-  model.addAttribute("tapplication", new TApplication());
+  TApplication existingApp = tApplicationRepository.findByUser(user.get()).orElse(new TApplication());
+  model.addAttribute("tapplication", existingApp);
+
   return "studentform";
  }
 
@@ -140,9 +142,13 @@ public class ApplicationController {
  }
 
  @GetMapping("/qualification")
- public String qualificationPage(){
-  return "/qualification"; // Loads the qualification.html page
+ public String showQualificationPage(Model model, Principal principal) {
+  MUsers user = usersService.findByEmail(principal.getName());
+  TApplication app = tApplicationRepository.findByUser(user).orElse(new TApplication());
+  model.addAttribute("tapplication", app);
+  return "qualification";
  }
+
 
 
  @PostMapping("/submit-qualification")
@@ -174,9 +180,27 @@ public class ApplicationController {
   return "redirect:/application/parentsinfo"; // Change to your actual next page
  }
 
- @GetMapping("/parentsinfo")
- public String parentsinfoPage(){
-  return "parentsinfo"; // ✅ Correct
+ @GetMapping("/quota")
+ public String showQuotaPage(Model model, Principal principal) {
+  MUsers user = usersService.findByEmail(principal.getName());
+  TApplication app = tApplicationRepository.findByUser(user).orElse(new TApplication());
+  model.addAttribute("tapplication", app);
+  return "quota"; // your quota.html
+ }
+ @PostMapping("/save-quota")
+ public String saveQuota(@ModelAttribute TApplication tapp, Principal principal) {
+  MUsers user = usersService.findByEmail(principal.getName());
+  TApplication existing = tApplicationRepository.findByUser(user).orElse(new TApplication());
+
+  existing.setCategory(tapp.getCategory());
+  existing.setInstitute(tapp.getInstitute());
+  existing.setQuota(tapp.getQuota());
+
+  existing.setUser(user);
+  tApplicationRepository.save(existing);
+
+  return "redirect:/application/qualification";
  }
 
-}
+ }
+
