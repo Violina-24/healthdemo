@@ -23,7 +23,8 @@ public class TApplication {
     private int age;
     private String gender;
     @ManyToOne
-    private MCategory category;
+    @JoinColumn(name = "category_name")
+    private MCategory categoryname;
 
     @ManyToOne
    @JoinColumn(name = "permanent_address_id")
@@ -64,6 +65,10 @@ public class TApplication {
     private SubjectChoice subjectChoice;
 
 
+    // ManyToOne relationship to Course (institute)
+    @ManyToOne
+    @JoinColumn(name = "institute") // or your actual column name
+    private MCourse institute;
 
     @Lob
     private byte[] PassportPhoto;
@@ -156,14 +161,21 @@ public class TApplication {
         this.gender = gender;
     }
 
-    public MCategory getCategory() {
-        return category;
+    public MCourse getInstitute() {
+        return institute;
     }
 
-    public void setCategory(MCategory category) {
-        this.category = category;
+    public void setInstitute(MCourse institute) {
+        this.institute = institute;
     }
 
+    public MCategory getCategoryname() {
+        return categoryname;
+    }
+
+    public void setCategoryname(MCategory categoryname) {
+        this.categoryname = categoryname;
+    }
 
     public String getReligion() {
         return religion;

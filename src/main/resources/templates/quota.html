@@ -107,7 +107,7 @@
 
       <div class="d-flex justify-content-end gap-2 mt-4">
         <button type="button" onclick="goBack()" class="btn btn-secondary px-4">Previous</button>
-        <button type="submit" class="btn btn-primary">Save</button>
+        <button type="button" onclick="saveAndContinue()" class="btn btn-primary px-4">Save and Continue</button>
         <button type="button" class="btn btn-success" onclick="goNext()">Next</button>
       </div>
     </div>
@@ -195,6 +195,46 @@
     handleDomicileChange(); // ✅ call this on page load
   });
 </script>
+<script>
+  function saveAndContinue() {
+    // Get form data (adjust based on the form fields you have)
+    const formData = {
+      domicile: document.getElementById("domicile").value,
+      state: getSelectedState(),
+      category: document.getElementById("categoryDropdown").value,
+      mgmtQuota: document.querySelector('input[name="mgmtQuota"]:checked')?.value,
+      physicallyChallenged: document.querySelector('input[name="physicallyChallenged"]:checked')?.value,
+      ews: document.querySelector('input[name="ews"]:checked')?.value
+    };
+
+    // Save to localStorage
+    localStorage.setItem('formData', JSON.stringify(formData));
+
+    // Alert and redirect
+    alert("Your data has been saved!");
+    window.location.href = "/qualification"; // Redirect to the next page (replace with your actual page URL)
+  }
+
+  // Populate the form fields with saved data when the page loads
+  document.addEventListener("DOMContentLoaded", function() {
+    const savedData = JSON.parse(localStorage.getItem('formData'));
+    if (savedData) {
+      // Populate fields if there is saved data
+      document.getElementById("domicile").value = savedData.domicile || '';
+      document.getElementById("categoryDropdown").value = savedData.category || '';
+      if (savedData.mgmtQuota) {
+        document.querySelector(`input[name="mgmtQuota"][value="${savedData.mgmtQuota}"]`).checked = true;
+      }
+      if (savedData.physicallyChallenged) {
+        document.querySelector(`input[name="physicallyChallenged"][value="${savedData.physicallyChallenged}"]`).checked = true;
+      }
+      if (savedData.ews) {
+        document.querySelector(`input[name="ews"][value="${savedData.ews}"]`).checked = true;
+      }
+    }
+  });
+</script>
+
 <script>
   function goBack() {
       window.history.back(); // Goes to the previous page

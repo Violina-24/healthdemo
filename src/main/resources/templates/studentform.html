@@ -31,6 +31,7 @@
     <a href="home" class="text-light fs-6 mx-2 text-decoration-none">Home</a>
     <a href="login" class="text-light fs-6 mx-2 text-decoration-none">Login</a>
 </div>
+
 <div class="application-container">
     <div class="application-card">
         <nav class="bg-white shadow rounded-3 mx-3 mt-3">
@@ -42,37 +43,6 @@
                 </div>
             </div>
         </nav>
-
-        <script>
-            const urlParams = new URLSearchParams(window.location.search);
-            const coursename = decodeURIComponent(urlParams.get("coursename") || "");
-            const institute = decodeURIComponent(urlParams.get("institute") || "");
-            const uid = urlParams.get("uid");
-
-            if (coursename && institute) {
-                document.getElementById("course-info").innerText = `You are applying for ${coursename} at ${institute}`;
-            }
-
-            if (uid) {
-                fetch(`http://localhost:8082/api/get-loginuser-details`, {
-                    method: "GET",
-                    headers: { "Content-Type": "application/json" },
-                    credentials: "include"
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data && data.userId == uid) {
-                        document.getElementById("name").value = data.userName;
-                        document.getElementById("email").value = data.email;
-                        document.getElementById("phone").value = data.phone;
-                        document.getElementById("dob").value = data.dob;
-                    } else {
-                        console.warn("UID mismatch or data missing");
-                    }
-                })
-                .catch(err => console.error("Error fetching user details", err));
-            }
-        </script>
 
         <div class="container my-5 p-4 bg-white shadow rounded-3">
             <form action="/submit-application" method="POST">
@@ -123,7 +93,6 @@
                         </div>
                     </div>
                 </div>
-
 
                 <!-- Communication Address -->
                 <div class="mb-4">
@@ -180,7 +149,7 @@
                 <!-- Section: Buttons -->
                 <div class="d-flex justify-content-end gap-2 pt-3">
                     <button type="button" onclick="goBack()" class="btn btn-secondary px-4">Previous</button>
-                    <button type="submit" class="btn btn-primary px-4">Save</button>
+                    <button type="button" onclick="saveAndContinue()" class="btn btn-primary px-4">Save and Continue</button>
                     <button type="button" onclick="goNext()" class="btn btn-success px-4">Next</button>
                 </div>
 
@@ -189,39 +158,125 @@
     </div>
 </div>
 
-<footer class=" footer bg-dark text-white mt-auto py-4">
+<footer class="footer bg-dark text-white mt-auto py-4">
     <div class="text-center">
         <p class="mb-1">© 2025 Meghalaya State Counselling Authority. All rights reserved.</p>
         <p class="text-secondary mb-0">For technical support: support@meghalayamedical.gov.in</p>
     </div>
 </footer>
-
 <script>
-    document.getElementById("sameAsComm").addEventListener("change", function () {
-      if (this.checked) {
-        document.getElementById("perm_address1").value = document.getElementById("comm_address1").value;
-        document.getElementById("perm_address2").value = document.getElementById("comm_address2").value;
-        document.getElementById("perm_district").value = document.getElementById("comm_district").value;
-        document.getElementById("perm_state").value = document.getElementById("comm_state").value;
-        document.getElementById("perm_pincode").value = document.getElementById("comm_pincode").value;
-      } else {
-        document.getElementById("perm_address1").value = "";
-        document.getElementById("perm_address2").value = "";
-        document.getElementById("perm_district").value = "";
-        document.getElementById("perm_state").value = "";
-        document.getElementById("perm_pincode").value = "";
-      }
+    function saveAndContinue() {
+        // Get form data
+        const formData = {
+            name: document.getElementById("name").value,
+            email: document.getElementById("email").value,
+            phone: document.getElementById("phone").value,
+            dob: document.getElementById("dob").value,
+            nationality: document.querySelector('input[name="nationality"]').value,
+            religion: document.querySelector('input[name="religion"]').value,
+            gender: document.querySelector('select[name="gender"]').value,
+            comm_address1: document.getElementById("comm_address1").value,
+            comm_address2: document.getElementById("comm_address2").value,
+            comm_district: document.getElementById("comm_district").value,
+            comm_state: document.getElementById("comm_state").value,
+            comm_pincode: document.getElementById("comm_pincode").value,
+            perm_address1: document.getElementById("perm_address1").value,
+            perm_address2: document.getElementById("perm_address2").value,
+            perm_district: document.getElementById("perm_district").value,
+            perm_state: document.getElementById("perm_state").value,
+            perm_pincode: document.getElementById("perm_pincode").value
+        };
+
+        // Save to localStorage (or sessionStorage if you prefer session persistence)
+        localStorage.setItem('formData', JSON.stringify(formData));
+
+        // Alert and redirect
+        alert("Your data has been saved!");
+        window.location.href = "/quota"; // Redirect to the next page (replace with your actual page URL)
+    }
+
+    // When the page loads, populate the form fields with saved data (if any)
+    document.addEventListener("DOMContentLoaded", function() {
+        const savedData = JSON.parse(localStorage.getItem('formData'));
+        if (savedData) {
+            document.getElementById("name").value = savedData.name || '';
+            document.getElementById("email").value = savedData.email || '';
+            document.getElementById("phone").value = savedData.phone || '';
+            document.getElementById("dob").value = savedData.dob || '';
+            document.querySelector('input[name="nationality"]').value = savedData.nationality || '';
+            document.querySelector('input[name="religion"]').value = savedData.religion || '';
+            document.querySelector('select[name="gender"]').value = savedData.gender || '';
+            document.getElementById("comm_address1").value = savedData.comm_address1 || '';
+            document.getElementById("comm_address2").value = savedData.comm_address2 || '';
+            document.getElementById("comm_district").value = savedData.comm_district || '';
+            document.getElementById("comm_state").value = savedData.comm_state || '';
+            document.getElementById("comm_pincode").value = savedData.comm_pincode || '';
+            document.getElementById("perm_address1").value = savedData.perm_address1 || '';
+            document.getElementById("perm_address2").value = savedData.perm_address2 || '';
+            document.getElementById("perm_district").value = savedData.perm_district || '';
+            document.getElementById("perm_state").value = savedData.perm_state || '';
+            document.getElementById("perm_pincode").value = savedData.perm_pincode || '';
+        }
     });
 </script>
 <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const coursename = decodeURIComponent(urlParams.get("coursename") || "");
+        const institute = decodeURIComponent(urlParams.get("institute") || "");
+        const uid = urlParams.get("uid");
+
+        if (coursename && institute) {
+            document.getElementById("course-info").innerText = `You are applying for ${coursename} at ${institute}`;
+        }
+
+        if (uid) {
+            fetch("/api/get-loginuser-details", {
+                method: "GET",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include"
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data && data.userId == uid) {
+                    document.getElementById("name").value = data.userName;
+                    document.getElementById("email").value = data.email;
+                    document.getElementById("phone").value = data.phone;
+                    document.getElementById("dob").value = data.dob;
+                } else {
+                    console.warn("UID mismatch or data missing");
+                }
+            })
+            .catch(err => console.error("Error fetching user details", err));
+        }
+
+        document.getElementById("sameAsComm").addEventListener("change", function () {
+            if (this.checked) {
+                document.getElementById("perm_address1").value = document.getElementById("comm_address1").value;
+                document.getElementById("perm_address2").value = document.getElementById("comm_address2").value;
+                document.getElementById("perm_district").value = document.getElementById("comm_district").value;
+                document.getElementById("perm_state").value = document.getElementById("comm_state").value;
+                document.getElementById("perm_pincode").value = document.getElementById("comm_pincode").value;
+            } else {
+                document.getElementById("perm_address1").value = "";
+                document.getElementById("perm_address2").value = "";
+                document.getElementById("perm_district").value = "";
+                document.getElementById("perm_state").value = "";
+                document.getElementById("perm_pincode").value = "";
+            }
+        });
+    });
+
     function goBack() {
-        window.history.back(); // Goes to the previous page
+        window.history.back();
     }
 
     function goNext() {
-        window.location.href = "/quota"; // Redirect to next page
+        window.location.href = "/quota";
     }
 </script>
+
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
