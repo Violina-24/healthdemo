@@ -8,6 +8,7 @@ import com.health.healthdemo.services.ApplicationService;
 import com.health.healthdemo.services.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 //import org.springframework.stereotype.Controller;
@@ -16,6 +17,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.util.Map;
 import java.util.HashMap;
 
@@ -153,6 +156,117 @@ public class ApplicationController {
   }
   return "redirect:/login";
  }
+ @PostMapping("/api/preview")
+ @ResponseBody
+ public ResponseEntity<?> previewApplicationApi(@ModelAttribute TApplication application,
+                                                Principal principal) {
+  if (principal == null) {
+   return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+           .body(Map.of("error", "User not logged in"));
+  }
+
+  String email = principal.getName();
+  Optional<MUsers> userOpt = mUsersRepository.findByEmail(email);
+  if (userOpt.isEmpty()) {
+   return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+           .body(Map.of("error", "User not found"));
+  }
+
+  MUsers user = userOpt.get();
+  application.setUser(user);
+
+  // Return preview-relevant data
+  Map<String, Object> response = new HashMap<>();
+  response.put("name", application.getName());
+  response.put("dob", application.getDOB());
+  response.put("email", user.getEmail());
+  response.put("phone", user.getPhone());
+  // add more fields as needed
+
+  return ResponseEntity.ok(response);
+ }
+
+
+
+ @PostMapping("/upload-documents")
+ public String uploadDocuments(@RequestParam("passportPhoto") MultipartFile passportPhoto,
+                               @RequestParam("ageProof") MultipartFile ageProof,
+                               @RequestParam("class10and12Marksheet") MultipartFile marksheet,
+                               @RequestParam(value = "casteCertificate", required = false) MultipartFile casteCertificate,
+                               @RequestParam(value = "pwdCertificate", required = false) MultipartFile pwdCertificate,
+                               @RequestParam("neetResult") MultipartFile neetResult,
+                               @RequestParam("characterCertificate") MultipartFile characterCertificate,
+                               @RequestParam(value = "prc", required = false) MultipartFile prc,
+                               @RequestParam(value = "employerCertificate", required = false) MultipartFile employerCertificate,
+                               Principal principal) {
+  if (principal == null) return "redirect:/login";
+
+  MUsers user = usersService.findByEmail(principal.getName());
+  if (user == null) return "redirect:/login";
+
+  TApplication application = tApplicationRepository.findByUser(user).orElse(new TApplication());
+  application.setUser(user);
+
+  try {
+   application.setPassportPhoto(passportPhoto.getBytes());
+   application.setAgeProof(ageProof.getBytes());
+   application.setClassXIIMarksheet(marksheet.getBytes());
+   if (casteCertificate != null && !casteCertificate.isEmpty()) {
+    application.setCaste_Certificate(casteCertificate.getBytes());
+   }
+   if (pwdCertificate != null && !pwdCertificate.isEmpty()) {
+    application.setPWD_Certificate(pwdCertificate.getBytes());
+   }
+   application.setNeet_Results(neetResult.getBytes());
+   application.setCharacter_Certificate(characterCertificate.getBytes());
+   if (prc != null && !prc.isEmpty()) {
+    application.setPrc(prc.getBytes());
+   }
+   if (employerCertificate != null && !employerCertificate.isEmpty()) {
+    application.setEmployer_Certificate(employerCertificate.getBytes());
+   }
+
+   tApplicationRepository.save(application);
+  } catch (Exception e) {
+   e.printStackTrace();
+   return "redirect:/application/document-upload?error=true";
+  }
+
+  return "redirect:/application/preview";
+ }
+
+ @GetMapping("/application/view-file/{type}")
+ public ResponseEntity<byte[]> viewFile(@PathVariable String type, Principal principal) {
+  if (principal == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
+  MUsers user = usersService.findByEmail(principal.getName());
+  if (user == null) return ResponseEntity.notFound().build();
+
+  TApplication application = tApplicationRepository.findByUser(user)
+          .orElseThrow(() -> new RuntimeException("Application not found"));
+
+  byte[] fileData;
+  String contentType;
+
+  switch (type) {
+   case "passportPhoto":
+    fileData = application.getPassportPhoto();
+    contentType = "image/jpeg"; // or "image/png" as needed
+    break;
+   case "ageProof":
+    fileData = application.getAgeProof();
+    contentType = "application/pdf";
+    break;
+   // add more cases for other files...
+   default:
+    return ResponseEntity.badRequest().build();
+  }
+
+  return ResponseEntity.ok()
+          .contentType(MediaType.parseMediaType(contentType))
+          .body(fileData);
+ }
+
 }
 
 

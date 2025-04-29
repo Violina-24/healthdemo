@@ -64,7 +64,7 @@
 
       <div class="d-flex justify-content-end gap-2 mt-4">
         <button type="button" onclick="goBack()" class="btn btn-secondary px-4">Previous</button>
-        <button type="submit" class="btn btn-primary">Save</button>
+        <button type="button" class="btn btn-primary" onclick="saveAndNext()">Save and Continue</button>
         <button type="button" class="btn btn-success" onclick="goNext()">Next</button>
       </div>
     </form>
@@ -80,11 +80,48 @@
 </footer>
 
 <script>
+  // Save form data to localStorage
+  function saveQualificationData() {
+    const formData = {
+      physics: document.getElementById("physics").value,
+      chemistry: document.getElementById("chemistry").value,
+      biology: document.getElementById("biology").value,
+      subjectChoice: document.getElementById("subjectChoice").value,
+      neet: document.getElementById("neet").value
+    };
+    localStorage.setItem("qualificationForm", JSON.stringify(formData));
+  }
+
+  // Triggered when "Save and Continue" is clicked
+ function saveAndNext() {
+  saveQualificationData();
+  window.location.href = "/fileupload";
+}
+
+  // Triggered when "Save" is clicked
+  document.querySelector('form').addEventListener('submit', function () {
+    saveQualificationData();
+  });
+
+  // Restore saved data on page load
+  document.addEventListener("DOMContentLoaded", function () {
+    const saved = JSON.parse(localStorage.getItem("qualificationForm"));
+    if (saved) {
+      document.getElementById("physics").value = saved.physics || "";
+      document.getElementById("chemistry").value = saved.chemistry || "";
+      document.getElementById("biology").value = saved.biology || "";
+      document.getElementById("subjectChoice").value = saved.subjectChoice || "Biology";
+      document.getElementById("neet").value = saved.neet || "";
+    }
+  });
+
   function goBack() {
     window.history.back();
   }
 
-  function goNext() {
+   function goNext() {
     window.location.href = "/fileupload";
   }
 </script>
+</body>
+</html>
