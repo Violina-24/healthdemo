@@ -1,11 +1,16 @@
 package com.health.healthdemo.controller;
 
+import com.health.healthdemo.entity.MCategory;
+import com.health.healthdemo.entity.MPostalAddress;
 import com.health.healthdemo.entity.MUsers;
 import com.health.healthdemo.entity.TApplication;
+import com.health.healthdemo.repository.MCategoryRepository;
+import com.health.healthdemo.repository.MPostalAddressRepository;
 import com.health.healthdemo.repository.MUsersRepository;
 import com.health.healthdemo.repository.TApplicationRepository;
 import com.health.healthdemo.services.ApplicationService;
 import com.health.healthdemo.services.UsersService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -19,6 +24,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -39,6 +45,10 @@ public class ApplicationController {
  private TApplicationRepository tApplicationRepository;
  @Autowired
  private UsersService usersService;
+ @Autowired
+ private MCategoryRepository  mCategoryRepository;
+ @Autowired
+ MPostalAddressRepository mPostalAddressRepository;
 
  // ✅ 1. API endpoint for frontend (fetch user details)
  @GetMapping("/api/user")
@@ -62,42 +72,57 @@ public class ApplicationController {
  }
 
  // ✅ 2. Show student form page
- @GetMapping("/student-form")
- public String showStudentForm(Model model, Principal principal) {
-  if (principal == null) {
-   return "redirect:/login";
-  }
-  String email = principal.getName();
-  Optional<MUsers> user = mUsersRepository.findByEmail(email);
-
-  if (user.isPresent()) {
-   model.addAttribute("user", user.get());
-   TApplication existingApp = tApplicationRepository.findByUser(user.get()).orElse(new TApplication());
-   model.addAttribute("tapplication", existingApp);
-   return "studentform";
-  } else {
-   return "redirect:/login";
-  }
+ @GetMapping("/studentform")
+ public String loadStudentForm(Model model, Principal principal) {
+  MUsers user = mUsersRepository.findByEmail(principal.getName()).orElseThrow();
+  TApplication application = tApplicationRepository.findByUser(user)
+          .orElse(new TApplication());
+  model.addAttribute("tapplication", application);
+  return "studentform";
  }
+
 
  // ✅ 3. Save student form (API called by JavaScript)
- @PostMapping("/save-student-form")
+ @PostMapping("/submit-studentform")
  @ResponseBody
- public ResponseEntity<String> saveStudentForm(@ModelAttribute TApplication application, Principal principal) {
-  if (principal == null || principal.getName() == null) {
-   return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not logged in");
+ public ResponseEntity<String> submitStudentForm(@RequestBody TApplication formInput, Principal principal) {
+  if (principal == null) {
+   // Log the message for debugging
+   System.out.println("User is not logged in!");
+   return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
   }
-  MUsers user = usersService.findByEmail(principal.getName());
+  String email = principal.getName();
+  MUsers user = mUsersRepository.findByEmail(email).orElseThrow();
 
-  if (user == null) {
-   return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found");
+  TApplication existingApp = tApplicationRepository.findByUser(user).orElse(new TApplication());
+
+  // Set fields
+  existingApp.setUser(user); // don't forget this
+  existingApp.setName(formInput.getName());
+  existingApp.setDOB(formInput.getDOB());
+  existingApp.setNationality(formInput.getNationality());
+  existingApp.setReligion(formInput.getReligion());
+  existingApp.setGender(formInput.getGender());
+
+  // Set permanent address
+  MPostalAddress permAddr = formInput.getPermanent_Address();
+  if (permAddr != null) {
+   existingApp.setPermanent_Address(permAddr);
   }
 
-  application.setUser(user);
-  tApplicationRepository.save(application);
+  // Set correspondence address
+  MPostalAddress corrAddr = formInput.getCorrespondence_Address();
+  if (corrAddr != null) {
+   existingApp.setCorrespondence_Address(corrAddr);
+  }
 
+  tApplicationRepository.save(existingApp);
   return ResponseEntity.ok("Application saved successfully");
  }
+
+
+
+
 
  // ✅ 4. Quota page
  @GetMapping("/quota")
@@ -266,6 +291,63 @@ public class ApplicationController {
           .contentType(MediaType.parseMediaType(contentType))
           .body(fileData);
  }
+// @PostMapping("/submit")
+// public ResponseEntity<String> saveApplication(@RequestBody Map<String, Object> formData, HttpSession session) {
+//  String email = (String) session.getAttribute("userEmail");
+//
+//  if (email == null || !email.equals(formData.get("email"))) {
+//   return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Email mismatch or session expired.");
+//  }
+//
+//  TApplication application = new TApplication();
+//
+//  // Student Form
+//  application.setName((String) formData.get("name"));
+//  application.setemail((String) formData.get("email"));
+//  application.setphone((String) formData.get("phone"));
+//  application.setDOB(LocalDate.parse((String) formData.get("dob")));
+//  application.setNationality((int) formData.get("nationality"));
+//  application.setReligion((String) formData.get("religion"));
+//  application.setGender((String) formData.get("gender"));
+//
+//  // Quota Page
+////  application.setDomicile((String) formData.get("domicile"));
+////  application.setCategory((String) formData.get("category"));
+////  application.setInstitute((String) formData.get("institute"));
+////  application.setCourse((String) formData.get("course"));
+//
+//  // Qualification Page
+//  application.setNeetMarks((String) formData.get("neetMarks"));
+//  application.setBoard10((String) formData.get("board10"));
+//  application.setBoard12((String) formData.get("board12"));
+//  application.setPassYear10((String) formData.get("passYear10"));
+//  application.setPassYear12((String) formData.get("passYear12"));
+//
+//  // Document Upload
+//  application.setPhotoPath((String) formData.get("photoPath"));
+//  application.setMarksheetPath((String) formData.get("marksheetPath"));
+//  application.setCasteCertPath((String) formData.get("casteCertPath"));
+//  application.setNeetResultPath((String) formData.get("neetResultPath"));
+//
+//  // Permanent Address
+//  Map<String, Object> perm = (Map<String, Object>) formData.get("permanent_Address");
+//  application.setPermAddress1((String) perm.get("addressLine1"));
+//  application.setPermAddress2((String) perm.get("addressLine2"));
+//  application.setPermDistrict((String) perm.get("district"));
+//  application.setPermState((String) perm.get("state"));
+//  application.setPermPincode((String) perm.get("pincode"));
+//
+//  // Correspondence Address
+//  Map<String, Object> corr = (Map<String, Object>) formData.get("correspondence_Address");
+//  application.setCorrAddress1((String) corr.get("addressLine1"));
+//  application.setCorrAddress2((String) corr.get("addressLine2"));
+//  application.setCorrDistrict((String) corr.get("district"));
+//  application.setCorrState((String) corr.get("state"));
+//  application.setCorrPincode((String) corr.get("pincode"));
+//
+//  tApplicationRepository.save(application);
+//  return ResponseEntity.ok("All form data submitted successfully.");
+// }
 
 }
 

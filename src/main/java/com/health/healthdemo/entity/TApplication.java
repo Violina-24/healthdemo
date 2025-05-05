@@ -17,6 +17,7 @@ public class TApplication {
     @JoinColumn(name="uid", nullable = false)
     private MUsers user;
     @ManyToOne
+    @JoinColumn(name = "name")
     private MUsers name;
 
     private LocalDate DOB;

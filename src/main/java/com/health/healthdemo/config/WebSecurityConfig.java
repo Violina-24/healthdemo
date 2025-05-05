@@ -20,35 +20,56 @@ public class WebSecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(AbstractHttpConfigurer::disable)  // Disable CSRF for simplicity (not recommended for production)
-                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Enable CORS with proper configuration
+                // Disable CSRF for simplicity (ensure you handle CSRF in production, especially with form-based login)
+                .csrf(AbstractHttpConfigurer::disable)
+
+                // Enable CORS with proper configuration
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/css/**", "/js/**", "/images/**", "/uploads/**", "/favicon.ico").permitAll() // Allow static files
+                        // Allow static files without authentication
+                        .requestMatchers("/css/**", "/js/**", "/images/**", "/uploads/**", "/favicon.ico")
+                        .permitAll()
+
+                        // Allow public API endpoints without authentication
                         .requestMatchers("/", "/api/login", "/register", "/login", "/home",
-                                "/favicon.ico", "/studentform", "/qualification", "/application/qualification",
-                                "/application/api/user", "/api/user", "/get-user-details", "/save-student-form",
-                                "/api/categories", "/application/parentsinfo", "/parentsinfo", "/index",
-                                "/api/documents/**", "/userdetails", "/api/home", "/api/getUserLoginDetails","/api/get-loginuser-details","/api/logout", "api/documents/with-course/{dtype}", "api/categories/fetched_categories",
-                                "/fileupload", "/quota","/preview","/previewApplication","/forgotpassword")// Allow API endpoints
-                        .permitAll()
-                        .anyRequest().authenticated() // Authenticate all other requests
+                                "/favicon.ico", "/studentform", "/application/studentform", "/application/submit-studentform",
+                                "/qualification", "/application/qualification", "/application/api/user", "/api/user",
+                                "/get-user-details", "/save-student-form", "/api/categories", "/application/parentsinfo",
+                                "/parentsinfo", "/index", "/api/documents/**", "/userdetails", "/api/home",
+                                "/api/getUserLoginDetails", "/api/get-loginuser-details", "/api/logout",
+                                "api/documents/with-course/{dtype}", "api/categories/fetched_categories", "/fileupload",
+                                "/quota", "/preview", "/previewApplication", "/forgotpassword")
+                        .permitAll() // Allow these endpoints for everyone
+
+                        // Authenticate all other requests (requires login)
+                        .anyRequest()
+                        .authenticated()
                 )
+
+                // Session management (Create session if required, for traditional login handling)
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)  // Ensure session creation when needed
+                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)  // Create session when needed
                 )
+
+                // Form login configuration
                 .formLogin(login -> login
-                        .loginPage("/login") // Correct login page URL
-                        .defaultSuccessUrl("/home", true)
-                        .permitAll()
+                        .loginPage("/login")  // Custom login page URL
+                        .defaultSuccessUrl("/home", true) // Redirect to home page after successful login
+                        .permitAll()  // Allow access to login page without authentication
                 )
+
+                // Logout configuration
                 .logout(logout -> logout
-                        .logoutUrl("/logout")
-                        .logoutSuccessUrl("/login?logout")
-                        .permitAll()
+                        .logoutUrl("/logout") // Logout URL
+                        .logoutSuccessUrl("/login?logout") // Redirect to login page after logout
+                        .permitAll()  // Allow logout without authentication
                 )
+
                 // Custom AuthenticationEntryPoint for API responses
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((request, response, authException) -> {
+                            // Handle unauthenticated requests
                             response.setContentType("application/json");
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                             response.getWriter().write("{\"error\": \"User not logged in\"}");
