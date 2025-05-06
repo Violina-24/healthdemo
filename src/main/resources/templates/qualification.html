@@ -7,6 +7,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
   <link rel="stylesheet" type="text/css" href="/css/styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
 <!-- Header Section -->
@@ -64,7 +65,7 @@
 
       <div class="d-flex justify-content-end gap-2 mt-4">
         <button type="button" onclick="goBack()" class="btn btn-secondary px-4">Previous</button>
-        <button type="button" class="btn btn-primary" onclick="saveAndNext()">Save and Continue</button>
+        <button type="button" class="btn btn-primary" onclick="saveAndContinue()">Save and Continue</button>
         <button type="button" class="btn btn-success" onclick="goNext()">Next</button>
       </div>
     </form>
@@ -80,8 +81,49 @@
 </footer>
 
 <script>
-  // Save form data to localStorage
-  function saveQualificationData() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const GlobalUserID = urlParams.get("uid");
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const formEmail = sessionStorage.getItem("userEmail") || "guest@example.com";
+    const allData = JSON.parse(localStorage.getItem("qualificationForm")) || {};
+    const saved = allData[formEmail];
+
+    if (saved) {
+      prefillFormIfMatched(saved);
+    }
+
+    // Add change listeners to enable/disable button
+    document.querySelectorAll("input, select").forEach(input => {
+      input.addEventListener("change", toggleButton);
+    });
+
+    toggleButton(); // initial check
+  });
+
+  function prefillFormIfMatched(saved) {
+    document.getElementById("physics").value = saved.physics || "";
+    document.getElementById("chemistry").value = saved.chemistry || "";
+    document.getElementById("biology").value = saved.biology || "";
+    document.getElementById("subjectChoice").value = saved.subjectChoice || "";
+    document.getElementById("neet").value = saved.neet || "";
+  }
+
+  function toggleButton() {
+    const physics = document.getElementById("physics").value;
+    const chemistry = document.getElementById("chemistry").value;
+    const biology = document.getElementById("biology").value;
+    const subjectChoice = document.getElementById("subjectChoice").value;
+    const neet = document.getElementById("neet").value;
+
+    const allFilled = physics && chemistry && biology && subjectChoice && neet;
+    // Enable/disable Save button if you had an id like 'saveAndContinuebtn'
+    //document.getElementById("saveAndContinuebtn").disabled = !allFilled;
+  }
+
+  window.saveAndContinue = function () {
+    const formEmail = sessionStorage.getItem("userEmail") || "guest@example.com";
+
     const formData = {
       physics: document.getElementById("physics").value,
       chemistry: document.getElementById("chemistry").value,
@@ -89,39 +131,25 @@
       subjectChoice: document.getElementById("subjectChoice").value,
       neet: document.getElementById("neet").value
     };
-    localStorage.setItem("qualificationForm", JSON.stringify(formData));
-  }
 
-  // Triggered when "Save and Continue" is clicked
- function saveAndNext() {
-  saveQualificationData();
-  window.location.href = "/fileupload";
-}
+    const allData = JSON.parse(localStorage.getItem("qualificationForm")) || {};
+    allData[formEmail] = formData;
+    localStorage.setItem("qualificationForm", JSON.stringify(allData));
 
-  // Triggered when "Save" is clicked
-  document.querySelector('form').addEventListener('submit', function () {
-    saveQualificationData();
-  });
+    Swal.fire({
+      title: "Saved!",
+      text: "Qualification data saved successfully.",
+      icon: "success"
+    });
+  };
 
-  // Restore saved data on page load
-  document.addEventListener("DOMContentLoaded", function () {
-    const saved = JSON.parse(localStorage.getItem("qualificationForm"));
-    if (saved) {
-      document.getElementById("physics").value = saved.physics || "";
-      document.getElementById("chemistry").value = saved.chemistry || "";
-      document.getElementById("biology").value = saved.biology || "";
-      document.getElementById("subjectChoice").value = saved.subjectChoice || "Biology";
-      document.getElementById("neet").value = saved.neet || "";
-    }
-  });
-
-  function goBack() {
+  window.goBack = function () {
     window.history.back();
-  }
+  };
 
-   function goNext() {
-    window.location.href = "/fileupload";
-  }
+  window.goNext = function () {
+    window.location.href = "/fileupload?uid=" + GlobalUserID;
+  };
 </script>
 </body>
 </html>

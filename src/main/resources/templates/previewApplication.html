@@ -3,75 +3,107 @@
 <head>
   <meta charset="UTF-8">
   <title>Application Preview</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 2rem;
+    }
+    .section {
+      margin-bottom: 2rem;
+    }
+    .section h2 {
+      background-color: #f0f0f0;
+      padding: 10px;
+      border-left: 5px solid #007bff;
+    }
+    .field {
+      margin: 5px 0;
+    }
+    .field span {
+      font-weight: bold;
+    }
+  </style>
 </head>
-<body class="p-4">
+<body>
 
-<div class="container">
-  <h3 class="mb-4">Application Preview</h3>
+<h1>Application Preview</h1>
 
-<!--  <div class="card p-3 mb-3">-->
-<!--    <h5>Personal Information</h5>-->
-<!--    <p><strong>Name:</strong> <span id="previewName"></span></p>-->
-<!--    <p><strong>Email:</strong> <span id="previewEmail"></span></p>-->
-<!--    <p><strong>Phone:</strong> <span id="previewPhone"></span></p>-->
-<!--    <p><strong>Date of Birth:</strong> <span id="previewDob"></span></p>-->
-<!--  </div>-->
-
-<!--  <div class="card p-3 mb-3">-->
-<!--    <h5>Application Details</h5>-->
-<!--    <p><strong>Course:</strong> <span id="previewCourse"></span></p>-->
-<!--    <p><strong>Institute:</strong> <span id="previewInstitute"></span></p>-->
-<!--    <p><strong>Category:</strong> <span id="previewCategory"></span></p>-->
-<!--    &lt;!&ndash; Add more fields as needed &ndash;&gt;-->
-<!--  </div>-->
-
-<!--  <form action="/finalSubmit" method="post">-->
-<!--    &lt;!&ndash; Hidden inputs to carry the form data forward &ndash;&gt;-->
-<!--    <input type="hidden" name="name" id="inputName">-->
-<!--    <input type="hidden" name="email" id="inputEmail">-->
-<!--    <input type="hidden" name="phone" id="inputPhone">-->
-<!--    <input type="hidden" name="dob" id="inputDob">-->
-<!--    <input type="hidden" name="course" id="inputCourse">-->
-<!--    <input type="hidden" name="institute" id="inputInstitute">-->
-<!--    <input type="hidden" name="category" id="inputCategory">-->
-
-<!--    <button type="submit" class="btn btn-success mt-3">Submit Application</button>-->
-<!--  </form>-->
-<!--</div>-->
-
-<!--<script>-->
-<!--  // Simulated data — replace with actual session/localStorage or server-provided data-->
-<!--  const formData = JSON.parse(localStorage.getItem("applicationForm")) || {};-->
-
-<!--  // Populate preview fields-->
-<!--  document.getElementById("previewName").textContent = formData.name || '';-->
-<!--  document.getElementById("previewEmail").textContent = formData.email || '';-->
-<!--  document.getElementById("previewPhone").textContent = formData.phone || '';-->
-<!--  document.getElementById("previewDob").textContent = formData.dob || '';-->
-<!--  document.getElementById("previewCourse").textContent = formData.course || '';-->
-<!--  document.getElementById("previewInstitute").textContent = formData.institute || '';-->
-<!--  document.getElementById("previewCategory").textContent = formData.category || '';-->
-
-<!--  // Populate hidden form fields for submission-->
-<!--  document.getElementById("inputName").value = formData.name || '';-->
-<!--  document.getElementById("inputEmail").value = formData.email || '';-->
-<!--  document.getElementById("inputPhone").value = formData.phone || '';-->
-<!--  document.getElementById("inputDob").value = formData.dob || '';-->
-<!--  document.getElementById("inputCourse").value = formData.course || '';-->
-<!--  document.getElementById("inputInstitute").value = formData.institute || '';-->
-<!--  document.getElementById("inputCategory").value = formData.category || '';-->
-<!--</script>-->
-
-<h2>Preview Application</h2>
-<p><strong>Name:</strong> [[${formData.name}]]</p>
-<p><strong>Email:</strong> [[${formData.email}]]</p>
-<!-- Add all other fields -->
-<form action="/submitApplication" method="post">
-  <button type="submit" class="btn btn-success">Save and Submit</button>
-</form>
-  <img src="/application/view-file/passportPhoto" alt="Passport Photo" width="200"/>
-  <iframe src="/application/view-file/ageProof" width="100%" height="400px"></iframe>
+<div class="section" id="studentSection">
+  <h2>Student Information</h2>
+  <div class="field"><span>Name:</span> <span id="studentName"></span></div>
+  <div class="field"><span>Email:</span> <span id="studentEmail"></span></div>
+  <div class="field"><span>Phone:</span> <span id="studentPhone"></span></div>
+  <div class="field"><span>Date of Birth:</span> <span id="studentDob"></span></div>
 </div>
+
+<div class="section" id="quotaSection">
+  <h2>Category & Quota</h2>
+  <div class="field"><span>Domicile:</span> <span id="domicile"></span></div>
+  <div class="field"><span>Category:</span> <span id="category"></span></div>
+  <div class="field"><span>Institute:</span> <span id="institute"></span></div>
+  <div class="field"><span>Course:</span> <span id="course"></span></div>
+</div>
+
+<div class="section" id="qualificationSection">
+  <h2>Qualification</h2>
+  <div class="field"><span>Physics:</span> <span id="physics"></span></div>
+  <div class="field"><span>Chemistry:</span> <span id="chemistry"></span></div>
+  <div class="field"><span>Biology:</span> <span id="biology"></span></div>
+  <div class="field"><span>NEET Score:</span> <span id="neet"></span></div>
+  <div class="field"><span>Subject Choice:</span> <span id="subjectChoice"></span></div>
+</div>
+
+<div class="section" id="documentsSection">
+  <h2>Uploaded Documents</h2>
+  <div class="field"><span>Passport Photo:</span> <span id="passportPhoto"></span></div>
+  <div class="field"><span>Age Proof:</span> <span id="ageProof"></span></div>
+  <div class="field"><span>Marksheet:</span> <span id="marksheet"></span></div>
+  <div class="field"><span>Caste Certificate:</span> <span id="casteCertificate"></span></div>
+  <div class="field"><span>PWD Certificate:</span> <span id="pwdCertificate"></span></div>
+  <div class="field"><span>Character Certificate:</span> <span id="characterCertificate"></span></div>
+</div>
+
+<form action="/application/submitAll" method="post">
+  <button type="submit">Final Submit</button>
+</form>
+
+<script>
+  const data = JSON.parse(localStorage.getItem("finalPreviewData"));
+
+  if (data) {
+    const { studentform, quota, qualification, fileupload } = data;
+
+    // Student Info
+    document.getElementById("studentName").textContent = studentform?.name || "-";
+    document.getElementById("studentEmail").textContent = data.userEmail || "-";
+    document.getElementById("studentPhone").textContent = studentform?.phone || "-";
+    document.getElementById("studentDob").textContent = studentform?.dob || "-";
+
+    // Quota Info
+    document.getElementById("domicile").textContent = quota?.domicile || "-";
+    document.getElementById("category").textContent = quota?.category || "-";
+    document.getElementById("institute").textContent = quota?.institute || "-";
+    document.getElementById("course").textContent = quota?.course || "-";
+
+    // Qualification Info
+    document.getElementById("physics").textContent = qualification?.physics || "-";
+    document.getElementById("chemistry").textContent = qualification?.chemistry || "-";
+    document.getElementById("biology").textContent = qualification?.biology || "-";
+    document.getElementById("neet").textContent = qualification?.neet || "-";
+    document.getElementById("subjectChoice").textContent = qualification?.subjectChoice || "-";
+
+    // File Upload Info (filenames)
+    document.getElementById("passportPhoto").textContent = fileupload?.passportPhoto || "Not uploaded";
+    document.getElementById("ageProof").textContent = fileupload?.ageProof || "Not uploaded";
+    document.getElementById("marksheet").textContent = fileupload?.marksheet || "Not uploaded";
+    document.getElementById("casteCertificate").textContent = fileupload?.casteCertificate || "Not uploaded";
+    document.getElementById("pwdCertificate").textContent = fileupload?.pwdCertificate || "Not uploaded";
+    document.getElementById("characterCertificate").textContent = fileupload?.characterCertificate || "Not uploaded";
+  } else {
+    alert("No preview data found. Please complete the form first.");
+    window.location.href = "/studentform";
+  }
+</script>
+
 </body>
 </html>

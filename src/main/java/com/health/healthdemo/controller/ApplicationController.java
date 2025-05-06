@@ -291,63 +291,22 @@ public class ApplicationController {
           .contentType(MediaType.parseMediaType(contentType))
           .body(fileData);
  }
-// @PostMapping("/submit")
-// public ResponseEntity<String> saveApplication(@RequestBody Map<String, Object> formData, HttpSession session) {
-//  String email = (String) session.getAttribute("userEmail");
-//
-//  if (email == null || !email.equals(formData.get("email"))) {
-//   return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Email mismatch or session expired.");
-//  }
-//
-//  TApplication application = new TApplication();
-//
-//  // Student Form
-//  application.setName((String) formData.get("name"));
-//  application.setemail((String) formData.get("email"));
-//  application.setphone((String) formData.get("phone"));
-//  application.setDOB(LocalDate.parse((String) formData.get("dob")));
-//  application.setNationality((int) formData.get("nationality"));
-//  application.setReligion((String) formData.get("religion"));
-//  application.setGender((String) formData.get("gender"));
-//
-//  // Quota Page
-////  application.setDomicile((String) formData.get("domicile"));
-////  application.setCategory((String) formData.get("category"));
-////  application.setInstitute((String) formData.get("institute"));
-////  application.setCourse((String) formData.get("course"));
-//
-//  // Qualification Page
-//  application.setNeetMarks((String) formData.get("neetMarks"));
-//  application.setBoard10((String) formData.get("board10"));
-//  application.setBoard12((String) formData.get("board12"));
-//  application.setPassYear10((String) formData.get("passYear10"));
-//  application.setPassYear12((String) formData.get("passYear12"));
-//
-//  // Document Upload
-//  application.setPhotoPath((String) formData.get("photoPath"));
-//  application.setMarksheetPath((String) formData.get("marksheetPath"));
-//  application.setCasteCertPath((String) formData.get("casteCertPath"));
-//  application.setNeetResultPath((String) formData.get("neetResultPath"));
-//
-//  // Permanent Address
-//  Map<String, Object> perm = (Map<String, Object>) formData.get("permanent_Address");
-//  application.setPermAddress1((String) perm.get("addressLine1"));
-//  application.setPermAddress2((String) perm.get("addressLine2"));
-//  application.setPermDistrict((String) perm.get("district"));
-//  application.setPermState((String) perm.get("state"));
-//  application.setPermPincode((String) perm.get("pincode"));
-//
-//  // Correspondence Address
-//  Map<String, Object> corr = (Map<String, Object>) formData.get("correspondence_Address");
-//  application.setCorrAddress1((String) corr.get("addressLine1"));
-//  application.setCorrAddress2((String) corr.get("addressLine2"));
-//  application.setCorrDistrict((String) corr.get("district"));
-//  application.setCorrState((String) corr.get("state"));
-//  application.setCorrPincode((String) corr.get("pincode"));
-//
-//  tApplicationRepository.save(application);
-//  return ResponseEntity.ok("All form data submitted successfully.");
-// }
+@PostMapping("/application/submitAll")
+public ResponseEntity<?> submitApplication(@RequestBody Map<String, Object> allFormData) {
+    Map<String, Object> studentformForm = (Map<String, Object>) allFormData.get("studentform");
+    Map<String, Object> quotaForm = (Map<String, Object>) allFormData.get("quota");
+    Map<String, Object> qualificationForm = (Map<String, Object>) allFormData.get("qualification");
+    Map<String, Object> fileuploadForm = (Map<String, Object>) allFormData.get("fileupload");
+
+    String email = (String) allFormData.get("userEmail");
+
+ applicationService.saveApplicationFromForms(studentformForm, quotaForm, qualificationForm, fileuploadForm, email);
+
+
+ return ResponseEntity.ok(Map.of("status", "success", "message", "Application submitted successfully"));
+}
+
+
 
 }
 
