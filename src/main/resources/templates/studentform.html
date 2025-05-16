@@ -172,6 +172,7 @@
 <script>
     let GlobalUserID = null;
     let GlobalEmail = "";
+    let GlobalInstitute="";
 
     document.addEventListener("DOMContentLoaded", function () {
         debugger;
@@ -181,7 +182,7 @@
         const institute = decodeURIComponent(urlParams.get("institute") || "");
         const uid = urlParams.get("uid");
         GlobalUserID = parseInt(uid);  // ✅ store as integer
-
+        GlobalInstitute = institute;  // ✅ store as integer
         // Set course info message
         if (coursename && institute) {
             document.getElementById("course-info").innerText = `You are applying for ${coursename} at ${institute}`;
@@ -310,7 +311,8 @@
         // ✅ Navigation forward with UID
         window.goNext = function () {
             console.log("Navigating with UID:", GlobalUserID);
-        window.location.href = "/quota?uid=" + GlobalUserID;
+            console.log("Navigating with GlobalInstitute:", GlobalInstitute);
+        window.location.href = "/quota?uid=" + encodeURIComponent(GlobalUserID) + "&institute=" + encodeURIComponent(GlobalInstitute);
         };
     });
 </script>

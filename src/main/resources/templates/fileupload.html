@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Meghalaya State Counselling Authority</title>
+  <meta charset="UTF-8">
+  <title>Meghalaya State Counselling Authority</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
   <link rel="stylesheet" type="text/css" href="/css/styles.css">
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body class="bg-gray-100">
 <!-- Header Section -->
@@ -35,117 +36,180 @@
   <div class="bg-white rounded-3 shadow p-4 mx-auto" style="max-width: 800px;">
     <h2 class="text-center fw-bold mb-4 text-primary">Upload Your Documents</h2>
 
-    <form action="/submitDocuments" method="post" enctype="multipart/form-data">
+    <form id="fileUploadForm" enctype="multipart/form-data">
       <div class="row g-3">
         <div class="col-md-6">
           <label class="form-label fw-semibold">Aadhaar Linked Phone Number</label>
-          <input type="tel" class="form-control" name="aadhaarPhone" pattern="[6-9]{1}[0-9]{9}" maxlength="10" minlength="10" placeholder="Enter 10-digit mobile number" required>
+          <input type="tel" class="form-control" name="aadhaarPhone" id="aadhaarPhone" pattern="[6-9]{1}[0-9]{9}" maxlength="10" minlength="10" placeholder="Enter 10-digit mobile number" required>
+          <small id="aadhaarPhoneInfo" class="form-text text-success"></small>
         </div>
         <div class="col-md-6">
           <label class="form-label fw-semibold">Passport Size Photo</label>
-          <input type="file" class="form-control" name="passportPhoto" required>
+          <input type="file" class="form-control" name="passportPhoto" id="passportPhoto" required>
+          <small id="passportPhotoInfo" class="form-text text-success"></small>
         </div>
         <div class="col-md-6">
-          <label class="form-label fw-semibold"> Birth Certificate or Other age proof</label>
-          <input type="file" class="form-control" name="ageProof" required>
+          <label class="form-label fw-semibold">Birth Certificate or Other age proof</label>
+          <input type="file" class="form-control" name="ageProof" id="ageProof" required>
+          <small id="ageProofInfo" class="form-text text-success"></small>
         </div>
-
         <div class="col-md-6">
           <label class="form-label fw-semibold">Class X and XII Marksheet</label>
-          <input type="file" class="form-control" name="class10and12Marksheet" accept="application/pdf" required>
+          <input type="file" class="form-control" name="class10and12Marksheet" id="class10and12Marksheet" accept="application/pdf" required>
+          <small id="class10and12MarksheetInfo" class="form-text text-success"></small>
         </div>
-
         <div class="col-md-6">
           <label class="form-label fw-semibold">Class X and XII Pass Certificate</label>
-          <input type="file" class="form-control" name="class10and12certificate" accept="application/pdf" required>
+          <input type="file" class="form-control" name="class10and12certificate" id="class10and12certificate" accept="application/pdf" required>
+          <small id="class10and12certificateInfo" class="form-text text-success"></small>
         </div>
-
         <div class="col-md-6">
           <label class="form-label fw-semibold">NEET Result Sheet</label>
-          <input type="file" class="form-control" name="neetResult" required>
+          <input type="file" class="form-control" name="neetResult" id="neetResult" required>
+          <small id="neetResultInfo" class="form-text text-success"></small>
         </div>
-
         <div class="col-md-6" id="casteCertificateSection">
           <label class="form-label fw-semibold">ST/SC/OST Certificate <small class="text-muted">(If applicable)</small></label>
-          <input type="file" class="form-control" name="casteCertificate">
+          <input type="file" class="form-control" name="casteCertificate" id="casteCertificate">
+          <small id="casteCertificateInfo" class="form-text text-success"></small>
         </div>
-
         <div class="col-md-6">
           <label class="form-label fw-semibold">Permanent Residence Certificate (PRC)</label>
-          <input type="file" class="form-control" name="prc" required>
+          <input type="file" class="form-control" name="prc" id="prc" required>
+          <small id="prcInfo" class="form-text text-success"></small>
         </div>
-
         <div class="col-md-6">
           <label class="form-label fw-semibold">Character Certificate</label>
-          <input type="file" class="form-control" name="characterCertificate" required>
+          <input type="file" class="form-control" name="characterCertificate" id="characterCertificate" required>
+          <small id="characterCertificateInfo" class="form-text text-success"></small>
         </div>
         <div class="col-md-6" id="pwdCertificateSection">
           <label class="form-label fw-semibold">PWD Certificate <small class="text-muted">(If applicable)</small></label>
-          <input type="file" class="form-control" name="pwdCertificate">
+          <input type="file" class="form-control" name="pwdCertificate" id="pwdCertificate">
+          <small id="pwdCertificateInfo" class="form-text text-success"></small>
         </div>
       </div>
-
 
       <!-- Button Section -->
       <div class="d-flex justify-content-end align-items-center mt-4">
         <div class="btn-group gap-2">
           <button type="button" onclick="goBack()" class="btn btn-secondary px-4">Previous</button>
           <button type="button" id="previewButton" class="btn btn-primary px-4">Preview</button>
-          <button class="btn btn-success " type="submit" >Save and Submit</button>
+          <button class="btn btn-success" type="submit">Save and Submit</button>
         </div>
       </div>
     </form>
   </div>
-  </div>
 </div>
 
-<footer class=" footer bg-dark text-white mt-auto py-4">
+<footer class="footer bg-dark text-white mt-auto py-4">
   <div class="text-center">
     <p class="mb-1">© 2025 Meghalaya State Counselling Authority. All rights reserved.</p>
     <p class="text-secondary mb-0">For technical support: support@meghalayamedical.gov.in</p>
   </div>
 </footer>
-<script>
-  document.getElementById("previewButton").addEventListener("click", function () {
-      const form = document.getElementById("studentForm");
-      const formData = new FormData(form);
 
-      fetch("/application/api/preview", {
-          method: "POST",
-          body: formData,
-          credentials: "include"  // Keep session cookie
-      })
-      .then(res => res.json())
-      .then(data => {
-          if (data.error) {
-              alert(data.error);
-          } else {
-              // Show preview modal or redirect to preview page
-              console.log("Preview Data:", data);
-              // Optional: redirect or render preview
-              // window.location.href = "/application/preview-page"; // if needed
-          }
-      })
-      .catch(err => console.error("Preview error", err));
+<script>
+  const urlParams = new URLSearchParams(window.location.search);
+  const GlobalUserID = urlParams.get("uid");
+  const userEmail = sessionStorage.getItem("userEmail") || "guest@example.com";
+  const sessionKey = "fileUploadForm";
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const saved = JSON.parse(sessionStorage.getItem(sessionKey));
+    if (saved) {
+      document.getElementById("aadhaarPhone").value = saved.aadhaarPhone || "";
+
+      for (const key in saved.files || {}) {
+        const fileInfo = document.getElementById(`${key}Info`);
+        if (fileInfo) {
+          fileInfo.textContent = "File uploaded previously.";
+        }
+      }
+    }
   });
-</script>
 
+  document.getElementById("previewButton").addEventListener("click", async function () {
+    const aadhaarPhone = document.getElementById("aadhaarPhone").value;
 
-<script>
-  function goBack() {
+    const fileFields = [
+      "passportPhoto", "ageProof", "class10and12Marksheet", "class10and12certificate",
+      "neetResult", "casteCertificate", "prc", "characterCertificate", "pwdCertificate"
+    ];
+
+    const filesData = {};
+    for (let field of fileFields) {
+      const fileInput = document.getElementById(field);
+      const file = fileInput.files[0];
+      if (file) {
+        filesData[field] = await toBase64(file);
+      }
+    }
+
+    const formData = {
+      aadhaarPhone: aadhaarPhone,
+      files: filesData
+    };
+
+    // Save everything to sessionStorage under one key
+    sessionStorage.setItem(sessionKey, JSON.stringify(formData));
+
+    // Navigate to preview (no need to store file data in another key)
+    window.location.href = `/previewApplication?uid=${GlobalUserID}`;
+  });
+
+  function toBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = error => reject(error);
+    });
+  }
+
+  document.getElementById("fileUploadForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const allFormsData = {
+      studentForm: JSON.parse(localStorage.getItem("studentformForm") || "{}")[userEmail],
+      quotaForm: JSON.parse(localStorage.getItem("quotaForm") || "{}")[userEmail],
+      qualificationForm: JSON.parse(localStorage.getItem("qualificationForm") || "{}")[userEmail],
+      fileUploadForm: JSON.parse(sessionStorage.getItem(sessionKey) || "{}")
+    };
+
+    fetch("/application/submitAll",{
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  credentials: "include", // important for session auth
+  body: JSON.stringify({
+    uid: GlobalUserID,
+    email: userEmail,
+    data: allFormsData
+  })
+})
+
+  .then(response => {
+      if (!response.ok) throw new Error("Submission failed");
+      return response.json();
+    })
+    .then(data => {
+    const appId = data.applicationId;
+    Swal.fire("Success", "Application submitted successfully!", "success")
+      .then(() => window.location.href = `/application/success?appId=${appId}`);
+   })
+
+    .catch(error => {
+      Swal.fire("Error", error.message, "error");
+    });
+  });
+
+  window.goBack = function () {
     window.history.back();
-  }
+  };
 </script>
-<script>
-  const userCategory = 'General'; // Replace with dynamic value
-  const isPhysicallyChallenged = false; // Replace with dynamic value
 
-  if (userCategory === 'General') {
-    document.getElementById('casteCertificateSection').style.display = 'none';
-  }
-  if (!isPhysicallyChallenged) {
-    document.getElementById('pwdCertificateSection').style.display = 'none';
-  }
-</script>
+
 </body>
 </html>

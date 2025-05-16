@@ -41,7 +41,7 @@ public class ApplicationService {
         applicationRepository.deleteById(A_id);
     }
 
-    public void saveApplicationFromForms(Map<String, Object> studentformForm,
+    public Long saveApplicationFromForms(Map<String, Object> studentformForm,
                                          Map<String, Object> quotaForm,
                                          Map<String, Object> qualificationForm,
                                          Map<String, Object> fileuploadForm,
@@ -51,27 +51,28 @@ public class ApplicationService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         TApplication application = new TApplication();
-
         application.setUser(user);
+
+        // Student Form Data
         application.setDOB(LocalDate.parse((String) studentformForm.get("dob")));
-
-
         Period age = Period.between(application.getDOB(), LocalDate.now());
         application.setAge(age.getYears());
+        application.setNationality((int) studentformForm.get("nationality"));
+        application.setReligion((String) studentformForm.get("religion"));
+        application.setGender((String) studentformForm.get("gender"));
 
+        // Quota Data
         String categoryName = (String) quotaForm.get("category");
         List<MCategory> categories = categoryRepository.findByCategoryname(categoryName);
         if (categories.isEmpty()) {
             throw new RuntimeException("Invalid category: " + categoryName);
         }
-        MCategory category = categories.get(0); // use the first one
+        application.setCategoryname(categories.get(0)); // use first
+//        // qualification data
+//        application.setNationality((int) studentformForm.get("physics"));
 
-        application.setCategoryname(category);
 
-        application.setNationality((int) studentformForm.get("nationality"));
-        application.setReligion((String) studentformForm.get("religion"));
-        application.setGender((String) studentformForm.get("gender"));
-
+        // Permanent Address
         MPostalAddress permanentAddress = new MPostalAddress();
         permanentAddress.setAddressLine1((String) studentformForm.get("permAddressLine1"));
         permanentAddress.setAddressLine2((String) studentformForm.get("permAddressLine2"));
@@ -80,6 +81,7 @@ public class ApplicationService {
         addressRepository.save(permanentAddress);
         application.setPermanent_Address(permanentAddress);
 
+        // Correspondence Address
         MPostalAddress correspondenceAddress = new MPostalAddress();
         correspondenceAddress.setAddressLine1((String) studentformForm.get("corrAddressLine1"));
         correspondenceAddress.setAddressLine2((String) studentformForm.get("corrAddressLine2"));
@@ -88,17 +90,20 @@ public class ApplicationService {
         addressRepository.save(correspondenceAddress);
         application.setCorrespondence_Address(correspondenceAddress);
 
+        // File Uploads
         application.setPassportPhoto((byte[]) fileuploadForm.get("passportPhoto"));
         application.setAgeProof((byte[]) fileuploadForm.get("ageProof"));
-        application.setClassXIIMarksheet((byte[]) fileuploadForm.get("ClassXIIMarksheet"));
-//        application.setCertificates((String) fileuploadForm.get("class10and12certificatePath"));
+        application.setClass10and12Marksheet((byte[]) fileuploadForm.get("Class10and12Marksheet"));
+        application.setClass10and12certificate((byte[]) fileuploadForm.get("class10and12certificate"));
         application.setNeet_Results((byte[]) fileuploadForm.get("neetResult"));
         application.setPrc((byte[]) fileuploadForm.get("prc"));
         application.setCharacter_Certificate((byte[]) fileuploadForm.get("characterCertificate"));
         application.setCaste_Certificate((byte[]) fileuploadForm.get("casteCertificate"));
         application.setPWD_Certificate((byte[]) fileuploadForm.get("pwdCertificate"));
 
-
-        applicationRepository.save(application);
+        // Save and return the ID
+        TApplication savedApp = applicationRepository.save(application);
+        return savedApp.getA_id();
     }
+
 }

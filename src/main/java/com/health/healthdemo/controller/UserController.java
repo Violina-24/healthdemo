@@ -48,6 +48,7 @@ public class UserController {
 
             // Store the entire user object in the session
             session.setAttribute("loggedInUser", loggedInUser);
+            session.setAttribute("userEmail", loggedInUser.getEmail());
             System.out.println("User logged in: " + loggedInUser.getEmail());
 
             return ResponseEntity.ok().body("{\"message\": \"Login Successful\"}");

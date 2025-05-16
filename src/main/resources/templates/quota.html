@@ -128,8 +128,7 @@
 <script>
   const urlParams = new URLSearchParams(window.location.search);
   const GlobalUserID = urlParams.get("uid");
-
-  let selectedInstitute = "PIMC"; // can be updated dynamically
+  let  Institute = urlParams.get("institute");
 
   function toggleButton() {
     const domicile = document.getElementById("domicile").value;
@@ -175,7 +174,7 @@
   function loadCategoryOptions() {
     const domicile = document.getElementById("domicile").value;
     const state = getSelectedState();
-    const institute = selectedInstitute;
+    const institute = Institute;
 
     if (!domicile || (domicile === "indian" && !state)) {
       return;
@@ -194,9 +193,15 @@
       categoryDropdown.innerHTML = '<option value="">Select Category</option>';
 
       if (Array.isArray(data)) {
+      debugger;
         data.forEach((category) => {
+        const categoryName = category.categoryname?.trim();
+           Institute = (institute || "").trim().toLowerCase();
+          if (Institute === "smc" && (categoryName === "Management" || categoryName === "NRI")){
+        return; // skip appending this option
+      }
           const option = document.createElement("option");
-          option.value = category.categoryname;
+          option.value = category.cid;
           option.textContent = category.categoryname;
           categoryDropdown.appendChild(option);
         });

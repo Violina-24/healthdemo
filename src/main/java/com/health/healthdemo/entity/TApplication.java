@@ -76,7 +76,9 @@ public class TApplication {
     @Lob
     private byte[] AgeProof;
     @Lob
-    private byte[] ClassXIIMarksheet;
+    private byte[] class10and12Marksheet;
+    @Lob
+    private byte[] class10and12certificate;
     @Lob
     private byte[] Caste_Certificate;
     @Lob
@@ -298,16 +300,24 @@ public class TApplication {
         AgeProof = ageProof;
     }
 
-    public byte[] getClassXIIMarksheet() {
-        return ClassXIIMarksheet;
+    public byte[] getClass10and12Marksheet() {
+        return class10and12Marksheet;
     }
 
-    public void setClassXIIMarksheet(byte[] classXIIMarksheet) {
-        ClassXIIMarksheet = classXIIMarksheet;
+    public void setClass10and12Marksheet(byte[] class10and12Marksheet) {
+        class10and12Marksheet = class10and12Marksheet;
     }
 
     public byte[] getCaste_Certificate() {
         return Caste_Certificate;
+    }
+
+    public byte[] getClass10and12certificate() {
+        return class10and12certificate;
+    }
+
+    public void setClass10and12certificate(byte[] class10and12certificate) {
+        this.class10and12certificate = class10and12certificate;
     }
 
     public void setCaste_Certificate(byte[] caste_Certificate) {

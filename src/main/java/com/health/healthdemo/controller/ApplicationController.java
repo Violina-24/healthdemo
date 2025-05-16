@@ -217,6 +217,7 @@ public class ApplicationController {
  public String uploadDocuments(@RequestParam("passportPhoto") MultipartFile passportPhoto,
                                @RequestParam("ageProof") MultipartFile ageProof,
                                @RequestParam("class10and12Marksheet") MultipartFile marksheet,
+                               @RequestParam("class10and12certificate") MultipartFile certificate,
                                @RequestParam(value = "casteCertificate", required = false) MultipartFile casteCertificate,
                                @RequestParam(value = "pwdCertificate", required = false) MultipartFile pwdCertificate,
                                @RequestParam("neetResult") MultipartFile neetResult,
@@ -235,7 +236,8 @@ public class ApplicationController {
   try {
    application.setPassportPhoto(passportPhoto.getBytes());
    application.setAgeProof(ageProof.getBytes());
-   application.setClassXIIMarksheet(marksheet.getBytes());
+   application.setClass10and12Marksheet(marksheet.getBytes());
+   application.setClass10and12certificate(certificate.getBytes());
    if (casteCertificate != null && !casteCertificate.isEmpty()) {
     application.setCaste_Certificate(casteCertificate.getBytes());
    }
@@ -291,20 +293,39 @@ public class ApplicationController {
           .contentType(MediaType.parseMediaType(contentType))
           .body(fileData);
  }
-@PostMapping("/application/submitAll")
-public ResponseEntity<?> submitApplication(@RequestBody Map<String, Object> allFormData) {
-    Map<String, Object> studentformForm = (Map<String, Object>) allFormData.get("studentform");
-    Map<String, Object> quotaForm = (Map<String, Object>) allFormData.get("quota");
-    Map<String, Object> qualificationForm = (Map<String, Object>) allFormData.get("qualification");
-    Map<String, Object> fileuploadForm = (Map<String, Object>) allFormData.get("fileupload");
+ @PostMapping("/submitAll")
+ public ResponseEntity<?> submitApplication(
+         @RequestBody Map<String, Object> allFormData,
+         HttpSession session) {
 
-    String email = (String) allFormData.get("userEmail");
+  String email = (String) session.getAttribute("userEmail");
 
- applicationService.saveApplicationFromForms(studentformForm, quotaForm, qualificationForm, fileuploadForm, email);
+  if (email == null) {
+   return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+           .body(Map.of("error", "User not logged in"));
+  }
 
+  Map<String, Object> studentformForm = (Map<String, Object>) allFormData.get("studentformForm");
+  Map<String, Object> quotaForm = (Map<String, Object>) allFormData.get("quotaForm");
+  Map<String, Object> qualificationForm = (Map<String, Object>) allFormData.get("qualificationForm");
+  Map<String, Object> fileUploadForm = (Map<String, Object>) allFormData.get("fileUploadForm");
 
- return ResponseEntity.ok(Map.of("status", "success", "message", "Application submitted successfully"));
-}
+  Long applicationId = applicationService.saveApplicationFromForms(
+          studentformForm, quotaForm, qualificationForm, fileUploadForm, email);
+
+  return ResponseEntity.ok(Map.of(
+          "status", "success",
+          "message", "Application submitted successfully",
+          "applicationId", applicationId
+  ));
+ }
+
+ @GetMapping("/applicationsuccess")
+ public String applicationSuccessPage(@RequestParam("applicationId") Long applicationId, Model model) {
+  model.addAttribute("applicationId", applicationId);
+  return "application_success"; // This should match your HTML file name (application_success.html)
+ }
+
 
 
 
