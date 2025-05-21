@@ -9,5 +9,7 @@ import java.util.List;
 @Repository
 public interface MCategoryRepository extends JpaRepository <MCategory,Integer>{
     List<MCategory> findByCategoryname(String categoryname);
+    List<MCategory> findByCid(Integer cid);
+
 
 }

@@ -10,7 +10,9 @@ public class MCourse {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long Courseid;
+
     private String Coursename;
+
     private String institute;
 
     public Long getCourseid() {

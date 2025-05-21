@@ -125,14 +125,16 @@
     <div class="flex gap-4">
       <button class="btn btn-outline-primary" onclick="exportPDF()">Export as PDF</button>
 
-      <form id="finalSubmitForm" action="/application/submitAll" method="post" onsubmit="return confirmSubmission()">
-        <button onclick="submitApplication()" type="submit" class="btn btn-primary">Final Submit</button>
+      <form id="finalSubmitForm" onsubmit="submitApplication(event)">
+        <button type="submit" class="btn btn-primary">Final Submit</button>
       </form>
+
     </div>
   </div>
 
 </div>
 
+  <div id="base64FilePreview"></div>
 
 <script>
   const userEmail = sessionStorage.getItem("userEmail") || "guest@example.com";
@@ -174,7 +176,7 @@ if (perAddr) {
   // Fill quota info
   document.getElementById("domicile").textContent = quotaFormData.domicile || "-";
   document.getElementById("state").textContent = quotaFormData.state || "-";
-  document.getElementById("category").textContent = quotaFormData.category || "-";
+  document.getElementById("category").textContent = quotaFormData.categoryName || "-";
 <!--  document.getElementById("institute").textContent = quotaFormData.institute || "-";-->
 <!--  document.getElementById("course").textContent = quotaFormData.course || "-";-->
   document.getElementById("managementQuota").textContent = quotaFormData.managementQuota || "-";
@@ -198,21 +200,47 @@ if (perAddr) {
   const container = document.getElementById(elementId);
   container.innerHTML = "";
 
-  if (!fileData) {
-    container.textContent = "Not uploaded";
+  if (!fileData || !fileData.path) {
+    container.textContent = "Not Uploaded";
     return;
   }
 
-  const base64Data = typeof fileData === "string" ? fileData : fileData.data;
-  const fileName = fileData.name || "Uploaded File";
+  const fileUrl = fileData.path;
+  const fileType = fileData.type || "";
 
-  if (base64Data.startsWith("data:image/")) {
+  if (fileType.startsWith("image/")) {
+    const img = document.createElement("img");
+    img.src = fileUrl;
+    img.className = "thumbnail";
+    container.appendChild(img);
+  } else if (fileType === "application/pdf") {
+    const iframe = document.createElement("iframe");
+    iframe.src = fileUrl;
+    iframe.className = "uniform-frame";
+    container.appendChild(iframe);
+  } else {
+    const link = document.createElement("a");
+    link.href = fileUrl;
+    link.textContent = "View File";
+    link.target = "_blank";
+    container.appendChild(link);
+  }
+}
+
+const fileData = JSON.parse(sessionStorage.getItem("fileData") || "{}");
+const base64Data = typeof fileData === "string" ? fileData : fileData.data;
+const fileName = fileData.name || "Uploaded File";
+const container = document.getElementById("base64FilePreview");
+container.innerHTML = "";
+
+if (base64Data && base64Data.startsWith("data:image/")) {
+  // Handle image preview
   container.innerHTML = `
     <img src="${base64Data}" alt="${fileName}" class="uniform-frame" />
     <div>${fileName}</div>
   `;
-} else if (base64Data.startsWith("data:application/pdf")) {
-  // Convert base64 to Blob
+} else if (base64Data && base64Data.startsWith("data:application/pdf")) {
+  // Handle PDF preview
   const base64Parts = base64Data.split(',');
   const byteCharacters = atob(base64Parts[1]);
   const byteNumbers = new Array(byteCharacters.length);
@@ -224,31 +252,41 @@ if (perAddr) {
   const blobUrl = URL.createObjectURL(pdfBlob);
 
   container.innerHTML = `
-    <iframe src="${blobUrl}" title="${fileName}" class="uniform-frame"></iframe>
+    <iframe src="${blobUrl}" title="${fileName}" class="uniform-frame" width="100%" height="500px"></iframe>
     <div>
       ${fileName}
-      <a href="${blobUrl}" download="${fileName}" target="_blank" style="margin-left: 10px;"><i class="fa-solid fa-download"></i></a>
+      <a href="${blobUrl}" download="${fileName}" target="_blank" style="margin-left: 10px;">
+        <i class="fa-solid fa-download"></i>
+      </a>
     </div>
   `;
+} else if (base64Data) {
+  // Handle unknown base64 file types (e.g., .txt, .doc)
+  container.innerHTML = `
+    <a href="${base64Data}" target="_blank">${fileName}</a>
+  `;
 } else {
-    container.innerHTML = `
-      <a href="${base64Data}" target="_blank">${fileName}</a>
-    `;
-  }
+  // Handle no file case
+  container.innerHTML = `<div>No file uploaded.</div>`;
 }
+
+
 
 
   // Render all file previews
   renderFilePreview("passportPhoto", files.passportPhoto);
-  renderFilePreview("ageProof", files.ageProof);
-  renderFilePreview("class10and12Marksheet", files.class10and12Marksheet);
-  renderFilePreview("class10and12certificate", files.class10and12certificate);
-  renderFilePreview("neetResult", files.neetResult);
-  renderFilePreview("casteCertificate", files.casteCertificate);
-  renderFilePreview("prc", files.prc);
-  renderFilePreview("characterCertificate", files.characterCertificate);
-  renderFilePreview("pwdCertificate", files.pwdCertificate);
+renderFilePreview("ageProof", files.ageProof);
+renderFilePreview("class10and12Marksheet", files.class10and12Marksheet);
+renderFilePreview("class10and12certificate", files.class10and12certificate);
+renderFilePreview("neetResult", files.neetResult);
+renderFilePreview("casteCertificate", files.casteCertificate);
+renderFilePreview("prc", files.prc);
+renderFilePreview("characterCertificate", files.characterCertificate);
+renderFilePreview("pwdCertificate", files.pwdCertificate);
 
+ function goToPreviousPage() {
+  window.history.back(); // Navigates to the previous page
+}
   function exportPDF() {
     const element = document.getElementById("previewContent");
     const opt = {
@@ -264,43 +302,102 @@ if (perAddr) {
   function confirmSubmission() {
     return confirm("Are you sure you want to submit this application? Once submitted, it cannot be edited.");
   }
-  function goToPreviousPage() {
-  window.history.back(); // Navigates to the previous page
-}
-// submit button function
-  function submitApplication() {
+function submitApplication(event) {
+    event.preventDefault();
+
     if (!confirmSubmission()) return;
 
-     const fullApplicationData = {
-    studentForm: studentFormData,
-    quotaForm: quotaFormData,
-    qualificationForm: qualificationFormData,
-    fileUploadForm: fileUploadData
-  };
+    const user = {
+        uid: studentFormData.uid || 0,
+        name: studentFormData.name,
+        email: userEmail,
+        phone: studentFormData.phone,
+        password: studentFormData.password || "", // add if needed
+        dob: studentFormData.dob
+    };
 
-    fetch('/submitAll', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-      body: JSON.stringify(fullApplicationData)
+    const cid = {
+        cid: quotaFormData.categoryId,
+        categoryname: quotaFormData.categoryName
+    };
+
+    const mPostalAddress = {
+        id: studentFormData.permanent_Address?.id || 0,
+        addressLine1: studentFormData.permanent_Address?.addressLine1 || null,
+        addressLine2: studentFormData.permanent_Address?.addressLine2 || null,
+        district: studentFormData.permanent_Address?.district || null,
+        state: studentFormData.permanent_Address?.state || null,
+        pincode: studentFormData.permanent_Address?.pincode || 0
+    };
+
+    const mCourse = {
+        institute: quotaFormData.institute,
+        coursename: quotaFormData.course,
+        courseid: quotaFormData.courseId
+    };
+
+    const fullApplicationData = {
+        age: qualificationFormData.age || null,
+        gender: studentFormData.gender,
+        religion: studentFormData.religion,
+        nationality: studentFormData.nationality,
+        user,
+        cid,
+        mPostalAddress,
+        mCourse,
+        dob: studentFormData.dob,
+        passportPhoto: fileUploadData.files?.passportPhoto || null,
+        ageProof: fileUploadData.files?.ageProof || null,
+        class10and12Marksheet: fileUploadData.files?.class10and12Marksheet || null,
+        class10and12certificate: fileUploadData.files?.class10and12certificate || null,
+        neet_Results: fileUploadData.files?.neetResult || null,
+        caste_Certificate: fileUploadData.files?.casteCertificate || null,
+        prc: fileUploadData.files?.prc || null,
+        character_Certificate: fileUploadData.files?.characterCertificate || null,
+        pwd_Certificate: fileUploadData.files?.pwdCertificate || null,
+        parents_Guardian_Name: qualificationFormData.guardianName || null,
+        biology_Biotech_Score: qualificationFormData.biology || null,
+        physics_Score: qualificationFormData.physics || null,
+        chemistry_Score: qualificationFormData.chemistry || null,
+        pcb_Marks: qualificationFormData.pcb || 0,
+        subjectChoice: qualificationFormData.subjectChoice || null,
+        neet_SCORE: qualificationFormData.neet || 0
+    };
+
+    console.log("Formatted application data:", fullApplicationData);
+
+    fetch('/application/save', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(fullApplicationData) // problem is here
     })
     .then(response => {
-      if (!response.ok) {
-        throw new Error("Submission failed");
-      }
-      return response.json();
+        if (response.status === 401) throw new Error("Session expired. Please login again.");
+        if (!response.ok) {
+            return response.json().then(err => {
+                throw new Error(err.error || "Submission failed");
+            });
+        }
+        return response.json();
     })
     .then(data => {
-      alert("Application submitted successfully! Your Application ID: " + data.applicationId);
-      window.location.href = `/application/success?applicationId=${data.applicationId}`;
+        alert("Application submitted successfully! Your Application ID: " + data.applicationId);
+        localStorage.removeItem("studentformForm");
+        localStorage.removeItem("quotaForm");
+        localStorage.removeItem("qualificationForm");
+        sessionStorage.removeItem("fileUploadForm");
+        window.location.href = `/application/applicationsuccess?applicationId=${data.applicationId}`;
     })
     .catch(error => {
-      console.error("Error submitting application:", error);
-      alert("An error occurred during submission. Please try again.");
+        console.error("Error submitting application:", error);
+        alert(error.message || "An error occurred during submission. Please try again.");
     });
-  }
+}
+
+
 
 </script>
 </div>

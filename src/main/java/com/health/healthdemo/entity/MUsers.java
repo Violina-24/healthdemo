@@ -18,6 +18,7 @@ public class MUsers {
     private String phone;  // Changed from int to String
     private String password; // Added password field
     private String dob;
+
     public Long getUid() {
         return uid;
     }

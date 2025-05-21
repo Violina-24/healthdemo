@@ -44,18 +44,19 @@ public class UserController {
         Optional<MUsers> foundUser = usersRepository.findByEmailAndPassword(user.getEmail(), user.getPassword());
 
         if (foundUser.isPresent()) {
-            MUsers loggedInUser = foundUser.get();
+            MUsers userObj = foundUser.get();
 
-            // Store the entire user object in the session
-            session.setAttribute("loggedInUser", loggedInUser);
-            session.setAttribute("userEmail", loggedInUser.getEmail());
-            System.out.println("User logged in: " + loggedInUser.getEmail());
+            // ✅ Store only the email string in session
+            session.setAttribute("userEmail", userObj.getEmail());
+            System.out.println("User logged in: " + userObj.getEmail());
 
             return ResponseEntity.ok().body("{\"message\": \"Login Successful\"}");
         } else {
             return ResponseEntity.status(401).body("{\"message\": \"Invalid credentials\"}");
         }
     }
+
+
     @PostMapping("/api/logout")
     public ResponseEntity<?> logoutUser(HttpSession session) {
         // Invalidate the session to log out the user
@@ -82,23 +83,33 @@ public class UserController {
 
     @GetMapping("/api/get-loginuser-details")
     public ResponseEntity<?> getUserDetails(HttpSession session) {
-        MUsers user = (MUsers) session.getAttribute("loggedInUser");
+        String userEmail = (String) session.getAttribute("userEmail");
 
-        if (user == null) {
+        if (userEmail == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("error", "User not authenticated"));
         }
 
+        Optional<MUsers> userOpt = usersRepository.findByEmail(userEmail);
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "User not found"));
+        }
+
+        MUsers user = userOpt.get();
+
         Map<String, String> userData = Map.of(
-                "userId", String.valueOf(user.getUid()),   // Assuming getId() returns user ID
+                "userId", String.valueOf(user.getUid()),
                 "userName", user.getName(),
                 "email", user.getEmail(),
                 "phone", user.getPhone(),
-                    "dob",user.getDob());
-
+                "dob", user.getDob()
+        );
 
         return ResponseEntity.ok(userData);
     }
+
+
 
 
 
@@ -185,27 +196,27 @@ public Map<String, Object> homepage(Authentication authentication) {
 //        }
 
 
-    @GetMapping("/api/userdetails")
-    @ResponseBody
-    public ResponseEntity<Map<String, String>> getUserDetails(Principal principal) {
-        Map<String, String> response = new HashMap<>();
-
-        if (principal != null) {
-            String email = principal.getName();
-            MUsers user = usersService.findByEmail(email);
-            if (user != null) {
-                response.put("name", user.getName());
-                response.put("email", user.getEmail());
-                response.put("phone", user.getPhone());
-                response.put("dob", user.getDob());
-                return ResponseEntity.ok(response);
-            }
-        }
-
-        response.put("name", "Guest");
-        return ResponseEntity.ok(response);
-    }
-
+//    @GetMapping("/api/userdetails")
+//    @ResponseBody
+//    public ResponseEntity<Map<String, String>> getUserDetails(Principal principal) {
+//        Map<String, String> response = new HashMap<>();
+//
+//        if (principal != null) {
+//            String email = principal.getName();
+//            MUsers user = usersService.findByEmail(email);
+//            if (user != null) {
+//                response.put("name", user.getName());
+//                response.put("email", user.getEmail());
+//                response.put("phone", user.getPhone());
+//                response.put("dob", user.getDob());
+//                return ResponseEntity.ok(response);
+//            }
+//        }
+//
+//        response.put("name", "Guest");
+//        return ResponseEntity.ok(response);
+//    }
+//
 
 
 }

@@ -1,6 +1,5 @@
 package com.health.healthdemo.controller;
 
-import com.health.healthdemo.entity.MCategory;
 import com.health.healthdemo.entity.MPostalAddress;
 import com.health.healthdemo.entity.MUsers;
 import com.health.healthdemo.entity.TApplication;
@@ -17,20 +16,17 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 //import org.springframework.stereotype.Controller;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDate;
+import java.util.Collections;
 import java.util.Map;
 import java.util.HashMap;
 
 
 import java.security.Principal;
-import java.util.HashMap;
 import java.util.Optional;
 
 @Controller
@@ -39,6 +35,9 @@ public class ApplicationController {
 
  @Autowired
  private ApplicationService applicationService;
+
+ @Autowired
+ private ApplicationService tApplicationService;
  @Autowired
  private MUsersRepository mUsersRepository;
  @Autowired
@@ -83,42 +82,42 @@ public class ApplicationController {
 
 
  // ✅ 3. Save student form (API called by JavaScript)
- @PostMapping("/submit-studentform")
- @ResponseBody
- public ResponseEntity<String> submitStudentForm(@RequestBody TApplication formInput, Principal principal) {
-  if (principal == null) {
-   // Log the message for debugging
-   System.out.println("User is not logged in!");
-   return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
-  }
-  String email = principal.getName();
-  MUsers user = mUsersRepository.findByEmail(email).orElseThrow();
-
-  TApplication existingApp = tApplicationRepository.findByUser(user).orElse(new TApplication());
-
-  // Set fields
-  existingApp.setUser(user); // don't forget this
-  existingApp.setName(formInput.getName());
-  existingApp.setDOB(formInput.getDOB());
-  existingApp.setNationality(formInput.getNationality());
-  existingApp.setReligion(formInput.getReligion());
-  existingApp.setGender(formInput.getGender());
-
-  // Set permanent address
-  MPostalAddress permAddr = formInput.getPermanent_Address();
-  if (permAddr != null) {
-   existingApp.setPermanent_Address(permAddr);
-  }
-
-  // Set correspondence address
-  MPostalAddress corrAddr = formInput.getCorrespondence_Address();
-  if (corrAddr != null) {
-   existingApp.setCorrespondence_Address(corrAddr);
-  }
-
-  tApplicationRepository.save(existingApp);
-  return ResponseEntity.ok("Application saved successfully");
- }
+// @PostMapping("/submit-studentform")
+// @ResponseBody
+// public ResponseEntity<String> submitStudentForm(@RequestBody TApplication formInput, Principal principal) {
+//  if (principal == null) {
+//   // Log the message for debugging
+//   System.out.println("User is not logged in!");
+//   return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+//  }
+//  String email = principal.getName();
+//  MUsers user = mUsersRepository.findByEmail(email).orElseThrow();
+//
+//  TApplication existingApp = tApplicationRepository.findByUser(user).orElse(new TApplication());
+//
+//  // Set fields
+//  existingApp.setUser(user); // don't forget this
+////  existingApp.setName(formInput.getName());
+//  existingApp.setDOB(formInput.getDOB());
+//  existingApp.setNationality(formInput.getNationality());
+//  existingApp.setReligion(formInput.getReligion());
+//  existingApp.setGender(formInput.getGender());
+//
+////  // Set permanent address
+////  MPostalAddress permAddr = formInput.getPermanent_Address();
+////  if (permAddr != null) {
+////   existingApp.setPermanent_Address(permAddr);
+////  }
+////
+////  // Set correspondence address
+////  MPostalAddress corrAddr = formInput.getCorrespondence_Address();
+////  if (corrAddr != null) {
+////   existingApp.setCorrespondence_Address(corrAddr);
+////  }
+//
+//  tApplicationRepository.save(existingApp);
+//  return ResponseEntity.ok("Application saved successfully");
+// }
 
 
 
@@ -133,19 +132,19 @@ public class ApplicationController {
   return "quota";
  }
 
- @PostMapping("/save-quota")
- public String saveQuota(@ModelAttribute TApplication tapp, Principal principal) {
-  MUsers user = usersService.findByEmail(principal.getName());
-  TApplication existing = tApplicationRepository.findByUser(user).orElse(new TApplication());
-
-  existing.setCategoryname(tapp.getCategoryname());
-  existing.setInstitute(tapp.getInstitute());
-
-  existing.setUser(user);
-  tApplicationRepository.save(existing);
-
-  return "redirect:/application/qualification";
- }
+// @PostMapping("/save-quota")
+// public String saveQuota(@ModelAttribute TApplication tapp, Principal principal) {
+//  MUsers user = usersService.findByEmail(principal.getName());
+//  TApplication existing = tApplicationRepository.findByUser(user).orElse(new TApplication());
+//
+//  existing.setCid(tapp.getCid());
+//  existing.setInstitute(tapp.getInstitute());
+//
+//  existing.setUser(user);
+//  tApplicationRepository.save(existing);
+//
+//  return "redirect:/application/qualification";
+// }
 
  // ✅ 5. Qualification page
  @GetMapping("/qualification")
@@ -156,31 +155,33 @@ public class ApplicationController {
   return "qualification";
  }
 
- @PostMapping("/submit-qualification")
- public String submitQualification(@ModelAttribute TApplication tapplication, Principal principal) {
-  if (principal == null) {
-   return "redirect:/login";
-  }
-  String email = principal.getName();
-  Optional<MUsers> userOptional = mUsersRepository.findByEmail(email);
+// @PostMapping("/submit-qualification")
+// public String submitQualification(@ModelAttribute TApplication tapplication, Principal principal) {
+//  if (principal == null) {
+//   return "redirect:/login";
+//  }
+//  String email = principal.getName();
+//  Optional<MUsers> userOptional = mUsersRepository.findByEmail(email);
+//
+//  if (userOptional.isPresent()) {
+//   MUsers user = userOptional.get();
+//   TApplication existingApplication = tApplicationRepository.findByUser(user).orElse(new TApplication());
+//
+//   existingApplication.setPhysics_Score(tapplication.getPhysics_Score());
+//   existingApplication.setChemistry_Score(tapplication.getChemistry_Score());
+//   existingApplication.setBiology_Biotech_Score(tapplication.getBiology_Biotech_Score());
+//   existingApplication.setSubjectChoice(tapplication.getSubjectChoice());
+//   existingApplication.setNEET_SCORE(tapplication.getNEET_SCORE());
+//
+//   existingApplication.setUser(user);
+//   tApplicationRepository.save(existingApplication);
+//
+//   return "redirect:/application/parentsinfo";
+//  }
+//  return "redirect:/login";
+// }
 
-  if (userOptional.isPresent()) {
-   MUsers user = userOptional.get();
-   TApplication existingApplication = tApplicationRepository.findByUser(user).orElse(new TApplication());
 
-   existingApplication.setPhysics_Score(tapplication.getPhysics_Score());
-   existingApplication.setChemistry_Score(tapplication.getChemistry_Score());
-   existingApplication.setBiology_Biotech_Score(tapplication.getBiology_Biotech_Score());
-   existingApplication.setSubjectChoice(tapplication.getSubjectChoice());
-   existingApplication.setNEET_SCORE(tapplication.getNEET_SCORE());
-
-   existingApplication.setUser(user);
-   tApplicationRepository.save(existingApplication);
-
-   return "redirect:/application/parentsinfo";
-  }
-  return "redirect:/login";
- }
  @PostMapping("/api/preview")
  @ResponseBody
  public ResponseEntity<?> previewApplicationApi(@ModelAttribute TApplication application,
@@ -202,7 +203,7 @@ public class ApplicationController {
 
   // Return preview-relevant data
   Map<String, Object> response = new HashMap<>();
-  response.put("name", application.getName());
+//  response.put("name", application.getName());
   response.put("dob", application.getDOB());
   response.put("email", user.getEmail());
   response.put("phone", user.getPhone());
@@ -249,9 +250,9 @@ public class ApplicationController {
    if (prc != null && !prc.isEmpty()) {
     application.setPrc(prc.getBytes());
    }
-   if (employerCertificate != null && !employerCertificate.isEmpty()) {
-    application.setEmployer_Certificate(employerCertificate.getBytes());
-   }
+//   if (employerCertificate != null && !employerCertificate.isEmpty()) {
+//    application.setEmployer_Certificate(employerCertificate.getBytes());
+//   }
 
    tApplicationRepository.save(application);
   } catch (Exception e) {
@@ -293,32 +294,139 @@ public class ApplicationController {
           .contentType(MediaType.parseMediaType(contentType))
           .body(fileData);
  }
- @PostMapping("/submitAll")
- public ResponseEntity<?> submitApplication(
-         @RequestBody Map<String, Object> allFormData,
-         HttpSession session) {
 
-  String email = (String) session.getAttribute("userEmail");
-
-  if (email == null) {
-   return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-           .body(Map.of("error", "User not logged in"));
+ @PostMapping("/save")
+ public ResponseEntity<TApplication> saveApplication(@RequestBody TApplication tApplication) {
+  try {
+   System.out.println("controller dob" + tApplication.getDOB());
+   TApplication savedApplication = tApplicationService.saveApplication(tApplication);
+   return ResponseEntity.ok(savedApplication);
+  } catch (RuntimeException ex) {
+   return ResponseEntity.badRequest().body(null);
   }
-
-  Map<String, Object> studentformForm = (Map<String, Object>) allFormData.get("studentformForm");
-  Map<String, Object> quotaForm = (Map<String, Object>) allFormData.get("quotaForm");
-  Map<String, Object> qualificationForm = (Map<String, Object>) allFormData.get("qualificationForm");
-  Map<String, Object> fileUploadForm = (Map<String, Object>) allFormData.get("fileUploadForm");
-
-  Long applicationId = applicationService.saveApplicationFromForms(
-          studentformForm, quotaForm, qualificationForm, fileUploadForm, email);
-
-  return ResponseEntity.ok(Map.of(
-          "status", "success",
-          "message", "Application submitted successfully",
-          "applicationId", applicationId
-  ));
  }
+
+// @PostMapping("/submitAll")
+// public ResponseEntity<?> submitApplication(
+//         @RequestBody Map<String, Object> allFormData,
+//         HttpSession session) {
+//
+//  String userEmail = (String) session.getAttribute("userEmail");
+//
+//  if (userEmail == null) {
+//   System.out.println("Unauthorized access attempt or session expired.");
+//   return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+//           .body(Map.of("error", "User not logged in or session expired"));
+//  }
+//
+//  Optional<MUsers> userOpt = mUsersRepository.findByEmail(userEmail);
+//
+//  if (userOpt.isEmpty()) {
+//   return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+//           .body(Map.of("error", "User not found"));
+//  }
+//
+//  MUsers user = userOpt.get();
+//
+//
+//  Map<String, Object> studentformForm = (Map<String, Object>) allFormData.get("studentformForm");
+//  Map<String, Object> quotaForm = (Map<String, Object>) allFormData.get("quotaForm");
+//  Map<String, Object> qualificationForm = (Map<String, Object>) allFormData.get("qualificationForm");
+//  Map<String, Object> fileUploadForm = (Map<String, Object>) allFormData.get("fileUploadForm");
+//
+//  Long applicationId = applicationService.saveApplicationFromForms(
+//          studentformForm, quotaForm, qualificationForm, fileUploadForm, userEmail);
+//
+//  return ResponseEntity.ok(Map.of(
+//          "status", "success",
+//          "message", "Application submitted successfully",
+//          "applicationId", applicationId
+//  ));
+// }
+//
+
+// @PostMapping("/submitAll")
+// @ResponseBody
+// public ResponseEntity<?> submitApplication(@RequestBody Map<String, Object> fullApplicationData) {
+//  try {
+//   System.out.println("===== Stage 1: Received Application Submission Request =====");
+//   System.out.println("Full Application Data: " + fullApplicationData);
+//
+//   // Extract sub-forms
+//   Map<String, Object> studentForm = (Map<String, Object>) fullApplicationData.get("studentformForm");
+//   Map<String, Object> quotaForm = (Map<String, Object>) fullApplicationData.get("quotaForm");
+//   Map<String, Object> qualificationForm = (Map<String, Object>) fullApplicationData.get("qualificationForm");
+//   Map<String, Object> fileUploadForm = (Map<String, Object>) fullApplicationData.get("fileUploadForm");
+//
+//   System.out.println("===== Stage 2: Saving Permanent Address =====");
+//   Map<String, Object> permAddr = (Map<String, Object>) studentForm.get("permanent_Address");
+//   MPostalAddress permanentAddress = new MPostalAddress();
+//   permanentAddress.setAddressLine1((String) permAddr.get("addressLine1"));
+//   permanentAddress.setAddressLine2((String) permAddr.get("addressLine2"));
+//   permanentAddress.setDistrict((String) permAddr.get("district"));
+//   permanentAddress.setState((String) permAddr.get("state"));
+//   permanentAddress.setPincode(Integer.parseInt(permAddr.get("pincode").toString()));
+//   mPostalAddressRepository.save(permanentAddress);
+//   System.out.println("Permanent Address Saved: " + permanentAddress);
+//
+//   System.out.println("===== Stage 3: Saving Correspondence Address =====");
+//   Map<String, Object> corrAddr = (Map<String, Object>) studentForm.get("correspondence_Address");
+//   MPostalAddress correspondenceAddress = new MPostalAddress();
+//   correspondenceAddress.setAddressLine1((String) corrAddr.get("addressLine1"));
+//   correspondenceAddress.setAddressLine2((String) corrAddr.get("addressLine2"));
+//   correspondenceAddress.setDistrict((String) corrAddr.get("district"));
+//   correspondenceAddress.setState((String) corrAddr.get("state"));
+//   correspondenceAddress.setPincode(Integer.parseInt(corrAddr.get("pincode").toString()));
+//   mPostalAddressRepository.save(correspondenceAddress);
+//   System.out.println("Correspondence Address Saved: " + correspondenceAddress);
+//
+//   System.out.println("===== Stage 4: Creating Application Object =====");
+//   TApplication application = new TApplication();
+//   application.setName((String) studentForm.get("name"));
+//   application.setGender((String) studentForm.get("gender"));
+//   application.setNationality((String) studentForm.get("nationality"));
+//   application.setReligion((String) studentForm.get("religion"));
+//   application.setPermanent_Address(permanentAddress);
+//   application.setCorrespondence_Address(correspondenceAddress);
+//   System.out.println("Basic Student Info Set");
+//
+//   System.out.println("===== Stage 5: Setting Quota Info =====");
+////   application.setDomicile((String) quotaForm.get("domicile"));
+////   application.setState((String) quotaForm.get("state"));
+////   application.setCategoryName((String) quotaForm.get("categoryName"));
+////   application.setPhysicallyChallenged((String) quotaForm.get("physicallyChallenged"));
+////   application.setEws((String) quotaForm.get("ews"));
+////   application.setManagementQuota((String) quotaForm.get("managementQuota"));
+////   System.out.println("Quota Info Set");
+//
+//   System.out.println("===== Stage 6: Setting Qualification Info =====");
+////   application.setPhysicsMarks(Double.parseDouble((String) qualificationForm.get("physics")));
+////   application.setChemistryMarks(Double.parseDouble((String) qualificationForm.get("chemistry")));
+////   application.setBiologyMarks(Double.parseDouble((String) qualificationForm.get("biology")));
+////   application.setNeetScore((String) qualificationForm.get("neet"));
+////   application.setSubjectChoice((String) qualificationForm.get("subjectChoice"));
+//   System.out.println("Qualification Info Set");
+//
+////   System.out.println("===== Stage 7: Setting File Upload (Aadhaar Phone) =====");
+////   application.setAadhaarPhone((String) fileUploadForm.get("aadhaarPhone"));
+////   System.out.println("File Upload Info Set");
+//
+//   System.out.println("===== Stage 8: Saving Final Application =====");
+//   tApplicationRepository.save(application);
+//   System.out.println("Application Saved Successfully: ID = " + application.getA_id());
+//
+//   Map<String, Object> result = new HashMap<>();
+//   result.put("applicationId", application.getA_id());
+//   return ResponseEntity.ok(result);
+//
+//  } catch (Exception e) {
+//   e.printStackTrace();
+//   System.err.println("===== Error Stage: " + e.getMessage() + " =====");
+//   return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//           .body(Collections.singletonMap("error", "Error submitting application: " + e.getMessage()));
+//  }
+// }
+
 
  @GetMapping("/applicationsuccess")
  public String applicationSuccessPage(@RequestParam("applicationId") Long applicationId, Model model) {

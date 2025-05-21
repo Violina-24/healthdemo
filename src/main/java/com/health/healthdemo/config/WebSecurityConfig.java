@@ -28,7 +28,7 @@ public class WebSecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
                         // Allow static files without authentication
-                        .requestMatchers("/css/**", "/js/**", "/images/**", "/uploads/**", "/favicon.ico")
+                        .requestMatchers("/css/**", "/js/**", "/images/**", "/uploads/**", "/favicon.ico","/application/save")
                         .permitAll()
 
                         // Allow public API endpoints without authentication
@@ -51,6 +51,9 @@ public class WebSecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)  // Create session when needed
                 )
+
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+
 
                 // Form login configuration
                 .formLogin(login -> login
@@ -83,14 +86,15 @@ public class WebSecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:8082"));
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:8082")); // Or your frontend origin
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowCredentials(true);  // Essential for maintaining session
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type"));
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setAllowCredentials(true); // <== VERY IMPORTANT
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
+
 
 }

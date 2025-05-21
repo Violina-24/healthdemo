@@ -167,44 +167,68 @@
     });
   }
 
-  document.getElementById("fileUploadForm").addEventListener("submit", function (e) {
+  document.getElementById("fileUploadForm").addEventListener("submit", async function (e) {
     e.preventDefault();
 
+    // Get all files as base64
+    const fileFields = [
+        "passportPhoto", "ageProof", "class10and12Marksheet", "class10and12certificate",
+        "neetResult", "casteCertificate", "prc", "characterCertificate", "pwdCertificate"
+    ];
+
+    const filesData = {};
+    for (let field of fileFields) {
+        const fileInput = document.getElementById(field);
+        if (fileInput.files[0]) {
+            filesData[field] = await toBase64(fileInput.files[0]);
+        }
+    }
+
     const allFormsData = {
-      studentForm: JSON.parse(localStorage.getItem("studentformForm") || "{}")[userEmail],
-      quotaForm: JSON.parse(localStorage.getItem("quotaForm") || "{}")[userEmail],
-      qualificationForm: JSON.parse(localStorage.getItem("qualificationForm") || "{}")[userEmail],
-      fileUploadForm: JSON.parse(sessionStorage.getItem(sessionKey) || "{}")
+        studentformForm: JSON.parse(localStorage.getItem("studentformForm") || "{}")[userEmail],
+        quotaForm: JSON.parse(localStorage.getItem("quotaForm") || "{}")[userEmail],
+        qualificationForm: JSON.parse(localStorage.getItem("qualificationForm") || "{}")[userEmail],
+        fileUploadForm: {
+            aadhaarPhone: document.getElementById("aadhaarPhone").value,
+            files: filesData
+        }
     };
 
-    fetch("/application/submitAll",{
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json"
-  },
-  credentials: "include", // important for session auth
-  body: JSON.stringify({
-    uid: GlobalUserID,
-    email: userEmail,
-    data: allFormsData
-  })
-})
-
-  .then(response => {
-      if (!response.ok) throw new Error("Submission failed");
-      return response.json();
+    fetch("/application/save", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        credentials: "include",
+        body: JSON.stringify(allFormsData)
+    })
+    .then(response => {
+        if (response.status === 401) {
+            throw new Error("Session expired. Please login again.");
+        }
+        if (!response.ok) {
+            return response.json().then(err => { throw new Error(err.error || "Submission failed"); });
+        }
+        return response.json();
     })
     .then(data => {
-    const appId = data.applicationId;
-    Swal.fire("Success", "Application submitted successfully!", "success")
-      .then(() => window.location.href = `/application/success?appId=${appId}`);
-   })
+        const appId = data.applicationId;
+        // Clear storage after successful submission
+        localStorage.removeItem("studentformForm");
+        localStorage.removeItem("quotaForm");
+        localStorage.removeItem("qualificationForm");
+        sessionStorage.removeItem("fileUploadForm");
 
+        Swal.fire("Success", "Application submitted successfully!", "success")
+            .then(() => window.location.href = `/application/applicationsuccess?applicationId=${appId}`);
+    })
     .catch(error => {
-      Swal.fire("Error", error.message, "error");
+        Swal.fire("Error", error.message, "error");
+        if (error.message.includes("Session expired")) {
+            window.location.href = "/login";
+        }
     });
-  });
-
+});
   window.goBack = function () {
     window.history.back();
   };

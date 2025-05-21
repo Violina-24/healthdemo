@@ -195,16 +195,19 @@
       if (Array.isArray(data)) {
       debugger;
         data.forEach((category) => {
-        const categoryName = category.categoryname?.trim();
-           Institute = (institute || "").trim().toLowerCase();
-          if (Institute === "smc" && (categoryName === "Management" || categoryName === "NRI")){
-        return; // skip appending this option
-      }
+          const categoryName = String(category.categoryname || "").trim(); // Safe trimming
+          Institute = (institute || "").trim().toLowerCase();
+
+          if (Institute === "smc" && (categoryName === "Management" || categoryName === "NRI")) {
+            return; // skip these categories for SMC
+          }
+
           const option = document.createElement("option");
-          option.value = category.cid;
-          option.textContent = category.categoryname;
+          option.value = category.cid;                // Send this to backend
+          option.textContent = categoryName;          // Show this to user
           categoryDropdown.appendChild(option);
         });
+
 
         // Prefill after category options are populated
         const formEmail = sessionStorage.getItem("userEmail") || "guest@example.com";
@@ -281,14 +284,20 @@
     toggleButton(); // initial check
   });
 
-  // Save & Continue function
+   // ✅ Save & Continue function with categoryName
   window.saveAndContinue = function () {
     const formEmail = sessionStorage.getItem("userEmail") || "guest@example.com";
+
+    const categoryDropdown = document.getElementById("categoryDropdown");
+    const selectedCategory = categoryDropdown.options[categoryDropdown.selectedIndex];
+    const categoryId = selectedCategory.value;
+    const categoryName = selectedCategory.textContent.trim();
 
     const formData = {
       domicile: document.getElementById("domicile").value,
       state: document.querySelector('input[name="state"]:checked')?.value || "",
-      category: document.getElementById("categoryDropdown").value,
+      category: categoryId,                    // for backend
+      categoryName: categoryName,              // for preview
       managementQuota: document.querySelector('input[name="mgmtQuota"]:checked')?.id === "mgmtYes" ? "Yes" :
                        document.querySelector('input[name="mgmtQuota"]:checked')?.id === "mgmtNo" ? "No" : "",
       physicallyChallenged: document.querySelector('input[name="physicallyChallenged"]:checked')?.id === "pcYes" ? "Yes" :
