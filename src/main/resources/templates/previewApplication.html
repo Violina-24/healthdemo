@@ -105,17 +105,18 @@
     <div><strong>Aadhaar-linked Phone:</strong> <span id="aadhaarPhone"></span></div>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-    <div><strong>Passport Photo:</strong><div id="passportPhoto"></div></div>
-      <div><strong>Age Proof:</strong><div id="ageProof"></div></div>
-      <div><strong>Class 10 & 12 Marksheet:</strong><div id="class10and12Marksheet"></div></div>
-      <div><strong>Class 10 & 12 Certificate:</strong><div id="class10and12certificate"></div></div>
-      <div><strong>NEET Result:</strong><div id="neetResult"></div></div>
-      <div><strong>Caste Certificate:</strong><div id="casteCertificate"></div></div>
-      <div><strong>PRC:</strong><div id="prc"></div></div>
-      <div><strong>Character Certificate:</strong><div id="characterCertificate"></div></div>
-      <div><strong>PWD Certificate:</strong><div id="pwdCertificate"></div></div>
-    </div>
-  </div>
+      <div><strong>Passport Photo:</strong><div id="passportPhotoPreview"></div></div>
+      <div><strong>Age Proof:</strong><div id="ageProofPreview"></div></div>
+      <div><strong>Class 10 & 12 Marksheet:</strong><div id="class10and12MarksheetPreview"></div></div>
+      <div><strong>Class 10 & 12 Certificate:</strong><div id="class10and12certificatePreview"></div></div>
+      <div><strong>NEET Result:</strong><div id="neetResultPreview"></div></div>
+      <div><strong>Caste Certificate:</strong><div id="casteCertificatePreview"></div></div>
+      <div><strong>PRC:</strong><div id="prcPreview"></div></div>
+      <div><strong>Character Certificate:</strong><div id="characterCertificatePreview"></div></div>
+      <div><strong>PWD Certificate:</strong><div id="pwdCertificatePreview"></div></div>
+    </div> <!-- ✅ Correct place to close the grid -->
+  </div> <!-- ✅ Correct place to close the .mb-6 -->
+
   <!-- Buttons -->
   <div class="flex justify-between items-center mt-8">
     <!-- Previous Button (left side) -->
@@ -125,46 +126,61 @@
     <div class="flex gap-4">
       <button class="btn btn-outline-primary" onclick="exportPDF()">Export as PDF</button>
 
-      <form id="finalSubmitForm" onsubmit="submitApplication(event)">
+      <form id="previewForm">
         <button type="submit" class="btn btn-primary">Final Submit</button>
       </form>
+
 
     </div>
   </div>
 
 </div>
 
-  <div id="base64FilePreview"></div>
 
-<script>
-  const userEmail = sessionStorage.getItem("userEmail") || "guest@example.com";
-  const studentFormData = JSON.parse(localStorage.getItem("studentformForm") || "{}")[userEmail] || {};
-  const quotaFormData = JSON.parse(localStorage.getItem("quotaForm") || "{}")[userEmail] || {};
-  const qualificationFormData = JSON.parse(localStorage.getItem("qualificationForm") || "{}")[userEmail] || {};
-  const fileUploadData = JSON.parse(sessionStorage.getItem("fileUploadForm") || "{}");
+  <script>
+    document.getElementById("previewForm").addEventListener("submit", submitApplication);
 
-  if (!studentFormData || !quotaFormData || !qualificationFormData || !fileUploadData) {
-    alert("Incomplete form data. Please complete all steps.");
-    window.location.href = "/studentform";
-  }
+ // Get user email and form data from storage
+ const userEmail = sessionStorage.getItem("userEmail") || "guest@example.com";
+ const userId = sessionStorage.getItem("userId") || "2";
 
-  // Fill student info
-  document.getElementById("studentName").textContent = studentFormData.name || "-";
-  document.getElementById("studentEmail").textContent = userEmail || "-";
-  document.getElementById("studentPhone").textContent = studentFormData.phone || "-";
-  document.getElementById("studentDob").textContent = studentFormData.dob || "-";
-  document.getElementById("gender").textContent = studentFormData.gender || "-";
-  document.getElementById("nationality").textContent = studentFormData.nationality || "-";
-  document.getElementById("religion").textContent = studentFormData.religion || "-";
+ // Parse stored form data for current user
+ const studentFormData = JSON.parse(localStorage.getItem("studentformForm")) || {};
+ const formData = studentFormData[userEmail] || {};
 
-  const corrAddr = studentFormData.correspondence_Address;
+ if (!userEmail || Object.keys(formData).length === 0) {
+   alert("User data missing. Please go back and refill Step 1.");
+   window.location.href = "/studentform";
+ }
+
+ const quotaFormData = JSON.parse(localStorage.getItem("quotaForm") || "{}")[userEmail] || {};
+ const qualificationFormData = JSON.parse(localStorage.getItem("qualificationForm") || "{}")[userEmail] || {};
+ const fileUploadData = JSON.parse(sessionStorage.getItem("fileUploadForm") || "{}");
+
+ if (!studentFormData || !quotaFormData || !qualificationFormData || !fileUploadData) {
+   alert("Incomplete form data. Please complete all steps.");
+   window.location.href = "/studentform";
+ }
+
+ // Fill student info in HTML elements
+ document.getElementById("studentName").textContent = formData.name || "-";
+ document.getElementById("studentEmail").textContent = userEmail || "-";
+ document.getElementById("studentPhone").textContent = formData.phone || "-";
+ document.getElementById("studentDob").textContent = formData.dob || "-";
+ document.getElementById("gender").textContent = formData.gender || "-";
+ document.getElementById("nationality").textContent = formData.nationality || "-";
+ document.getElementById("religion").textContent = formData.religion || "-";
+
+ // Fill addresses
+const corrAddr = formData.correspondence_Address;
 if (corrAddr) {
   document.getElementById("correspondence_Address").textContent =
     `${corrAddr.addressLine1 || ""}, ${corrAddr.addressLine2 || ""}, ${corrAddr.district || ""}, ${corrAddr.state || ""} - ${corrAddr.pincode || ""}`;
 } else {
   document.getElementById("correspondence_Address").textContent = "-";
 }
-const perAddr = studentFormData.permanent_Address;
+
+const perAddr = formData.permanent_Address;
 if (perAddr) {
   document.getElementById("permanent_Address").textContent =
     `${perAddr.addressLine1 || ""}, ${perAddr.addressLine2 || ""}, ${perAddr.district || ""}, ${perAddr.state || ""} - ${perAddr.pincode || ""}`;
@@ -172,234 +188,334 @@ if (perAddr) {
   document.getElementById("permanent_Address").textContent = "-";
 }
 
+ // Fill quota info
+ document.getElementById("domicile").textContent = quotaFormData.domicile || "-";
+ document.getElementById("state").textContent = quotaFormData.state || "-";
+ document.getElementById("category").textContent = quotaFormData.categoryName || "-";
+ document.getElementById("managementQuota").textContent = quotaFormData.managementQuota || "-";
+ document.getElementById("ews").textContent = quotaFormData.ews || "-";
+ document.getElementById("physicallyChallenged").textContent = quotaFormData.physicallyChallenged || "-";
 
-  // Fill quota info
-  document.getElementById("domicile").textContent = quotaFormData.domicile || "-";
-  document.getElementById("state").textContent = quotaFormData.state || "-";
-  document.getElementById("category").textContent = quotaFormData.categoryName || "-";
-<!--  document.getElementById("institute").textContent = quotaFormData.institute || "-";-->
-<!--  document.getElementById("course").textContent = quotaFormData.course || "-";-->
-  document.getElementById("managementQuota").textContent = quotaFormData.managementQuota || "-";
-  document.getElementById("ews").textContent = quotaFormData.ews || "-";
-  document.getElementById("physicallyChallenged").textContent = quotaFormData.physicallyChallenged || "-";
+ // Fill qualification info
+document.getElementById("physics").textContent = qualificationFormData.Physics_Score || "-";
+document.getElementById("chemistry").textContent = qualificationFormData.Chemistry_Score || "-";
+document.getElementById("biology").textContent = qualificationFormData.Biology_Biotech_Score || "-";
+document.getElementById("neet").textContent = qualificationFormData.neet_score || "-";
+document.getElementById("subjectChoice").textContent = qualificationFormData.SubjectChoice || "-";
 
 
-  // Fill qualification info
-  document.getElementById("physics").textContent = qualificationFormData.physics || "-";
-  document.getElementById("chemistry").textContent = qualificationFormData.chemistry || "-";
-  document.getElementById("biology").textContent = qualificationFormData.biology || "-";
-  document.getElementById("neet").textContent = qualificationFormData.neet || "-";
-  document.getElementById("subjectChoice").textContent = qualificationFormData.subjectChoice || "-";
+ // Aadhaar phone
+ document.getElementById("aadhaarPhone").textContent = fileUploadData.aadhaarPhone || "-";
 
-  // Aadhaar phone
-  document.getElementById("aadhaarPhone").textContent = fileUploadData.aadhaarPhone || "-";
-//file data fill
-  const files = fileUploadData.files || {};
+ // File data preview functions
+ const files = fileUploadData.files || {};
 
- function renderFilePreview(elementId, fileData) {
-  const container = document.getElementById(elementId);
-  container.innerHTML = "";
+ function renderFilePreview(id, fileData) {
+   const previewContainer = document.getElementById(id + "Preview");
+   if (!fileData) {
+     previewContainer.innerHTML = "<p class='text-danger'>Not Uploaded</p>";
+     return;
+   }
 
-  if (!fileData || !fileData.path) {
-    container.textContent = "Not Uploaded";
+   const isPDF = fileData.startsWith("data:application/pdf");
+   if (isPDF) {
+previewContainer.innerHTML = `
+  <div style="display: flex; align-items: center; gap: 10px;">
+    <embed src="${fileData}" type="application/pdf" width="80" height="100" style="border:1px solid #ccc; border-radius:4px;" />
+    <button class="btn btn-outline-primary btn-sm" onclick="openPDFInNewWindow('${fileData}')">View PDF</button>
+  </div>
+`;
+
+  } else {
+  previewContainer.innerHTML = `
+  <img src="${fileData}" alt="${id}" style="max-width: 100px; max-height: 100px;" class="img-thumbnail">
+`;
+ }
+}
+
+ function openPDFInNewWindow(base64pdf) {
+  const newWindow = window.open("", "_blank");
+  if (!newWindow) {
+    alert("Popup blocked! Please allow popups for this site.");
+    return;
+  }
+  newWindow.document.write(`
+  <html>
+    <head><title>PDF Preview</title></head>
+    <body style="margin:0">
+      <iframe width="100%" height="100%" src="${base64pdf}" frameborder="0" style="border:none;"></iframe>
+    </body>
+  </html>
+`);
+
+  newWindow.document.close();
+}
+
+
+ function loadAllPreviews() {
+   const formData = JSON.parse(sessionStorage.getItem("fileUploadForm") || "{}");
+   const files = formData.files || {};
+
+   renderFilePreview("passportPhoto", files.passportPhoto);
+   renderFilePreview("ageProof", files.ageProof);
+   renderFilePreview("class10and12Marksheet", files.class10and12Marksheet);
+   renderFilePreview("class10and12certificate", files.class10and12certificate);
+   renderFilePreview("casteCertificate", files.casteCertificate);
+   renderFilePreview("prc", files.prc);
+   renderFilePreview("neetResult", files.neetResult);
+   renderFilePreview("characterCertificate", files.characterCertificate);
+   renderFilePreview("pwdCertificate", files.pwdCertificate);
+ }
+
+ document.addEventListener("DOMContentLoaded", loadAllPreviews);
+
+ function goToPreviousPage() {
+   window.history.back();
+ }
+
+ function exportPDF() {
+   const element = document.getElementById("previewContent");
+   const opt = {
+     margin: 0.5,
+     filename: 'Application_Preview.pdf',
+     image: { type: 'jpeg', quality: 0.98 },
+     html2canvas: { scale: 2 },
+     jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+   };
+   html2pdf().set(opt).from(element).save();
+ }
+
+ function confirmSubmission() {
+   return confirm("Are you sure you want to submit this application? Once submitted, it cannot be edited.");
+ }
+
+ function stripDataUriPrefix(dataUri) {
+   if (typeof dataUri !== "string") return null;
+   const parts = dataUri.split(",");
+   return parts.length === 2 ? parts[1] : null;
+ }
+
+ function cleanSimple(obj) {
+   if (Array.isArray(obj)) {
+     return obj.map(cleanSimple);
+   } else if (obj !== null && typeof obj === "object") {
+     return Object.fromEntries(
+       Object.entries(obj)
+         .filter(([_, v]) => v !== null && v !== undefined && v !== "")
+         .map(([k, v]) => [k, cleanSimple(v)])
+     );
+   }
+   return obj;
+ }
+function transformData(userEmail) {
+  const studentFormData = JSON.parse(localStorage.getItem("studentformForm")) || {};
+  const quotaForm = JSON.parse(localStorage.getItem("quotaForm") || "{}");
+  const qualificationForm = JSON.parse(localStorage.getItem("qualificationForm") || "{}");
+  const fileUploadForm = JSON.parse(sessionStorage.getItem("fileUploadForm") || "{}");
+
+  const formData = studentFormData[userEmail] || {};
+  const quotaData = quotaForm[userEmail] || {};
+  const qualificationData = qualificationForm[userEmail] || {};
+  const files = fileUploadForm.files || {};
+
+  const userId = parseInt(sessionStorage.getItem("userId") || "0");
+  const selectedCourseId = localStorage.getItem("selectedCourseId");
+
+  if (!userId) throw new Error("User ID missing in sessionStorage.");
+
+  // Use correct key names
+  const physics = parseFloat(qualificationData.Physics_Score) || 0.0;
+  const chemistry = parseFloat(qualificationData.Chemistry_Score) || 0.0;
+  const biology = parseFloat(qualificationData.Biology_Biotech_Score) || 0.0;
+  const pcbMarks = Math.round((physics + chemistry + biology) * 100) / 100;
+
+  return cleanSimple({
+    age: studentFormData.age || 0,
+    dob: formData.dob || null,
+    gender: formData.gender || null,
+    religion: formData.religion || null,
+    nationality: formData.nationality || null,
+
+    management_quota: quotaData.managementQuota === "Yes",
+    physically_challenged: quotaData.physicallyChallenged === "Yes",
+    economically_weaker_section: quotaData.ews === "Yes",
+
+    physicsScore: physics,
+    chemistryScore: chemistry,
+    biologyBiotechScore: biology,
+    pcbMarks: pcbMarks,
+    neetScore: parseInt(qualificationData.neet_score, 10) || 0,
+    subjectChoice: qualificationData.SubjectChoice || "",
+    Parents_Guardian_Name: qualificationData.parentName || "",
+
+  PassportPhoto: stripDataUriPrefix(files.passportPhoto),
+  AgeProof: stripDataUriPrefix(files.ageProof),
+  casteCertificate: stripDataUriPrefix(files.casteCertificate),  // matches @JsonProperty("casteCertificate")
+    characterCertificate: stripDataUriPrefix(files.characterCertificate), // matches @JsonProperty("characterCertificate")
+    pwdCertificate: stripDataUriPrefix(files.pwdCertificate), // matches @JsonProperty("pwdCertificate")
+  Prc: stripDataUriPrefix(files.prc),
+ neetResult: stripDataUriPrefix(files.neetResult), // matches @JsonProperty("neetResult")
+   class10and12Marksheet: stripDataUriPrefix(files.class10and12Marksheet),
+  class10and12certificate: stripDataUriPrefix(files.class10and12certificate),
+
+      permanentAddress: {
+      addressLine1: formData.permanent_Address?.addressLine1 || null,
+      addressLine2: formData.permanent_Address?.addressLine2 || null,
+      district: formData.permanent_Address?.district ?
+    { D_id: Number(formData.permanent_Address.district) } :
+    null,
+      state: formData.permanent_Address?.state || null,
+      pincode: formData.permanent_Address?.pincode ? parseInt(formData.permanent_Address.pincode) : 0
+    },
+
+    correspondenceAddress: {
+      addressLine1: formData.correspondence_Address?.addressLine1 || null,
+      addressLine2: formData.correspondence_Address?.addressLine2 || null,
+      district: formData.correspondence_Address?.district ?
+    { D_id: Number(formData.correspondence_Address.district) } :
+    null,
+      state: formData.correspondence_Address?.state || null,
+      pincode: formData.correspondence_Address?.pincode ? parseInt(formData.correspondence_Address.pincode) : 0
+    },
+
+    user: { uid: userId },
+    cid: { cid: quotaData.categoryId || 0 },
+    mPostalAddress: { id: formData.permanent_Address?.id || 0 },
+    mCourse: { courseid: quotaData.courseId || parseInt(selectedCourseId) || 0 },
+
+    correspondence_Address: formData.correspondence_Address || {},
+    permanent_Address: formData.permanent_Address || {},
+    qualification: qualificationData,
+    quota: quotaData,
+    files: files
+  });
+}
+
+function submitApplication(event) {
+  debugger;
+  event.preventDefault();
+
+  if (!confirmSubmission()) return;
+  document.querySelector("#previewForm button[type='submit']").disabled = true;
+
+  const userEmail = sessionStorage.getItem("userEmail");
+  const userIdFromSession = parseInt(sessionStorage.getItem("userId"));
+  const selectedCourseId = localStorage.getItem("selectedCourseId");
+
+  const studentFormData = JSON.parse(localStorage.getItem("studentformForm") || "{}");
+  const quotaFormData = JSON.parse(localStorage.getItem("quotaForm") || "{}")[userEmail] || {};
+  const qualificationFormData = JSON.parse(localStorage.getItem("qualificationForm") || "{}")[userEmail] || {};
+console.log("qualificationFormData:", qualificationFormData);;
+  const fileUploadData = JSON.parse(sessionStorage.getItem("fileUploadForm") || "{}");
+console.log("fileUploadData:", fileUploadData);
+  if (!userEmail || !studentFormData[userEmail]) {
+    alert("User data missing. Please go back and refill Step 1.");
     return;
   }
 
-  const fileUrl = fileData.path;
-  const fileType = fileData.type || "";
-
-  if (fileType.startsWith("image/")) {
-    const img = document.createElement("img");
-    img.src = fileUrl;
-    img.className = "thumbnail";
-    container.appendChild(img);
-  } else if (fileType === "application/pdf") {
-    const iframe = document.createElement("iframe");
-    iframe.src = fileUrl;
-    iframe.className = "uniform-frame";
-    container.appendChild(iframe);
-  } else {
-    const link = document.createElement("a");
-    link.href = fileUrl;
-    link.textContent = "View File";
-    link.target = "_blank";
-    container.appendChild(link);
-  }
-}
-
-const fileData = JSON.parse(sessionStorage.getItem("fileData") || "{}");
-const base64Data = typeof fileData === "string" ? fileData : fileData.data;
-const fileName = fileData.name || "Uploaded File";
-const container = document.getElementById("base64FilePreview");
-container.innerHTML = "";
-
-if (base64Data && base64Data.startsWith("data:image/")) {
-  // Handle image preview
-  container.innerHTML = `
-    <img src="${base64Data}" alt="${fileName}" class="uniform-frame" />
-    <div>${fileName}</div>
-  `;
-} else if (base64Data && base64Data.startsWith("data:application/pdf")) {
-  // Handle PDF preview
-  const base64Parts = base64Data.split(',');
-  const byteCharacters = atob(base64Parts[1]);
-  const byteNumbers = new Array(byteCharacters.length);
-  for (let i = 0; i < byteCharacters.length; i++) {
-    byteNumbers[i] = byteCharacters.charCodeAt(i);
-  }
-  const byteArray = new Uint8Array(byteNumbers);
-  const pdfBlob = new Blob([byteArray], { type: 'application/pdf' });
-  const blobUrl = URL.createObjectURL(pdfBlob);
-
-  container.innerHTML = `
-    <iframe src="${blobUrl}" title="${fileName}" class="uniform-frame" width="100%" height="500px"></iframe>
-    <div>
-      ${fileName}
-      <a href="${blobUrl}" download="${fileName}" target="_blank" style="margin-left: 10px;">
-        <i class="fa-solid fa-download"></i>
-      </a>
-    </div>
-  `;
-} else if (base64Data) {
-  // Handle unknown base64 file types (e.g., .txt, .doc)
-  container.innerHTML = `
-    <a href="${base64Data}" target="_blank">${fileName}</a>
-  `;
-} else {
-  // Handle no file case
-  container.innerHTML = `<div>No file uploaded.</div>`;
-}
-
-
-
-
-  // Render all file previews
-  renderFilePreview("passportPhoto", files.passportPhoto);
-renderFilePreview("ageProof", files.ageProof);
-renderFilePreview("class10and12Marksheet", files.class10and12Marksheet);
-renderFilePreview("class10and12certificate", files.class10and12certificate);
-renderFilePreview("neetResult", files.neetResult);
-renderFilePreview("casteCertificate", files.casteCertificate);
-renderFilePreview("prc", files.prc);
-renderFilePreview("characterCertificate", files.characterCertificate);
-renderFilePreview("pwdCertificate", files.pwdCertificate);
-
- function goToPreviousPage() {
-  window.history.back(); // Navigates to the previous page
-}
-  function exportPDF() {
-    const element = document.getElementById("previewContent");
-    const opt = {
-      margin: 0.5,
-      filename: 'Application_Preview.pdf',
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2 },
-      jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
-    };
-    html2pdf().set(opt).from(element).save();
+  if (!userIdFromSession || userIdFromSession === 0) {
+    alert("User ID missing. Please go back and refill Step 1.");
+    return;
   }
 
-  function confirmSubmission() {
-    return confirm("Are you sure you want to submit this application? Once submitted, it cannot be edited.");
+  const formData = studentFormData[userEmail];
+  const files = fileUploadData.files || {};
+
+const physics = parseFloat(qualificationFormData.Physics_Score) || 0.0;
+const chemistry = parseFloat(qualificationFormData.Chemistry_Score) || 0.0;
+const biology = parseFloat(qualificationFormData.Biology_Biotech_Score) || 0.0;
+const pcbMarks = Math.round((physics + chemistry + biology) * 100) / 100;
+
+  const cleanedData = {
+  dob: formData.dob || null,
+  age: formData.age || 0,
+  gender: formData.gender || null,
+  religion: formData.religion || null,
+  nationality: formData.nationality || null,
+
+
+  pcbMarks: pcbMarks,
+  neetScore: parseInt(qualificationFormData.neet_score, 10) || 0,
+  physicsScore: physics,
+  chemistryScore: chemistry,
+  biologyBiotechScore: biology,
+  subjectChoice: qualificationFormData.SubjectChoice || null,
+// parents_guardian_name: qualificationFormData.parentName || null,
+
+   management_quota: quotaFormData.managementQuota === "Yes",
+    physically_challenged: quotaFormData.physicallyChallenged === "Yes",
+    economically_weaker_section: quotaFormData.ews === "Yes",
+
+  PassportPhoto: stripDataUriPrefix(files.passportPhoto),
+  AgeProof: stripDataUriPrefix(files.ageProof),
+  casteCertificate: stripDataUriPrefix(files.casteCertificate),
+  characterCertificate: stripDataUriPrefix(files.characterCertificate),
+  pwdCertificate: stripDataUriPrefix(files.pwdCertificate),
+  neetResult: stripDataUriPrefix(files.neetResult),
+  Prc: stripDataUriPrefix(files.prc),
+  class10and12Marksheet: stripDataUriPrefix(files.class10and12Marksheet),
+  class10and12certificate: stripDataUriPrefix(files.class10and12certificate),
+
+  user: {
+    uid: userIdFromSession
+  },
+
+  cid: {
+    cid: quotaFormData.category || 0
+  },
+
+  mCourse: {
+    courseid: parseInt(selectedCourseId) || 0
+  },
+
+  // Permanent Address (MPostalAddress)
+    permanentAddress: {
+    addressLine1: formData.permanent_Address?.addressLine1 || null,  // lowercase
+    addressLine2: formData.permanent_Address?.addressLine2 || null,
+    district: formData.permanent_Address?.district ?
+    { D_id: Number(formData.permanent_Address.district) } :
+    null,
+    state: formData.permanent_Address?.state || null,
+    pincode: formData.permanent_Address?.pincode ? parseInt(formData.permanent_Address.pincode) : 0
+  },
+
+  correspondenceAddress: {
+    addressLine1: formData.correspondence_Address?.addressLine1 || null,
+    addressLine2: formData.correspondence_Address?.addressLine2 || null,
+    district: formData.correspondence_Address?.district ?
+    { D_id: Number(formData.correspondence_Address.district) } :
+    null,
+    state: formData.correspondence_Address?.state || null,
+    pincode: formData.correspondence_Address?.pincode ? parseInt(formData.correspondence_Address.pincode) : 0
   }
-function submitApplication(event) {
-    event.preventDefault();
+};
 
-    if (!confirmSubmission()) return;
 
-    const user = {
-        uid: studentFormData.uid || 0,
-        name: studentFormData.name,
-        email: userEmail,
-        phone: studentFormData.phone,
-        password: studentFormData.password || "", // add if needed
-        dob: studentFormData.dob
-    };
+  console.log("Submitting Application JSON:", cleanedData);
 
-    const cid = {
-        cid: quotaFormData.categoryId,
-        categoryname: quotaFormData.categoryName
-    };
-
-    const mPostalAddress = {
-        id: studentFormData.permanent_Address?.id || 0,
-        addressLine1: studentFormData.permanent_Address?.addressLine1 || null,
-        addressLine2: studentFormData.permanent_Address?.addressLine2 || null,
-        district: studentFormData.permanent_Address?.district || null,
-        state: studentFormData.permanent_Address?.state || null,
-        pincode: studentFormData.permanent_Address?.pincode || 0
-    };
-
-    const mCourse = {
-        institute: quotaFormData.institute,
-        coursename: quotaFormData.course,
-        courseid: quotaFormData.courseId
-    };
-
-    const fullApplicationData = {
-        age: qualificationFormData.age || null,
-        gender: studentFormData.gender,
-        religion: studentFormData.religion,
-        nationality: studentFormData.nationality,
-        user,
-        cid,
-        mPostalAddress,
-        mCourse,
-        dob: studentFormData.dob,
-        passportPhoto: fileUploadData.files?.passportPhoto || null,
-        ageProof: fileUploadData.files?.ageProof || null,
-        class10and12Marksheet: fileUploadData.files?.class10and12Marksheet || null,
-        class10and12certificate: fileUploadData.files?.class10and12certificate || null,
-        neet_Results: fileUploadData.files?.neetResult || null,
-        caste_Certificate: fileUploadData.files?.casteCertificate || null,
-        prc: fileUploadData.files?.prc || null,
-        character_Certificate: fileUploadData.files?.characterCertificate || null,
-        pwd_Certificate: fileUploadData.files?.pwdCertificate || null,
-        parents_Guardian_Name: qualificationFormData.guardianName || null,
-        biology_Biotech_Score: qualificationFormData.biology || null,
-        physics_Score: qualificationFormData.physics || null,
-        chemistry_Score: qualificationFormData.chemistry || null,
-        pcb_Marks: qualificationFormData.pcb || 0,
-        subjectChoice: qualificationFormData.subjectChoice || null,
-        neet_SCORE: qualificationFormData.neet || 0
-    };
-
-    console.log("Formatted application data:", fullApplicationData);
-
-    fetch('/application/save', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify(fullApplicationData) // problem is here
-    })
-    .then(response => {
-        if (response.status === 401) throw new Error("Session expired. Please login again.");
-        if (!response.ok) {
-            return response.json().then(err => {
-                throw new Error(err.error || "Submission failed");
-            });
-        }
-        return response.json();
-    })
-    .then(data => {
-        alert("Application submitted successfully! Your Application ID: " + data.applicationId);
-        localStorage.removeItem("studentformForm");
-        localStorage.removeItem("quotaForm");
-        localStorage.removeItem("qualificationForm");
-        sessionStorage.removeItem("fileUploadForm");
-        window.location.href = `/application/applicationsuccess?applicationId=${data.applicationId}`;
-    })
-    .catch(error => {
-        console.error("Error submitting application:", error);
-        alert(error.message || "An error occurred during submission. Please try again.");
-    });
+  fetch("http://localhost:8082/application/save", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(cleanedData),
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error("Failed to submit application");
+    }
+    return response.json();
+  })
+  .then(data => {
+    alert("Application submitted successfully! Your application ID is: " + data.applicationId);
+    // window.location.href = "/applicationSuccess?applicationId=" + data.applicationId;
+  })
+  .catch(error => {
+    console.error("Error submitting application:", error);
+    alert("Failed to submit application. Please try again.");
+  });
 }
-
-
 
 </script>
+
 </div>
 </body>
 </html>

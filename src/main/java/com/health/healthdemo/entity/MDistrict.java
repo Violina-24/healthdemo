@@ -9,16 +9,15 @@ import jakarta.persistence.Id;
 public class MDistrict {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long D_id;
+    private int D_id;
     private String districtname;
-    private int districtcode;
-    private int LGD_code;
 
-    public Long getD_id() {
+
+    public int getD_id() {
         return D_id;
     }
 
-    public void setD_id(Long d_id) {
+    public void setD_id(int d_id) {
         D_id = d_id;
     }
 
@@ -28,21 +27,5 @@ public class MDistrict {
 
     public void setDistrictname(String districtname) {
         this.districtname = districtname;
-    }
-
-    public int getDistrictcode() {
-        return districtcode;
-    }
-
-    public void setDistrictcode(int districtcode) {
-        this.districtcode = districtcode;
-    }
-
-    public int getLGD_code() {
-        return LGD_code;
-    }
-
-    public void setLGD_code(int LGD_code) {
-        this.LGD_code = LGD_code;
     }
 }

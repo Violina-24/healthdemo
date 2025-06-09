@@ -106,7 +106,7 @@
     document.getElementById("chemistry").value = saved.chemistry || "";
     document.getElementById("biology").value = saved.biology || "";
     document.getElementById("subjectChoice").value = saved.subjectChoice || "";
-    document.getElementById("neet").value = saved.neet || "";
+    document.getElementById("neet").value = saved.neetScore || "";
   }
 
   function toggleButton() {
@@ -114,34 +114,46 @@
     const chemistry = document.getElementById("chemistry").value;
     const biology = document.getElementById("biology").value;
     const subjectChoice = document.getElementById("subjectChoice").value;
-    const neet = document.getElementById("neet").value;
+    const neetScore = document.getElementById("neet").value;
+    const allFilled = physics && chemistry && biology && subjectChoice && neetScore;
 
-    const allFilled = physics && chemistry && biology && subjectChoice && neet;
     // Enable/disable Save button if you had an id like 'saveAndContinuebtn'
     //document.getElementById("saveAndContinuebtn").disabled = !allFilled;
   }
 
-  window.saveAndContinue = function () {
-    const formEmail = sessionStorage.getItem("userEmail") || "guest@example.com";
+window.saveAndContinue = function () {
+  const formEmail = sessionStorage.getItem("userEmail") || "guest@example.com";
 
-    const formData = {
-      physics: document.getElementById("physics").value,
-      chemistry: document.getElementById("chemistry").value,
-      biology: document.getElementById("biology").value,
-      subjectChoice: document.getElementById("subjectChoice").value,
-      neet: document.getElementById("neet").value
-    };
+const formData = {
+  Physics_Score: parseFloat(document.getElementById("physics").value) || 0.0,
+  Chemistry_Score: parseFloat(document.getElementById("chemistry").value) || 0.0,
+  Biology_Biotech_Score: parseFloat(document.getElementById("biology").value) || 0.0,
+  SubjectChoice: document.getElementById("subjectChoice").value || "",
+  neet_score: parseInt(document.getElementById("neet").value, 10) || 0, // matches @JsonProperty
+};
 
-    const allData = JSON.parse(localStorage.getItem("qualificationForm")) || {};
-    allData[formEmail] = formData;
-    localStorage.setItem("qualificationForm", JSON.stringify(allData));
+  // PCB_Marks is an int, so round it
+    formData.PCB_Marks = Math.round(
+      formData.Physics_Score + formData.Chemistry_Score + formData.Biology_Biotech_Score
+    );
 
-    Swal.fire({
-      title: "Saved!",
-      text: "Qualification data saved successfully.",
-      icon: "success"
-    });
-  };
+
+  // Get existing data or initialize
+  const allData = JSON.parse(localStorage.getItem("qualificationForm")) || {};
+  allData[formEmail] = formData;
+
+  // Save only to 'qualificationForm'
+  localStorage.setItem("qualificationForm", JSON.stringify(allData));
+
+  // Clean up old key
+  localStorage.removeItem("qualificationFormData");
+
+  Swal.fire({
+    title: "Saved!",
+    text: "Qualification data saved successfully.",
+    icon: "success"
+  });
+};
 
   window.goBack = function () {
     window.history.back();

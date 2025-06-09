@@ -2,6 +2,7 @@ package com.health.healthdemo.services;
 
 import com.health.healthdemo.entity.*;
 import com.health.healthdemo.repository.*;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -31,7 +32,7 @@ public class ApplicationService {
     @Autowired
     private  MDistrictRepository mDistrictRepository;
 
-
+    @Transactional
     public TApplication saveApplication(TApplication tApplication) {
         System.out.println("Start saving TApplication");
 
@@ -59,42 +60,55 @@ public class ApplicationService {
         System.out.println("Found Course: " + course.getCoursename());
         tApplication.setmCourse(course);
 
-        // 4. Create and save new postal address
-        MPostalAddress inputAddress = tApplication.getmPostalAddress();
-        if (inputAddress == null) {
-            throw new RuntimeException("Postal address is required");
-        }
-        System.out.println("Creating new Postal Address");
-
-        // If District is included by id, fetch from DB
-        Long districtId = inputAddress.getDistrict() != null ? inputAddress.getDistrict().getD_id() : null;
-        MDistrict district = null;
-        if (districtId != null) {
-            System.out.println("Fetching District with id: " + districtId);
-            district = mDistrictRepository.findById(districtId)
-                    .orElseThrow(() -> new RuntimeException("District not found with id " + districtId));
-            System.out.println("Found District: " + district.getDistrictname());  // assuming getName() exists
+        // 4. Handle Permanent Address
+        MPostalAddress permanentAddress = tApplication.getPermanentAddress();
+        if (permanentAddress != null) {
+            System.out.println("Processing Permanent Address");
+            MPostalAddress savedPermAddress = savePostalAddress(permanentAddress);
+            tApplication.setPermanentAddress(savedPermAddress);
         }
 
-        // Create new MPostalAddress instance to avoid accidentally saving an existing address
-        MPostalAddress newAddress = new MPostalAddress();
-        newAddress.setAddressLine1(inputAddress.getAddressLine1());
-        newAddress.setAddressLine2(inputAddress.getAddressLine2());
-        newAddress.setDistrict(district);
-        newAddress.setState(inputAddress.getState());
-        newAddress.setPincode(inputAddress.getPincode());
+        // 5. Handle Correspondence Address
+        MPostalAddress correspondenceAddress = tApplication.getCorrespondenceAddress(); // Changed from getCorrespondence_Address()
+        if (correspondenceAddress != null) {
+            System.out.println("Processing Correspondence Address");
+            MPostalAddress savedCorrAddress = savePostalAddress(correspondenceAddress);
+            tApplication.setCorrespondenceAddress(savedCorrAddress); // Changed from setCorrespondence_Address()
+        } else {
+            System.out.println("WARNING: No correspondence address provided");
+        }
 
-        MPostalAddress savedAddress = mPostalAddressRepository.save(newAddress);
-        System.out.println("Saved new Postal Address with id: " + savedAddress.getId());
-
-        tApplication.setmPostalAddress(savedAddress);
-
-        // 5. Save the TApplication entity
+        // 6. Save the TApplication entity
         TApplication savedApp = tApplicationRepository.save(tApplication);
         System.out.println("Saved TApplication with id: " + savedApp.getA_id());
 
         System.out.println("Finished saving TApplication");
         return savedApp;
+    }
+
+    private MPostalAddress savePostalAddress(MPostalAddress inputAddress) {
+        System.out.println("Input Address District: " +
+                (inputAddress.getDistrict() != null ?
+                        inputAddress.getDistrict().getD_id() : "null"));
+
+        // Create new address
+        MPostalAddress newAddress = new MPostalAddress();
+        newAddress.setAddressLine1(inputAddress.getAddressLine1());
+        newAddress.setAddressLine2(inputAddress.getAddressLine2());
+        newAddress.setState(inputAddress.getState());
+        newAddress.setPincode(inputAddress.getPincode());
+
+        // Handle district association
+        if (inputAddress.getDistrict() != null && inputAddress.getDistrict().getD_id() != null) {
+            // Get existing district from database
+            MDistrict district = mDistrictRepository.findById(inputAddress.getDistrict().getD_id())
+                    .orElseThrow(() -> new RuntimeException("District not found with id: " +
+                            inputAddress.getDistrict().getD_id()));
+
+            newAddress.setDistrict(district);
+        }
+
+        return mPostalAddressRepository.save(newAddress);
     }
 
 

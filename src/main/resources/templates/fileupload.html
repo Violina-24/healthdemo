@@ -31,6 +31,8 @@
   <a href="login" class="text-light fs-6 mx-2 text-decoration-none">Login</a>
 </div>
 
+<!--<div id="course-info" class="text-md font-semibold text-gray-700 mb-4"></div>-->
+
 <!-- Form Container -->
 <div class="container">
   <div class="bg-white rounded-3 shadow p-4 mx-auto" style="max-width: 800px;">
@@ -115,7 +117,18 @@
   const userEmail = sessionStorage.getItem("userEmail") || "guest@example.com";
   const sessionKey = "fileUploadForm";
 
+
   document.addEventListener("DOMContentLoaded", function () {
+  const selectedCourseId = localStorage.getItem("selectedCourseId");
+  const selectedCourseName = localStorage.getItem("selectedCourseName");
+  const selectedInstitute = localStorage.getItem("selectedInstitute");
+
+  // Optional: Display message
+  const courseInfoEl = document.getElementById("course-info");
+  if (courseInfoEl && selectedCourseName && selectedInstitute) {
+    courseInfoEl.innerText = `You are applying for ${selectedCourseName} at ${selectedInstitute}`;
+  }
+
     const saved = JSON.parse(sessionStorage.getItem(sessionKey));
     if (saved) {
       document.getElementById("aadhaarPhone").value = saved.aadhaarPhone || "";
@@ -184,6 +197,10 @@
         }
     }
 
+    const selectedCourseId = localStorage.getItem("selectedCourseId");
+    const selectedCourseName = localStorage.getItem("selectedCourseName");
+    const selectedInstitute = localStorage.getItem("selectedInstitute");
+
     const allFormsData = {
         studentformForm: JSON.parse(localStorage.getItem("studentformForm") || "{}")[userEmail],
         quotaForm: JSON.parse(localStorage.getItem("quotaForm") || "{}")[userEmail],
@@ -191,8 +208,13 @@
         fileUploadForm: {
             aadhaarPhone: document.getElementById("aadhaarPhone").value,
             files: filesData
-        }
-    };
+        },
+        courseId: selectedCourseId,
+        courseName: selectedCourseName,
+        institute: selectedInstitute
+};
+
+
 
     fetch("/application/save", {
         method: "POST",
@@ -218,6 +240,9 @@
         localStorage.removeItem("quotaForm");
         localStorage.removeItem("qualificationForm");
         sessionStorage.removeItem("fileUploadForm");
+        localStorage.removeItem("selectedCourseId");
+        localStorage.removeItem("selectedCourseName");
+        localStorage.removeItem("selectedInstitute");
 
         Swal.fire("Success", "Application submitted successfully!", "success")
             .then(() => window.location.href = `/application/applicationsuccess?applicationId=${appId}`);

@@ -298,13 +298,11 @@
       state: document.querySelector('input[name="state"]:checked')?.value || "",
       category: categoryId,                    // for backend
       categoryName: categoryName,              // for preview
-      managementQuota: document.querySelector('input[name="mgmtQuota"]:checked')?.id === "mgmtYes" ? "Yes" :
-                       document.querySelector('input[name="mgmtQuota"]:checked')?.id === "mgmtNo" ? "No" : "",
-      physicallyChallenged: document.querySelector('input[name="physicallyChallenged"]:checked')?.id === "pcYes" ? "Yes" :
-                            document.querySelector('input[name="physicallyChallenged"]:checked')?.id === "pcNo" ? "No" : "",
-      ews: document.querySelector('input[name="ews"]:checked')?.id === "ewsYes" ? "Yes" :
-           document.querySelector('input[name="ews"]:checked')?.id === "ewsNo" ? "No" : ""
-    };
+      // Store as "Yes"/"No" strings for localStorage
+        managementQuota: document.querySelector('input[name="mgmtQuota"]:checked')?.id === "mgmtYes" ? "Yes" : "No",
+        physicallyChallenged: document.querySelector('input[name="physicallyChallenged"]:checked')?.id === "pcYes" ? "Yes" : "No",
+        ews: document.querySelector('input[name="ews"]:checked')?.id === "ewsYes" ? "Yes" : "No"
+  };
 
     const allData = JSON.parse(localStorage.getItem('quotaForm')) || {};
     allData[formEmail] = formData;

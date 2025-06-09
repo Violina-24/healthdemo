@@ -71,6 +71,11 @@
                             <label class="form-label text-gray-700">Date of Birth</label>
                             <input type="date" id="dob" name="dob" readonly class="form-control shadow-sm bg-gray-100" />
                         </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-gray-700">Age</label>
+                            <input type="text" id="age" name="age" readonly class="form-control shadow-sm bg-gray-100" />
+                        </div>
+
                     </div>
                 </div>
 
@@ -108,9 +113,10 @@
                         <div class="col-md-6">
                             <input type="text" id="comm_address2" name="comm_address2" placeholder="Address Line 2" class="form-control shadow-sm" required />
                         </div>
-                        <div class="col-md-4">
-                            <input type="text" id="comm_district" name="comm_district" placeholder="District" class="form-control shadow-sm" required />
-                        </div>
+                        <select id="comm_district" name="comm_district" class="form-control shadow-sm" required>
+                            <option value="">Select District</option>
+                        </select>
+
                         <div class="col-md-4">
                             <input type="text" id="comm_state" name="comm_state" placeholder="State" class="form-control shadow-sm" required />
                         </div>
@@ -138,9 +144,10 @@
                         <div class="col-md-6">
                             <input type="text" id="perm_address2" name="perm_address2" placeholder="Address Line 2" class="form-control shadow-sm" required />
                         </div>
-                        <div class="col-md-4">
-                            <input type="text" id="perm_district" name="perm_district" placeholder="District" class="form-control shadow-sm" required />
-                        </div>
+                        <select id="perm_district" name="perm_district" class="form-control shadow-sm" required>
+                            <option value="">Select District</option>
+                        </select>
+
                         <div class="col-md-4">
                             <input type="text" id="perm_state" name="perm_state" placeholder="State" class="form-control shadow-sm" required />
                         </div>
@@ -180,8 +187,8 @@
         const urlParams = new URLSearchParams(window.location.search);
         const coursename = decodeURIComponent(urlParams.get("coursename") || "");
         const institute = decodeURIComponent(urlParams.get("institute") || "");
-        const uid = urlParams.get("uid");
-        GlobalUserID = parseInt(uid);  // ✅ store as integer
+        let uid = urlParams.get("uid") || sessionStorage.getItem("userId");
+        GlobalUserID = parseInt(uid);
         GlobalInstitute = institute;  // ✅ store as integer
         // Set course info message
         if (coursename && institute) {
@@ -203,12 +210,33 @@
                     document.getElementById("phone").value = data.phone;
                     document.getElementById("dob").value = data.dob;
 
+                    // ✅ Calculate and set age
+                    const ageField = document.getElementById("age");
+                    if (data.dob) {
+                        const dobDate = new Date(data.dob);
+                        const today = new Date();
+                        let age = today.getFullYear() - dobDate.getFullYear();
+                        const monthDiff = today.getMonth() - dobDate.getMonth();
+                        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dobDate.getDate())) {
+                            age--;
+                        }
+                        ageField.value = age;
+                    }
+
+
                     GlobalEmail = data.email;
                     sessionStorage.setItem("userEmail", GlobalEmail);
+
 
                     const allData = JSON.parse(localStorage.getItem("studentformForm")) || {};
                     const saved = allData[GlobalEmail];
 
+                    // ✅ Store uid for later submission
+                    saved.uid = parseInt(uid); // ⬅️ This is the key line added
+
+            // Merge and save back
+            allData[GlobalEmail] = saved;
+            localStorage.setItem("studentformForm", JSON.stringify(allData));
                     if (saved) {
                         prefillFormIfMatched(saved);
                     }
@@ -218,46 +246,93 @@
             })
             .catch(err => console.error("Error fetching user details", err));
         }
+ loadDistricts();
+        function loadDistricts() {
+    fetch('/api/districts', {
+        method: 'GET',
+        credentials: 'include'  // ✅ this includes session cookie (JSESSIONID)
+    })
+    .then(res => {
+        if (!res.ok) {
+            throw new Error("Unauthorized or failed to fetch");
+        }
+        return res.json();
+    })
+    .then(districts => {
+        const districtOptions = districts.map(d =>
+            `<option value="${d.d_id}">${d.districtname}</option>`
+        ).join('');
+
+        document.getElementById("comm_district").innerHTML += districtOptions;
+        document.getElementById("perm_district").innerHTML += districtOptions;
+
+        const saved = JSON.parse(localStorage.getItem('studentformForm')) || {};
+        const formEmail = sessionStorage.getItem('userEmail');
+        if (saved[formEmail]) {
+            const savedData = saved[formEmail];
+            document.getElementById("comm_district").value = savedData.correspondence_Address?.district || "";
+            document.getElementById("perm_district").value = savedData.permanent_Address?.district || "";
+        }
+    })
+    .catch(err => console.error("Failed to load districts", err));
+}
+
+
 
         // Save & Continue function
         window.saveAndContinue = function () {
-            const formEmail = document.getElementById("email").value;
-            sessionStorage.setItem("userEmail", formEmail);
+    const formEmail = document.getElementById("email").value;
+    sessionStorage.setItem("userEmail", formEmail);
 
-            const formData = {
-                name: document.getElementById("name").value,
-                email: formEmail,
-                phone: document.getElementById("phone").value,
-                dob: document.getElementById("dob").value,
-                nationality: document.querySelector('input[name="nationality"]').value,
-                religion: document.querySelector('input[name="religion"]').value,
-                gender: document.querySelector('select[name="gender"]').value,
-                permanent_Address: {
-                    addressLine1: document.getElementById("perm_address1").value,
-                    addressLine2: document.getElementById("perm_address2").value,
-                    district: document.getElementById("perm_district").value,
-                    state: document.getElementById("perm_state").value,
-                    pincode: document.getElementById("perm_pincode").value
-                },
-                correspondence_Address: {
-                    addressLine1: document.getElementById("comm_address1").value,
-                    addressLine2: document.getElementById("comm_address2").value,
-                    district: document.getElementById("comm_district").value,
-                    state: document.getElementById("comm_state").value,
-                    pincode: document.getElementById("comm_pincode").value
-                }
-            };
+    // ✅ Calculate age properly
+    const dobValue = document.getElementById("dob").value;
+    let age = "";
+    if (dobValue) {
+        const dobDate = new Date(dobValue);
+        const today = new Date();
+        age = today.getFullYear() - dobDate.getFullYear();
+        const monthDiff = today.getMonth() - dobDate.getMonth();
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dobDate.getDate())) {
+            age--;
+        }
+    }
 
-            const allData = JSON.parse(localStorage.getItem('studentformForm')) || {};
-            allData[formEmail] = formData;
-            localStorage.setItem('studentformForm', JSON.stringify(allData));
+    const formData = {
+        name: document.getElementById("name").value,
+        email: formEmail,
+        phone: document.getElementById("phone").value,
+        dob: dobValue,
+        age: age,  // ✅ correctly assign age here
+        nationality: document.querySelector('input[name="nationality"]').value,
+        religion: document.querySelector('input[name="religion"]').value,
+        gender: document.querySelector('select[name="gender"]').value,
+        permanent_Address: {
+            addressLine1: document.getElementById("perm_address1").value,
+            addressLine2: document.getElementById("perm_address2").value,
+            district: document.getElementById("perm_district").value,
+            state: document.getElementById("perm_state").value,
+            pincode: document.getElementById("perm_pincode").value
+        },
+        correspondence_Address: {
+            addressLine1: document.getElementById("comm_address1").value,
+            addressLine2: document.getElementById("comm_address2").value,
+            district: document.getElementById("comm_district").value,
+            state: document.getElementById("comm_state").value,
+            pincode: document.getElementById("comm_pincode").value
+        }
+    };
 
-            Swal.fire({
-                title: "Good job!",
-                text: "Data saved successfully!",
-                icon: "success"
-            });
-        };
+    const allData = JSON.parse(localStorage.getItem('studentformForm')) || {};
+    allData[formEmail] = formData;
+    localStorage.setItem('studentformForm', JSON.stringify(allData));
+
+    Swal.fire({
+        title: "Good job!",
+        text: "Data saved successfully!",
+        icon: "success"
+    });
+};
+
 
         // Prefill function
         function prefillFormIfMatched(saved) {
@@ -284,6 +359,10 @@
                 document.getElementById("comm_state").value = saved.correspondence_Address.state || "";
                 document.getElementById("comm_pincode").value = saved.correspondence_Address.pincode || "";
             }
+            if (savedData.age) {
+            document.getElementById("age").value = savedData.age;
+}
+
         }
 
         // Handle "Same as Correspondence"

@@ -9,59 +9,64 @@ public class MPostalAddress {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     private Long id;
-    private  String AddressLine1;
-    private String AddressLine2;
+    @Column(name = "address_line1")  // Match database column
+    private String addressLine1;  // Change to lowercase
+
+    @Column(name = "address_line2")
+    private String addressLine2;
+
     @ManyToOne
-    private MDistrict District;
-    private String State;
-    private int Pincode;
+    @JoinColumn(name = "d_id")  // Match your actual DB column
+    private MDistrict district;
+    private String state;
+    private int pincode;
 
 
-    public String getAddressLine1() {
-        return AddressLine1;
-    }
-
-    public void setAddressLine1(String addressLine1) {
-        AddressLine1 = addressLine1;
-    }
-
-    public String getAddressLine2() {
-        return AddressLine2;
-    }
-
-    public void setAddressLine2(String addressLine2) {
-        AddressLine2 = addressLine2;
-    }
-
-    public MDistrict getDistrict() {
-        return District;
-    }
-
-    public void setDistrict(MDistrict district) {
-        District = district;
-    }
-
-    public String getState() {
-        return State;
-    }
-
-    public void setState(String state) {
-        State = state;
-    }
-
-    public int getPincode() {
-        return Pincode;
-    }
-
-    public void setPincode(int pincode) {
-        Pincode = pincode;
+    public Long getId() {
+        return id;
     }
 
     public void setId(Long id) {
         this.id = id;
     }
 
-    public Long getId() {
-        return id;
+    public String getAddressLine1() {
+        return addressLine1;
+    }
+
+    public void setAddressLine1(String addressLine1) {
+        this.addressLine1 = addressLine1;
+    }
+
+    public String getAddressLine2() {
+        return addressLine2;
+    }
+
+    public void setAddressLine2(String addressLine2) {
+        this.addressLine2 = addressLine2;
+    }
+
+    public MDistrict getDistrict() {
+        return district;
+    }
+
+    public void setDistrict(MDistrict district) {
+        this.district = district;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
+    }
+
+    public int getPincode() {
+        return pincode;
+    }
+
+    public void setPincode(int pincode) {
+        this.pincode = pincode;
     }
 }

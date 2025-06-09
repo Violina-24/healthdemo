@@ -19,6 +19,8 @@ public class MUsers {
     private String password; // Added password field
     private String dob;
 
+    private String role;
+
     public Long getUid() {
         return uid;
     }
@@ -65,6 +67,14 @@ public class MUsers {
 
     public void setDob(String dob) {
         this.dob = dob;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 }
 

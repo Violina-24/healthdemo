@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface MDistrictRepository extends JpaRepository<MDistrict,Long> {
+public interface MDistrictRepository extends JpaRepository<MDistrict,int> {
     Optional<MDistrict> findByDistrictname(String districtname);
 
 }

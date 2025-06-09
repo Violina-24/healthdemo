@@ -46,15 +46,23 @@ public class UserController {
         if (foundUser.isPresent()) {
             MUsers userObj = foundUser.get();
 
-            // ✅ Store only the email string in session
+            // Store in session
             session.setAttribute("userEmail", userObj.getEmail());
-            System.out.println("User logged in: " + userObj.getEmail());
+            session.setAttribute("userId", userObj.getUid());
 
-            return ResponseEntity.ok().body("{\"message\": \"Login Successful\"}");
+            // ✅ Return both email and userId
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Login Successful");
+            response.put("userId", userObj.getUid());
+            response.put("email", userObj.getEmail());
+
+            return ResponseEntity.ok().body(response);  // ✅ FIXED: Return real map, not a string
         } else {
-            return ResponseEntity.status(401).body("{\"message\": \"Invalid credentials\"}");
+            return ResponseEntity.status(401).body(Map.of("message", "Invalid credentials"));
         }
     }
+
+
 
 
     @PostMapping("/api/logout")
@@ -84,6 +92,7 @@ public class UserController {
     @GetMapping("/api/get-loginuser-details")
     public ResponseEntity<?> getUserDetails(HttpSession session) {
         String userEmail = (String) session.getAttribute("userEmail");
+        Long uid = (Long) session.getAttribute("userId");
 
         if (userEmail == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)

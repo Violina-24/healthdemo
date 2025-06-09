@@ -15,6 +15,8 @@ public class MCourse {
 
     private String institute;
 
+
+
     public Long getCourseid() {
         return Courseid;
     }
@@ -34,6 +36,7 @@ public class MCourse {
     public String getInstitute() {
         return institute;
     }
+
 
     public void setInstitute(String institute) {
         this.institute = institute;

@@ -1,5 +1,8 @@
 package com.health.healthdemo.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.health.healthdemo.Base64ToByteArrayDeserializer;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -24,45 +27,85 @@ public class TApplication {
 
     private String nationality;
 
-    private int PCB_Marks;
+    @Column(name = "physics_score")
+    @JsonProperty("physicsScore")
+    private Float physicsScore;
 
-    private int NEET_SCORE;
+    @Column(name = "chemistry_score")
+    @JsonProperty("chemistryScore")
+    private Float chemistryScore;
 
-    private Float Physics_Score;
+    @Column(name = "biology_biotech_score")
+    @JsonProperty("biologyBiotechScore")
+    private Float biologyBiotechScore;
 
-    private Float Chemistry_Score;
+    @Column(name = "pcb_marks")
+    @JsonProperty("pcbMarks")
+    private int pcbMarks;
 
-    private Float Biology_Biotech_Score;
+    @Column(name = "neet_score")
+    @JsonProperty("neetScore")
+    private int neetScore;
 
-    private String Parents_Guardian_Name;
+    @Column(name = "subject_choice")
+    @JsonProperty("subjectChoice")
+    private String subjectChoice;
 
-    private String SubjectChoice;
+    @Column(name = "parents_guardian_name")
+    @JsonProperty("parentsGuardianName")
+    private String parentsGuardianName;
+
+
+    @Column(name = "management_quota")
+    @JsonProperty("management_quota") // Explicit JSON property name
+    private Boolean managementQuota;
+
+    @Column(name = "physically_challenged")
+    @JsonProperty("physically_challenged")
+    private Boolean physicallyChallenged;
+
+    @Column(name = "economically_weaker_section")
+    @JsonProperty("economically_weaker_section")
+    private Boolean ews;
+
 
     @Lob
+    @JsonDeserialize(using = Base64ToByteArrayDeserializer.class)
     private byte[] PassportPhoto;
 
     @Lob
+    @JsonDeserialize(using = Base64ToByteArrayDeserializer.class)
     private byte[] AgeProof;
 
     @Lob
+    @JsonDeserialize(using = Base64ToByteArrayDeserializer.class)
     private byte[] class10and12Marksheet;
 
     @Lob
+    @JsonDeserialize(using = Base64ToByteArrayDeserializer.class)
     private byte[] class10and12certificate;
 
     @Lob
+    @JsonProperty("casteCertificate")
+    @JsonDeserialize(using = Base64ToByteArrayDeserializer.class)
     private byte[] Caste_Certificate;
 
     @Lob
+    @JsonDeserialize(using = Base64ToByteArrayDeserializer.class)
     private byte[] Prc;
 
-
-
     @Lob
+    @JsonProperty("neetResult")
+    @JsonDeserialize(using = Base64ToByteArrayDeserializer.class)
     private byte[] Neet_Results;
     @Lob
+    @JsonProperty("characterCertificate")
+    @JsonDeserialize(using = Base64ToByteArrayDeserializer.class)
     private byte[] Character_Certificate;
+
     @Lob
+    @JsonProperty("pwdCertificate")
+    @JsonDeserialize(using = Base64ToByteArrayDeserializer.class)
     private byte[] PWD_Certificate;
 
     @ManyToOne
@@ -76,13 +119,18 @@ public class TApplication {
 //    @Transient
 //    private Long McategoryId;
 
-    @ManyToOne
-    @JoinColumn(name = "id")
-    private MPostalAddress mPostalAddress;
-
 //    @ManyToOne
-//    @JoinColumn(name = "correspondence_address_id")
-//    private MPostalAddress Correspondence_Address;
+//    @JoinColumn(name = "id")
+//    private MPostalAddress mPostalAddress;
+
+    @ManyToOne
+    @JoinColumn(name = "permanent_address_id")
+    private MPostalAddress permanentAddress;
+
+    @ManyToOne
+    @JoinColumn(name = "correspondence_address_id")
+    @JsonProperty("correspondenceAddress") // Add this annotation
+    private MPostalAddress correspondenceAddress; // Standardize to camelCase
 
 // need the coursename too to check which course the student has applied
 
@@ -93,7 +141,7 @@ public class TApplication {
 
     @PreUpdate
     private void  validateNEET_SCORERange() {
-        if (NEET_SCORE < -180 || NEET_SCORE > 720) {
+        if (neetScore < -180 || neetScore > 720) {
             throw  new  IllegalArgumentException("NEET_SCORE must be in valid range ");
         }
     }
@@ -152,52 +200,84 @@ public class TApplication {
         this.nationality = nationality;
     }
 
-    public int getPCB_Marks() {
-        return PCB_Marks;
+    public Float getPhysicsScore() {
+        return physicsScore;
     }
 
-    public void setPCB_Marks(int PCB_Marks) {
-        this.PCB_Marks = PCB_Marks;
+    public void setPhysicsScore(Float physicsScore) {
+        this.physicsScore = physicsScore;
     }
 
-    public int getNEET_SCORE() {
-        return NEET_SCORE;
+    public Float getChemistryScore() {
+        return chemistryScore;
     }
 
-    public void setNEET_SCORE(int NEET_SCORE) {
-        this.NEET_SCORE = NEET_SCORE;
+    public void setChemistryScore(Float chemistryScore) {
+        this.chemistryScore = chemistryScore;
     }
 
-    public Float getPhysics_Score() {
-        return Physics_Score;
+    public Float getBiologyBiotechScore() {
+        return biologyBiotechScore;
     }
 
-    public void setPhysics_Score(Float physics_Score) {
-        Physics_Score = physics_Score;
+    public void setBiologyBiotechScore(Float biologyBiotechScore) {
+        this.biologyBiotechScore = biologyBiotechScore;
     }
 
-    public Float getChemistry_Score() {
-        return Chemistry_Score;
+    public int getPcbMarks() {
+        return pcbMarks;
     }
 
-    public void setChemistry_Score(Float chemistry_Score) {
-        Chemistry_Score = chemistry_Score;
+    public void setPcbMarks(int pcbMarks) {
+        this.pcbMarks = pcbMarks;
     }
 
-    public Float getBiology_Biotech_Score() {
-        return Biology_Biotech_Score;
+    public int getNeetScore() {
+        return neetScore;
     }
 
-    public void setBiology_Biotech_Score(Float biology_Biotech_Score) {
-        Biology_Biotech_Score = biology_Biotech_Score;
+    public void setNeetScore(int neetScore) {
+        this.neetScore = neetScore;
     }
 
     public String getSubjectChoice() {
-        return SubjectChoice;
+        return subjectChoice;
     }
 
     public void setSubjectChoice(String subjectChoice) {
-        this.SubjectChoice = subjectChoice;
+        this.subjectChoice = subjectChoice;
+    }
+
+    public String getParentsGuardianName() {
+        return parentsGuardianName;
+    }
+
+    public void setParentsGuardianName(String parentsGuardianName) {
+        this.parentsGuardianName = parentsGuardianName;
+    }
+
+    public Boolean getManagementQuota() {
+        return managementQuota;
+    }
+
+    public void setManagementQuota(Boolean managementQuota) {
+        this.managementQuota = managementQuota;
+    }
+
+    public Boolean getPhysicallyChallenged() {
+        return physicallyChallenged;
+    }
+
+    public void setPhysicallyChallenged(Boolean physicallyChallenged) {
+        this.physicallyChallenged = physicallyChallenged;
+    }
+
+    public Boolean getEws() {
+        return ews;
+    }
+
+    public void setEws(Boolean ews) {
+        this.ews = ews;
     }
 
     public byte[] getPassportPhoto() {
@@ -291,12 +371,28 @@ public class TApplication {
 
 
 
-    public MPostalAddress getmPostalAddress() {
-        return mPostalAddress;
+//    public MPostalAddress getmPostalAddress() {
+//        return mPostalAddress;
+//    }
+//
+//    public void setmPostalAddress(MPostalAddress mPostalAddress) {
+//        this.mPostalAddress = mPostalAddress;
+//    }
+
+    public MPostalAddress getPermanentAddress() {
+        return permanentAddress;
     }
 
-    public void setmPostalAddress(MPostalAddress mPostalAddress) {
-        this.mPostalAddress = mPostalAddress;
+    public void setPermanentAddress(MPostalAddress permanentAddress) {
+        this.permanentAddress = permanentAddress;
+    }
+
+    public MPostalAddress getCorrespondenceAddress() {
+        return correspondenceAddress;
+    }
+
+    public void setCorrespondenceAddress(MPostalAddress correspondenceAddress) {
+        this.correspondenceAddress = correspondenceAddress;
     }
 
     public MCourse getmCourse() {
@@ -307,13 +403,7 @@ public class TApplication {
         this.mCourse = mCourse;
     }
 
-    public String getParents_Guardian_Name() {
-        return Parents_Guardian_Name;
-    }
 
-    public void setParents_Guardian_Name(String parents_Guardian_Name) {
-        Parents_Guardian_Name = parents_Guardian_Name;
-    }
 
 }
 

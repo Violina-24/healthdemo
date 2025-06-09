@@ -28,7 +28,7 @@ public class WebSecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
                         // Allow static files without authentication
-                        .requestMatchers("/css/**", "/js/**", "/images/**", "/uploads/**", "/favicon.ico","/application/save")
+                        .requestMatchers("/css/**", "/js/**", "/images/**", "/uploads/**", "/favicon.ico","/api/districts","/application/save")
                         .permitAll()
 
                         // Allow public API endpoints without authentication
@@ -39,7 +39,7 @@ public class WebSecurityConfig {
                                 "/parentsinfo", "/index", "/api/documents/**", "/userdetails", "/api/home",
                                 "/api/getUserLoginDetails", "/api/get-loginuser-details", "/api/logout",
                                 "api/documents/with-course/{dtype}", "api/categories/fetched_categories", "/fileupload",
-                                "/quota", "/preview", "/previewApplication", "/forgotpassword", "/application/submitAll","/applicationsuccess","/application_success")
+                                "/quota", "/preview", "/previewApplication", "/forgotpassword", "/application/submitAll","/application/applicationsuccess","/application_success")
                         .permitAll() // Allow these endpoints for everyone
 
                         // Authenticate all other requests (requires login)

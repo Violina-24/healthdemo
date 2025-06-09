@@ -21,13 +21,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.*;
 
 
 import java.security.Principal;
-import java.util.Optional;
 
 @Controller
 @RequestMapping("/application")
@@ -298,13 +295,23 @@ public class ApplicationController {
  @PostMapping("/save")
  public ResponseEntity<TApplication> saveApplication(@RequestBody TApplication tApplication) {
   try {
-   System.out.println("controller dob" + tApplication.getDOB());
+   System.out.println("controller dob: " + tApplication.getDOB());
+   System.out.println("PassportPhoto: " + (tApplication.getPassportPhoto() != null ? "present" : "null"));
+   System.out.println("AgeProof: " + (tApplication.getAgeProof() != null ? "present" : "null"));
+
+
+
    TApplication savedApplication = tApplicationService.saveApplication(tApplication);
    return ResponseEntity.ok(savedApplication);
   } catch (RuntimeException ex) {
+   ex.printStackTrace();
    return ResponseEntity.badRequest().body(null);
   }
  }
+
+
+
+
 
 // @PostMapping("/submitAll")
 // public ResponseEntity<?> submitApplication(

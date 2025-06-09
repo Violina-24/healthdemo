@@ -195,37 +195,34 @@
             return;
         }
 
-        const formData = {
-            email: document.querySelector("input[name='email']").value,
-            password: document.querySelector("input[name='password']").value
-        };
+        const email = document.querySelector("input[name='email']").value;
+        const password = document.querySelector("input[name='password']").value;
 
         fetch("http://localhost:8082/api/login", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(formData),
-            credentials: "include"
+            headers: {
+                "Content-Type": "application/json"
+            },
+            credentials: "include",
+            body: JSON.stringify({ email, password })
         })
-        .then(response => {
-            if (!response.ok) throw new Error("Login failed");
-            return response.json();
-        })
+        .then(response => response.json())
         .then(data => {
-            if (data.message === "Login Successful") {
-                alert("Login Successful!");
+            if (data.userId && data.email) {
+                sessionStorage.setItem("userId", data.userId);
+                sessionStorage.setItem("userEmail", data.email);
                 window.location.href = "/home";
             } else {
-                alert("Invalid email or password!");
+                alert("Login failed. Please try again.");
             }
-        })
-        .catch(error => {
-            console.error("Error:", error);
-            alert("An error occurred. Please try again.");
         });
     });
 
+    // Generate CAPTCHA on page load
     window.onload = generateCaptcha;
 </script>
+
+
 </body>
 
 </html>
