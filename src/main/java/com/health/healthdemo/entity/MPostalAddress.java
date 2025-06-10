@@ -2,6 +2,7 @@ package com.health.healthdemo.entity;
 
 
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import jakarta.persistence.*;
 
 @Entity
@@ -16,11 +17,22 @@ public class MPostalAddress {
     private String addressLine2;
 
     @ManyToOne
-    @JoinColumn(name = "d_id")  // Match your actual DB column
+    @JoinColumn(name = "d_id")// Match your actual DB column
     private MDistrict district;
+
+//    @Transient
+//    private Long districtId;
+
     private String state;
     private int pincode;
 
+//    public Long getDistrictId() {
+//        return districtId;
+//    }
+//
+//    public void setDistrictId(Long districtId) {
+//        this.districtId = districtId;
+//    }
 
     public Long getId() {
         return id;

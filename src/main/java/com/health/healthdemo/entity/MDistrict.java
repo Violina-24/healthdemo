@@ -1,5 +1,6 @@
 package com.health.healthdemo.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -9,15 +10,18 @@ import jakarta.persistence.Id;
 public class MDistrict {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int D_id;
+    @JsonProperty("D_id")
+    private Long D_id;
     private String districtname;
 
 
-    public int getD_id() {
+    public MDistrict() {}
+
+    public Long getD_id() {
         return D_id;
     }
 
-    public void setD_id(int d_id) {
+    public void setD_id(Long d_id) {
         D_id = d_id;
     }
 

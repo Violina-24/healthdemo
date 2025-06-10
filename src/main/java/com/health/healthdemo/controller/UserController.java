@@ -49,20 +49,29 @@ public class UserController {
             // Store in session
             session.setAttribute("userEmail", userObj.getEmail());
             session.setAttribute("userId", userObj.getUid());
+            session.setAttribute("userRole", userObj.getRole()); // Store role in session
 
-            // ✅ Return both email and userId
+            // Return response with user details including role
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Login Successful");
             response.put("userId", userObj.getUid());
             response.put("email", userObj.getEmail());
+            response.put("role", userObj.getRole());
 
-            return ResponseEntity.ok().body(response);  // ✅ FIXED: Return real map, not a string
+            return ResponseEntity.ok().body(response);
         } else {
             return ResponseEntity.status(401).body(Map.of("message", "Invalid credentials"));
         }
     }
 
-
+    @GetMapping("/admin-dashboard")
+    public String adminDashboard(HttpSession session) {
+        String role = (String) session.getAttribute("userRole");
+        if (role == null || !role.equals("admin")) {
+            return "redirect:/login";
+        }
+        return "admin-dashboard";
+    }
 
 
     @PostMapping("/api/logout")

@@ -19,7 +19,8 @@ public class MUsers {
     private String password; // Added password field
     private String dob;
 
-    private String role;
+    @Column(nullable = false)
+    private String role = "user";
 
     public Long getUid() {
         return uid;

@@ -87,7 +87,7 @@ public class ApplicationService {
     }
 
     private MPostalAddress savePostalAddress(MPostalAddress inputAddress) {
-        System.out.println("Input Address District: " +
+        System.out.println("Input District ID: " +
                 (inputAddress.getDistrict() != null ?
                         inputAddress.getDistrict().getD_id() : "null"));
 
@@ -98,19 +98,24 @@ public class ApplicationService {
         newAddress.setState(inputAddress.getState());
         newAddress.setPincode(inputAddress.getPincode());
 
-        // Handle district association
-        if (inputAddress.getDistrict() != null && inputAddress.getDistrict().getD_id() != null) {
-            // Get existing district from database
+        // Handle district association - THIS IS THE CRITICAL FIX
+        if (inputAddress.getDistrict() != null) {
+            // Fetch the complete district entity from database
             MDistrict district = mDistrictRepository.findById(inputAddress.getDistrict().getD_id())
-                    .orElseThrow(() -> new RuntimeException("District not found with id: " +
+                    .orElseThrow(() -> new RuntimeException("District not found: " +
                             inputAddress.getDistrict().getD_id()));
 
+            // Set the managed entity, not just the ID
             newAddress.setDistrict(district);
         }
 
+        // Debug before save
+        System.out.println("District before save: " +
+                (newAddress.getDistrict() != null ?
+                        newAddress.getDistrict().getD_id() : "null"));
+
         return mPostalAddressRepository.save(newAddress);
     }
-
 
     public Optional<TApplication> getApplicationById(Long A_id) {
         return tApplicationRepository.findById(A_id);
