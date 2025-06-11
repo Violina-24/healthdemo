@@ -6,6 +6,7 @@ import com.health.healthdemo.repository.MCourseRepository;
 import com.health.healthdemo.services.CouncellingService;
 import com.health.healthdemo.services.CourseService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -19,10 +20,6 @@ public class CourseController {
     @Autowired
     private MCourseRepository mCourseRepository;
     private CouncellingService counsellingService;
-    @GetMapping
-    public List<MCourse> getAllCourses() {
-        return mCourseRepository.findAll();
-    }
 
     @GetMapping("/{Courseid}")
     public ResponseEntity<MCourse> getCourseById(@PathVariable Long Courseid) {
@@ -84,6 +81,16 @@ public class CourseController {
     public ResponseEntity<MCourse> getCourseDetailsById(@PathVariable Long id) {
         Optional<MCourse> course = mCourseRepository.findById(id);
         return course.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+    @GetMapping
+    public ResponseEntity<?> getAllCourses() {
+        try {
+            List<MCourse> courses = mCourseRepository.findAll();
+            return ResponseEntity.ok(courses);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error fetching courses"));
+        }
     }
 
 

@@ -39,7 +39,8 @@ public class WebSecurityConfig {
                                 "/parentsinfo", "/index", "/api/documents/**", "/userdetails", "/api/home",
                                 "/api/getUserLoginDetails", "/api/get-loginuser-details", "/api/logout",
                                 "api/documents/with-course/{dtype}", "api/categories/fetched_categories", "/fileupload",
-                                "/quota", "/preview", "/previewApplication", "/forgotpassword", "/application/submitAll","/application/applicationsuccess","/application_success", "/admin-dashboard")
+                                "/quota", "/preview", "/previewApplication", "/forgotpassword", "/application/submitAll","/application/applicationsuccess","/application_success", "/admin-dashboard","/application/applications"
+                        , "/application/applications/{id}/status","/courses")
                         .permitAll() // Allow these endpoints for everyone
 
                         // Authenticate all other requests (requires login)

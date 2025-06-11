@@ -300,7 +300,7 @@ public class ApplicationController {
    System.out.println("AgeProof: " + (tApplication.getAgeProof() != null ? "present" : "null"));
 
 
-
+   tApplication.setStatus("pending");
    TApplication savedApplication = tApplicationService.saveApplication(tApplication);
    return ResponseEntity.ok(savedApplication);
   } catch (RuntimeException ex) {
@@ -441,8 +441,28 @@ public class ApplicationController {
   return "application_success"; // This should match your HTML file name (application_success.html)
  }
 
+ @GetMapping("/applications")
+ public ResponseEntity<List<TApplication>> getAllApplications() {
+  List<TApplication> applications = tApplicationRepository.findAll();
+  return ResponseEntity.ok(applications);
+ }
 
+ @PatchMapping("/applications/{id}/status")
+ public ResponseEntity<TApplication> updateApplicationStatus(
+         @PathVariable Long id,
+         @RequestBody Map<String, String> statusUpdate) {
 
+  Optional<TApplication> optionalApp = tApplicationRepository.findById(id);
+  if (optionalApp.isEmpty()) {
+   return ResponseEntity.notFound().build();
+  }
+
+  TApplication application = optionalApp.get();
+  application.setStatus(statusUpdate.get("status"));
+  tApplicationRepository.save(application);
+
+  return ResponseEntity.ok(application);
+ }
 
 }
 

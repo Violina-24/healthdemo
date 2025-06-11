@@ -146,6 +146,8 @@ public class TApplication {
         }
     }
 
+    @Column(name = "status")
+    private String status;
 
 //    private boolean Disability = false;
 //    public TApplication() {
@@ -403,8 +405,13 @@ public class TApplication {
         this.mCourse = mCourse;
     }
 
+    public String getStatus() {
+        return status;
+    }
 
-
+    public void setStatus(String status) {
+        this.status = status;
+    }
 }
 
 

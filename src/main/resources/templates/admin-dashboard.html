@@ -247,6 +247,20 @@
 .main-content {
     padding-bottom: 80px; /* Add space for footer */
 }
+
+.course-form {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .course-table th {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .course-table tr:hover {
+            background-color: #f5f5f5;
+        }
     </style>
 </head>
 <body>
@@ -303,6 +317,7 @@
 </div>
 
 <!-- Main Content -->
+<!-- Main Content -->
 <div class="main-content">
     <!-- Dashboard Section -->
     <div class="content-section active" id="dashboard-section">
@@ -314,7 +329,7 @@
 
             <!-- Stats Cards -->
             <div class="row">
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <div class="card stats-card text-white bg-primary" id="totalApplicationsCard">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center">
@@ -327,7 +342,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <div class="card stats-card text-white bg-success" id="acceptedApplicationsCard">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center">
@@ -340,7 +355,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <div class="card stats-card text-white bg-danger" id="rejectedApplicationsCard">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center">
@@ -349,6 +364,19 @@
                                     <h2 class="card-value" id="rejectedApplications">0</h2>
                                 </div>
                                 <i class="bi bi-x-circle fs-1"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stats-card text-white bg-warning" id="totalCoursesCard">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="card-title">Total Courses</h5>
+                                    <h2 class="card-value" id="totalCourses">0</h2>
+                                </div>
+                                <i class="bi bi-book fs-1"></i>
                             </div>
                         </div>
                     </div>
@@ -563,6 +591,58 @@
         </div>
     </div>
 </div>
+<div class="content-section" id="courses-section">
+    <div class="container-fluid">
+        <h3 class="mb-4"><i class="bi bi-book me-2"></i>Manage Courses</h3>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>Add New Course</h5>
+            </div>
+            <div class="card-body">
+                <form id="courseForm" class="course-form">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="courseName" class="form-label">Course Name</label>
+                            <input type="text" class="form-control" id="courseName" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="instituteName" class="form-label">Institute</label>
+                            <input type="text" class="form-control" id="instituteName" required>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="btn btn-primary">Add Course</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h5>All Courses</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table course-table">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Course Name</th>
+                            <th>Institute</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody id="coursesTableBody">
+                        <!-- Courses will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
 
 <!-- Application Preview Modal -->
 <div class="modal fade" id="previewModal" tabindex="-1" aria-hidden="true">
@@ -627,13 +707,10 @@
         // Initialize forms
         setupForms();
 
-        // Load applications data
+       // Load initial data
         loadApplications();
-
-        // Simulate loading activities
+        loadCourses();
         loadActivities();
-
-        // Initialize modal events
         setupModalEvents();
     });
 
@@ -707,45 +784,64 @@ document.querySelector('.sidebar-footer a').addEventListener('click', function(e
             e.preventDefault();
             uploadAdmission();
         });
+
+        // Course form
+        document.getElementById('courseForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            addCourse();
+        });
     }
 
-    // Load applications
+    // Load applications from API
     function loadApplications(page = 1) {
         currentApplicationPage = page;
 
-        // In a real app, you would fetch this from your API
-        // For demo purposes, we'll use mock data
-        const mockApplications = generateMockApplications(45);
-        applications = mockApplications;
-
-        // Update stats
-        updateApplicationStats();
-
-        // Render applications table
-        renderApplicationsTable();
-
-        // Render pagination
-        renderApplicationsPagination();
+        // Fetch applications from your API
+        fetch('/application/applications')
+            .then(response => response.json())
+            .then(data => {
+                applications = data;
+                updateApplicationStats();
+                renderApplicationsTable();
+                renderApplicationsPagination();
+            })
+            .catch(error => {
+                console.error('Error loading applications:', error);
+                // Fallback to mock data if API fails
+                applications = generateMockApplications(45);
+                updateApplicationStats();
+                renderApplicationsTable();
+                renderApplicationsPagination();
+            });
     }
 
-    // Generate mock applications
-    function generateMockApplications(count) {
-        const statuses = ['pending', 'accepted', 'rejected'];
-        const mockApps = [];
-
-        for (let i = 1; i <= count; i++) {
-            const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
-            mockApps.push({
-                id: i,
-                applicantName: `Applicant ${i}`,
-                email: `applicant${i}@example.com`,
-                status: randomStatus,
-                appliedDate: new Date(Date.now() - Math.floor(Math.random() * 30 * 24 * 60 * 60 * 1000)),
-                documentUrl: `/documents/application${i}.pdf`
+    // Load courses from API
+    function loadCourses() {
+        fetch('/courses', {  // Changed from '/api/courses' to '/courses'
+        credentials: 'include'  // Important for session cookies
+    })
+            .then(response => response.json())
+            .then(data => {
+                courses = data;
+                updateCourseStats();
+                renderCoursesTable();
+            })
+            .catch(error => {
+                console.error('Error loading courses:', error);
+                // Fallback to mock data if API fails
+                courses = generateMockCourses();
+                updateCourseStats();
+                renderCoursesTable();
             });
-        }
+    }
 
-        return mockApps;
+    // Generate mock courses (fallback)
+    function generateMockCourses() {
+        return [
+            { id: 1, name: "MBBS", institute: "AIIMS Delhi" },
+            { id: 2, name: "BDS", institute: "Maulana Azad Dental College" },
+            { id: 3, name: "B.Sc Nursing", institute: "CMC Vellore" }
+        ];
     }
 
     // Update application stats
@@ -753,52 +849,228 @@ document.querySelector('.sidebar-footer a').addEventListener('click', function(e
         const total = applications.length;
         const accepted = applications.filter(app => app.status === 'accepted').length;
         const rejected = applications.filter(app => app.status === 'rejected').length;
-        const pending = applications.filter(app => app.status === 'pending').length;
 
-        // Update dashboard stats
         document.getElementById('totalApplications').textContent = total;
         document.getElementById('acceptedApplications').textContent = accepted;
         document.getElementById('rejectedApplications').textContent = rejected;
-
-        // Update applications section stats
-        document.getElementById('filterTotalCount').textContent = total;
-        document.getElementById('filterAcceptedCount').textContent = accepted;
-        document.getElementById('filterRejectedCount').textContent = rejected;
     }
 
-    // Render applications table
-    function renderApplicationsTable() {
-        const tableBody = document.getElementById('applicationsTableBody');
-        tableBody.innerHTML = '';
+    // Update course stats
+    function updateCourseStats() {
+        document.getElementById('totalCourses').textContent = courses.length;
+    }
 
-        // Calculate pagination
-        const startIndex = (currentApplicationPage - 1) * applicationsPerPage;
-        const endIndex = Math.min(startIndex + applicationsPerPage, applications.length);
-        const pageApplications = applications.slice(startIndex, endIndex);
+    // Update renderCoursesTable to match your entity structure
+function renderCoursesTable() {
+    const tableBody = document.getElementById('coursesTableBody');
+    tableBody.innerHTML = '';
 
-        // Render each application
-        pageApplications.forEach(app => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${app.id}</td>
-                <td>${app.applicantName}</td>
-                <td>${app.email}</td>
-                <td><span class="status-badge status-${app.status}">${app.status.charAt(0).toUpperCase() + app.status.slice(1)}</span></td>
-                <td>${app.appliedDate.toLocaleDateString()}</td>
-                <td>
-                    <button class="btn btn-sm btn-success me-1 accept-btn" data-id="${app.id}">
-                        <i class="bi bi-check-lg"></i>
-                    </button>
-                    <button class="btn btn-sm btn-danger me-1 reject-btn" data-id="${app.id}">
-                        <i class="bi bi-x-lg"></i>
-                    </button>
-                    <button class="btn btn-sm btn-primary preview-btn" data-id="${app.id}">
-                        <i class="bi bi-eye"></i>
-                    </button>
-                </td>
-            `;
-            tableBody.appendChild(row);
+    courses.forEach(course => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${course.id}</td>
+            <td>${course.coursename}</td>  <!-- Changed from course.name -->
+            <td>${course.institute}</td>
+            <td>
+                <button class="btn btn-sm btn-outline-primary me-1 edit-course" data-id="${course.id}">
+                    <i class="bi bi-pencil"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-danger delete-course" data-id="${course.id}">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </td>
+        `;
+        tableBody.appendChild(row);
+    });
+
+        // Add event listeners for course actions
+        document.querySelectorAll('.edit-course').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const courseId = parseInt(this.getAttribute('data-id'));
+                editCourse(courseId);
+            });
         });
+
+        document.querySelectorAll('.delete-course').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const courseId = parseInt(this.getAttribute('data-id'));
+                deleteCourse(courseId);
+            });
+        });
+    }
+
+    // Add new course
+    function addCourse() {
+        const courseName = document.getElementById('courseName').value;
+        const instituteName = document.getElementById('instituteName').value;
+
+        // In a real app, you would send this to your API
+        fetch('/api/courses', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                name: courseName,
+                institute: instituteName
+            })
+        })
+        .then(response => response.json())
+        .then(newCourse => {
+            courses.push(newCourse);
+            updateCourseStats();
+            renderCoursesTable();
+            document.getElementById('courseForm').reset();
+            addActivity(`Added new course: ${courseName}`);
+        })
+        .catch(error => {
+            console.error('Error adding course:', error);
+            // Fallback to client-side addition if API fails
+            const newCourse = {
+                id: courses.length + 1,
+                name: courseName,
+                institute: instituteName
+            };
+            courses.push(newCourse);
+            updateCourseStats();
+            renderCoursesTable();
+            document.getElementById('courseForm').reset();
+            addActivity(`Added new course: ${courseName}`);
+        });
+    }
+
+    // Edit course
+    function editCourse(courseId) {
+        const course = courses.find(c => c.id === courseId);
+        if (course) {
+            document.getElementById('courseName').value = course.name;
+            document.getElementById('instituteName').value = course.institute;
+
+            // Change form to update mode
+            const form = document.getElementById('courseForm');
+            form.querySelector('button[type="submit"]').textContent = 'Update Course';
+            form.onsubmit = function(e) {
+                e.preventDefault();
+                updateCourse(courseId);
+            };
+        }
+    }
+
+    // Update course
+    function updateCourse(courseId) {
+        const courseName = document.getElementById('courseName').value;
+        const instituteName = document.getElementById('instituteName').value;
+
+        // In a real app, you would send this to your API
+        fetch(`/api/courses/${courseId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                name: courseName,
+                institute: instituteName
+            })
+        })
+        .then(response => {
+            if (response.ok) {
+                const index = courses.findIndex(c => c.id === courseId);
+                if (index !== -1) {
+                    courses[index] = { id: courseId, name: courseName, institute: instituteName };
+                    renderCoursesTable();
+                    resetCourseForm();
+                    addActivity(`Updated course: ${courseName}`);
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error updating course:', error);
+            // Fallback to client-side update if API fails
+            const index = courses.findIndex(c => c.id === courseId);
+            if (index !== -1) {
+                courses[index] = { id: courseId, name: courseName, institute: instituteName };
+                renderCoursesTable();
+                resetCourseForm();
+                addActivity(`Updated course: ${courseName}`);
+            }
+        });
+    }
+
+    // Delete course
+    function deleteCourse(courseId) {
+        if (confirm('Are you sure you want to delete this course?')) {
+            // In a real app, you would call your API
+            fetch(`/api/courses/${courseId}`, {
+                method: 'DELETE'
+            })
+            .then(response => {
+                if (response.ok) {
+                    courses = courses.filter(c => c.id !== courseId);
+                    updateCourseStats();
+                    renderCoursesTable();
+                    addActivity(`Deleted course ID: ${courseId}`);
+                }
+            })
+            .catch(error => {
+                console.error('Error deleting course:', error);
+                // Fallback to client-side deletion if API fails
+                courses = courses.filter(c => c.id !== courseId);
+                updateCourseStats();
+                renderCoursesTable();
+                addActivity(`Deleted course ID: ${courseId}`);
+            });
+        }
+    }
+
+    // Reset course form
+    function resetCourseForm() {
+        document.getElementById('courseForm').reset();
+        const form = document.getElementById('courseForm');
+        form.querySelector('button[type="submit"]').textContent = 'Add Course';
+        form.onsubmit = function(e) {
+            e.preventDefault();
+            addCourse();
+        };
+    }
+
+
+    function renderApplicationsTable() {
+    const tableBody = document.getElementById('applicationsTableBody');
+    tableBody.innerHTML = '';
+
+    // Calculate pagination
+    const startIndex = (currentApplicationPage - 1) * applicationsPerPage;
+    const endIndex = Math.min(startIndex + applicationsPerPage, applications.length);
+    const pageApplications = applications.slice(startIndex, endIndex);
+
+    // Render each application
+    pageApplications.forEach(app => {
+        const row = document.createElement('tr');
+        // Handle null status
+        const status = app.status || 'pending'; // default to 'pending' if null
+        const statusDisplay = status.charAt(0).toUpperCase() + status.slice(1);
+
+        row.innerHTML = `
+            <td>${app.id}</td>
+            <td>${app.applicantName}</td>
+            <td>${app.email}</td>
+            <td><span class="status-badge status-${status}">${statusDisplay}</span></td>
+            <td>${app.appliedDate ? new Date(app.appliedDate).toLocaleDateString() : ''}</td>
+            <td>
+                <button class="btn btn-sm btn-success me-1 accept-btn" data-id="${app.id}">
+                    <i class="bi bi-check-lg"></i>
+                </button>
+                <button class="btn btn-sm btn-danger me-1 reject-btn" data-id="${app.id}">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+                <button class="btn btn-sm btn-primary preview-btn" data-id="${app.id}">
+                    <i class="bi bi-eye"></i>
+                </button>
+            </td>
+        `;
+        tableBody.appendChild(row);
+    });
+
 
         // Add event listeners to action buttons
         document.querySelectorAll('.accept-btn').forEach(btn => {
