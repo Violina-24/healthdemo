@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Applications - Meghalaya State Counselling Authority</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <style>
+    .status-badge {
+        padding: 0.35em 0.65em;
+        font-size: 0.75em;
+        font-weight: 700;
+        border-radius: 0.25rem;
+    }
+    .status-pending { background-color: #ffc107; color: #000; }
+    .status-submitted { background-color: #28a745; color: #fff; }
+    .status-approved { background-color: #17a2b8; color: #fff; }
+    .status-rejected { background-color: #dc3545; color: #fff; }
+    .application-card {
+        transition: all 0.2s ease;
+        border-left: 4px solid #0d6efd;
+    }
+    .application-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .document-icon {
+        font-size: 1.5rem;
+        margin-right: 8px;
+    }
+  </style>
+</head>
+<body class="bg-light">
+<!-- Header -->
+<header class="shadow-sm bg-blue-900">
+  <div class="ind-container pt-3 mb-0 w-100">
+    <div class="d-flex align-items-start gap-4">
+      <img src="/images/emblem.png" alt="National Emblem" class="emblem"/>
+      <div class="w-100">
+        <h1 class="fs-5 fw-semibold text-white mb-1">
+          MEGHALAYA STATE COUNSELLING AUTHORITY FOR MEDICAL EDUCATION
+        </h1>
+        <p class="mb-0 text-white fs-6 fw-medium">GOVERNMENT OF MEGHALAYA</p>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="navbar d-flex justify-content-start ps-3 shadow bg-blue-800 text-white">
+  <a href="index" class="fs-6 mx-2 text-decoration-none text-white">Home</a>
+  <a href="login" class="fs-6 mx-2 text-decoration-none text-white">Login</a>
+  <a href="myapplications" class="fs-6 mx-2 text-decoration-none text-white">My Applications</a>
+</div>
+
+<!-- Main Content -->
+<main class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-10">
+      <div class="card shadow-sm">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+          <h2 class="h4 mb-0 text-primary">
+            <i class="bi bi-file-earmark-text me-2"></i>My Applications
+          </h2>
+          <button id="refresh-btn" class="btn btn-sm btn-outline-primary">
+            <i class="bi bi-arrow-clockwise"></i> Refresh
+          </button>
+        </div>
+        <div class="card-body">
+          <!-- Loading State -->
+          <div id="loading-state" class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-3">Loading your applications...</p>
+          </div>
+
+          <!-- Empty State -->
+          <div id="empty-state" class="text-center py-5 d-none">
+            <i class="bi bi-file-earmark-excel fs-1 text-muted"></i>
+            <h3 class="h5 mt-3">No Applications Found</h3>
+            <p class="text-muted">You haven't submitted any applications yet.</p>
+            <a href="index" class="btn btn-primary mt-2">
+              <i class="bi bi-arrow-left"></i> Browse Courses
+            </a>
+          </div>
+
+          <!-- Applications List -->
+          <div id="applications-container" class="d-none">
+            <div class="table-responsive">
+              <table class="table table-hover align-middle">
+                <thead class="table-light">
+                <tr>
+                  <th>Application ID</th>
+                  <th>Course</th>
+                  <th>Institute</th>
+                  <th>Status</th>
+                  <th>Submitted On</th>
+                  <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody id="applications-list">
+                <!-- Applications will be inserted here -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Error State -->
+          <div id="error-state" class="alert alert-danger d-none">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <span id="error-message">Failed to load applications.</span>
+            <button id="retry-btn" class="btn btn-sm btn-outline-danger ms-3">Retry</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Application Details Modal -->
+<div class="modal fade" id="detailsModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">Application Details</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="application-details">
+        <!-- Details will be loaded here -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="download-pdf-btn">
+          <i class="bi bi-download me-1"></i> Download PDF
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Document Viewer Modal -->
+<div class="modal fade" id="documentModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="documentModalTitle">Document Viewer</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center">
+        <iframe id="document-viewer" style="width:100%; height:70vh; border:none;"></iframe>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <a id="document-download-btn" class="btn btn-primary" download>
+          <i class="bi bi-download me-1"></i> Download
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // Current application ID for modal actions
+  let currentAppId = null;
+  const detailsModal = new bootstrap.Modal('#detailsModal');
+  const documentModal = new bootstrap.Modal('#documentModal');
+
+  // DOM elements
+  const loadingState = document.getElementById('loading-state');
+  const emptyState = document.getElementById('empty-state');
+  const applicationsContainer = document.getElementById('applications-container');
+  const errorState = document.getElementById('error-state');
+  const errorMessage = document.getElementById('error-message');
+  const retryBtn = document.getElementById('retry-btn');
+  const refreshBtn = document.getElementById('refresh-btn');
+  const applicationsList = document.getElementById('applications-list');
+  const downloadPdfBtn = document.getElementById('download-pdf-btn');
+  const documentViewer = document.getElementById('document-viewer');
+  const documentDownloadBtn = document.getElementById('document-download-btn');
+  const documentModalTitle = document.getElementById('documentModalTitle');
+
+  // Fetch applications when page loads
+  document.addEventListener('DOMContentLoaded', fetchApplications);
+
+  // Button event listeners
+  retryBtn.addEventListener('click', fetchApplications);
+  refreshBtn.addEventListener('click', fetchApplications);
+  downloadPdfBtn.addEventListener('click', () => {
+      if (currentAppId) {
+          downloadApplicationPdf(currentAppId);
+      }
+  });
+
+  // Function to fetch applications using your existing endpoint
+  async function fetchApplications() {
+      try {
+          // Show loading state
+          loadingState.classList.remove('d-none');
+          emptyState.classList.add('d-none');
+          applicationsContainer.classList.add('d-none');
+          errorState.classList.add('d-none');
+
+          const response = await fetch('/application/applications', {
+              credentials: 'include' // Important for session cookies
+          });
+
+          if (response.status === 401) {
+              window.location.href = '/login?redirect=applications.html';
+              return;
+          }
+
+          if (!response.ok) {
+              throw new Error(`Server returned ${response.status}`);
+          }
+
+          const applications = await response.json();
+
+          if (applications.length === 0) {
+              showEmptyState();
+          } else {
+              renderApplications(applications);
+          }
+
+      } catch (error) {
+          showError(error.message);
+      }
+  }
+
+  // Function to render applications
+  function renderApplications(applications) {
+      applicationsList.innerHTML = '';
+
+      applications.forEach(app => {
+          const row = document.createElement('tr');
+          row.className = 'application-card';
+          row.innerHTML = `
+              <td>${app.id || 'N/A'}</td>
+              <td>${app.courseName || 'N/A'}</td>
+              <td>${app.institute || 'N/A'}</td>
+              <td>
+                  <span class="status-badge ${getStatusClass(app.status)}">
+                      ${app.status || 'Pending'}
+                  </span>
+              </td>
+              <td>${app.appliedDate ? new Date(app.appliedDate).toLocaleString() : 'N/A'}</td>
+              <td>
+                  <button class="btn btn-sm btn-outline-primary view-details-btn"
+                          data-appid="${app.id}">
+                      <i class="bi bi-eye"></i> View
+                  </button>
+                  ${app.status === 'submitted' || app.status === 'approved' ? `
+                  <button class="btn btn-sm btn-outline-success download-btn ms-2"
+                          data-appid="${app.id}">
+                      <i class="bi bi-download"></i> PDF
+                  </button>
+                  ` : ''}
+              </td>
+          `;
+          applicationsList.appendChild(row);
+      });
+
+      // Add event listeners to view buttons
+      document.querySelectorAll('.view-details-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+              currentAppId = e.target.getAttribute('data-appid') ||
+                           e.target.closest('.view-details-btn').getAttribute('data-appid');
+              viewApplicationDetails(currentAppId);
+          });
+      });
+
+      // Add event listeners to download buttons
+      document.querySelectorAll('.download-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+              const appId = e.target.getAttribute('data-appid') ||
+                           e.target.closest('.download-btn').getAttribute('data-appid');
+              downloadApplicationPdf(appId);
+          });
+      });
+
+      // Show the applications container
+      loadingState.classList.add('d-none');
+      applicationsContainer.classList.remove('d-none');
+  }
+
+  // Function to view application details using your existing endpoint
+  async function viewApplicationDetails(appId) {
+      try {
+          const response = await fetch(`/application/applications/${appId}/full`, {
+              credentials: 'include'
+          });
+
+          if (!response.ok) {
+              throw new Error('Failed to load application details');
+          }
+
+          const details = await response.json();
+          renderApplicationDetails(details);
+          detailsModal.show();
+
+      } catch (error) {
+          alert(error.message);
+      }
+  }
+
+  // Function to render application details
+  function renderApplicationDetails(details) {
+      const detailsContainer = document.getElementById('application-details');
+
+      // Basic info section
+      let html = `
+          <div class="row mb-4">
+              <div class="col-md-6">
+                  <h5 class="mb-3"><i class="bi bi-person-badge me-2"></i>Basic Information</h5>
+                  <dl class="row">
+                      <dt class="col-sm-4">Application ID</dt>
+                      <dd class="col-sm-8">${details.id || 'N/A'}</dd>
+
+                      <dt class="col-sm-4">Status</dt>
+                      <dd class="col-sm-8">
+                          <span class="status-badge ${getStatusClass(details.status)}">
+                              ${details.status || 'Pending'}
+                          </span>
+                      </dd>
+
+                      <dt class="col-sm-4">Submitted On</dt>
+                      <dd class="col-sm-8">${details.createdDate ? new Date(details.createdDate).toLocaleString() : 'N/A'}</dd>
+
+                      <dt class="col-sm-4">Date of Birth</dt>
+                      <dd class="col-sm-8">${details.dob || 'N/A'}</dd>
+
+                      <dt class="col-sm-4">Gender</dt>
+                      <dd class="col-sm-8">${details.gender || 'N/A'}</dd>
+                  </dl>
+              </div>
+              <div class="col-md-6">
+                  <h5 class="mb-3"><i class="bi bi-book me-2"></i>Course Information</h5>
+                  <dl class="row">
+                      <dt class="col-sm-4">Course</dt>
+                      <dd class="col-sm-8">${details.course?.courseName || 'N/A'}</dd>
+
+                      <dt class="col-sm-4">Institute</dt>
+                      <dd class="col-sm-8">${details.course?.institute || 'N/A'}</dd>
+
+                      <dt class="col-sm-4">NEET Score</dt>
+                      <dd class="col-sm-8">${details.neetScore || 'N/A'}</dd>
+
+                      <dt class="col-sm-4">Subject Choice</dt>
+                      <dd class="col-sm-8">${details.subjectChoice || 'N/A'}</dd>
+                  </dl>
+              </div>
+          </div>
+
+          <div class="row mb-4">
+              <div class="col-md-6">
+                  <h5 class="mb-3"><i class="bi bi-house me-2"></i>Permanent Address</h5>
+                  ${renderAddress(details.permanentAddress)}
+              </div>
+              <div class="col-md-6">
+                  <h5 class="mb-3"><i class="bi bi-mailbox me-2"></i>Correspondence Address</h5>
+                  ${renderAddress(details.correspondenceAddress)}
+              </div>
+          </div>
+
+          <div class="row">
+              <div class="col-12">
+                  <h5 class="mb-3"><i class="bi bi-file-earmark me-2"></i>Documents</h5>
+                  <div class="d-flex flex-wrap gap-3">
+                      ${renderDocumentButton('Passport Photo', 'passportPhoto', details.id)}
+                      ${renderDocumentButton('Age Proof', 'ageProof', details.id)}
+                      ${renderDocumentButton('Marksheet', 'marksheet', details.id)}
+                      ${renderDocumentButton('Certificate', 'certificate', details.id)}
+                      ${details.casteCertificate ? renderDocumentButton('Caste Certificate', 'casteCertificate', details.id) : ''}
+                      ${details.pwdCertificate ? renderDocumentButton('PWD Certificate', 'pwdCertificate', details.id) : ''}
+                      ${renderDocumentButton('NEET Results', 'neetResults', details.id)}
+                      ${renderDocumentButton('Character Certificate', 'characterCertificate', details.id)}
+                      ${details.prc ? renderDocumentButton('PRC', 'prc', details.id) : ''}
+                  </div>
+              </div>
+          </div>
+      `;
+
+      detailsContainer.innerHTML = html;
+
+      // Add event listeners to document buttons
+      document.querySelectorAll('.view-document-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+              const docType = e.target.getAttribute('data-doctype');
+              const appId = e.target.getAttribute('data-appid');
+              viewDocument(appId, docType);
+          });
+      });
+  }
+
+  // Helper function to render address
+  function renderAddress(address) {
+      if (!address) return '<p class="text-muted">Not provided</p>';
+
+      return `
+          <address>
+              ${address.addressLine1 || ''}<br>
+              ${address.addressLine2 || ''}<br>
+              ${address.district || ''}, ${address.state || ''}<br>
+              ${address.pincode ? 'PIN: ' + address.pincode : ''}
+          </address>
+      `;
+  }
+
+  // Helper function to render document buttons
+  function renderDocumentButton(label, docType, appId) {
+      const iconClass = {
+          'passportPhoto': 'bi-person-bounding-box',
+          'ageProof': 'bi-calendar-check',
+          'marksheet': 'bi-file-text',
+          'certificate': 'bi-file-earmark-text',
+          'casteCertificate': 'bi-file-earmark-medical',
+          'pwdCertificate': 'bi-file-earmark-medical',
+          'neetResults': 'bi-file-earmark-bar-graph',
+          'characterCertificate': 'bi-file-earmark-person',
+          'prc': 'bi-file-earmark-richtext'
+      }[docType] || 'bi-file-earmark';
+
+      return `
+          <button class="btn btn-outline-secondary view-document-btn"
+                  data-doctype="${docType}" data-appid="${appId}">
+              <i class="bi ${iconClass} document-icon"></i>
+              ${label}
+          </button>
+      `;
+  }
+
+  // Function to view document
+  function viewDocument(appId, docType) {
+      const url = `/application/applications/${appId}/documents/${docType}`;
+
+      // Set modal title
+      documentModalTitle.textContent = `${docType.replace(/([A-Z])/g, ' $1').trim()} Document`;
+
+      // Set iframe source
+      documentViewer.src = url;
+
+      // Set download link
+      documentDownloadBtn.href = url;
+      documentDownloadBtn.download = `application_${appId}_${docType}.pdf`;
+
+      // Show modal
+      documentModal.show();
+  }
+
+  // Function to download application as PDF
+  function downloadApplicationPdf(appId) {
+      fetch(`/application/applications/${appId}/download`, {
+          credentials: 'include'
+      })
+      .then(response => {
+          if (!response.ok) throw new Error('Failed to download');
+          return response.blob();
+      })
+      .then(blob => {
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `application_${appId}.pdf`;
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+          a.remove();
+      })
+      .catch(error => {
+          alert('Failed to download application: ' + error.message);
+      });
+  }
+
+  // Helper function for status styling
+  function getStatusClass(status) {
+      if (!status) return 'status-pending';
+      switch(status.toLowerCase()) {
+          case 'submitted': return 'status-submitted';
+          case 'approved': return 'status-approved';
+          case 'rejected': return 'status-rejected';
+          default: return 'status-pending';
+      }
+  }
+
+  // UI state functions
+  function showEmptyState() {
+      loadingState.classList.add('d-none');
+      emptyState.classList.remove('d-none');
+  }
+
+  function showError(message) {
+      loadingState.classList.add('d-none');
+      errorMessage.textContent = message;
+      errorState.classList.remove('d-none');
+  }
+</script>
+</body>
+</html>

@@ -4,264 +4,7 @@
     <title>Admin Dashboard - MBBS Counselling</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-    <style>
-        :root {
-            --sidebar-width: 250px;
-            --header-height: 60px;
-            --primary-color: #004f98;
-            --secondary-color: #e0e7ff;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f8f9fa;
-        }
-
-        /* Sidebar Styles */
-        .sidebar {
-            width: var(--sidebar-width);
-            height: 100vh;
-            position: fixed;
-            left: 0;
-            top: 0;
-            background-color: var(--primary-color);
-            color: white;
-            padding-top: var(--header-height);
-            transition: all 0.3s;
-            z-index: 1000;
-        }
-
-        .sidebar-menu {
-            list-style: none;
-            padding: 0;
-        }
-
-        .sidebar-menu li {
-            padding: 12px 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.3s;
-        }
-
-        .sidebar-menu li a {
-            color: white;
-            text-decoration: none;
-            display: block;
-        }
-
-        .sidebar-menu li:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-        }
-
-        .sidebar-menu li.active {
-            background-color: rgba(255, 255, 255, 0.2);
-            border-left: 4px solid white;
-        }
-
-        .sidebar-menu i {
-            margin-right: 10px;
-            width: 20px;
-            text-align: center;
-        }
-
-        /* Main Content Styles */
-        .main-content {
-            margin-left: var(--sidebar-width);
-            padding: 20px;
-            min-height: calc(100vh - var(--header-height));
-        }
-
-        /* Header Styles */
-        .admin-header {
-            height: var(--header-height);
-            background-color: white;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            position: fixed;
-            width: 100%;
-            z-index: 999;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 20px;
-        }
-
-        .user-profile {
-            display: flex;
-            align-items: center;
-        }
-
-        .user-profile img {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            margin-right: 10px;
-        }
-
-        /* Dashboard Cards */
-        .stats-card {
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-            transition: all 0.3s;
-            cursor: pointer;
-            border: none;
-        }
-
-        .stats-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
-        }
-
-        .stats-card .card-body {
-            padding: 1.5rem;
-        }
-
-        .stats-card .card-title {
-            font-size: 1rem;
-            font-weight: 500;
-            margin-bottom: 0.5rem;
-        }
-
-        .stats-card .card-value {
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-bottom: 0;
-        }
-
-        /* Application Table */
-        .application-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .application-table th {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 12px 15px;
-            text-align: left;
-        }
-
-        .application-table td {
-            padding: 12px 15px;
-            border-bottom: 1px solid #e0e0e0;
-            vertical-align: middle;
-        }
-
-        .application-table tr:hover {
-            background-color: #f5f5f5;
-        }
-
-        .status-badge {
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 500;
-        }
-
-        .status-pending {
-            background-color: #fff3cd;
-            color: #856404;
-        }
-
-        .status-accepted {
-            background-color: #d4edda;
-            color: #155724;
-        }
-
-        .status-rejected {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-
-        /* Form Styles */
-        .form-container {
-            background-color: white;
-            border-radius: 10px;
-            padding: 25px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .form-header {
-            border-bottom: 1px solid #e0e0e0;
-            padding-bottom: 15px;
-            margin-bottom: 20px;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .sidebar {
-                left: -var(--sidebar-width);
-            }
-
-            .sidebar.active {
-                left: 0;
-            }
-
-            .main-content {
-                margin-left: 0;
-            }
-
-            .toggle-sidebar {
-                display: block !important;
-            }
-        }
-
-        .toggle-sidebar {
-            display: none;
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            color: var(--primary-color);
-        }
-
-        /* Content Sections */
-        .content-section {
-            display: none;
-        }
-
-        .content-section.active {
-            display: block;
-            animation: fadeIn 0.5s;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        /* Preview Modal */
-        .preview-modal iframe {
-            width: 100%;
-            height: 500px;
-            border: none;
-        }
-        /* Sidebar Footer Styles */
-.sidebar-footer {
-    background-color: rgba(0, 0, 0, 0.1);
-}
-
-.sidebar-footer a:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-}
-
-/* Ensure main content has enough padding at bottom */
-.main-content {
-    padding-bottom: 80px; /* Add space for footer */
-}
-
-.course-form {
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        .course-table th {
-            background-color: var(--primary-color);
-            color: white;
-        }
-
-        .course-table tr:hover {
-            background-color: #f5f5f5;
-        }
-    </style>
+    <link rel="stylesheet" type="text/css" href="/css/admin.css">
 </head>
 <body>
 <!-- Admin Header -->
@@ -270,7 +13,7 @@
         <i class="bi bi-list"></i>
     </button>
     <div class="user-profile">
-        <img src="/images/admin-avatar.png" alt="Admin Avatar" id="adminAvatar">
+        <img src="/images/avatar.jpg" alt="Admin Avatar" id="adminAvatar">
         <span id="adminName">Loading...</span>
         <a href="/api/logout" class="btn btn-sm btn-outline-danger ms-3">
             <i class="bi bi-box-arrow-right"></i> Logout
@@ -281,42 +24,46 @@
 <!-- Sidebar -->
 <div class="sidebar" id="sidebar">
     <ul class="sidebar-menu">
-        <li class="active" data-section="dashboard">
-            <a href="#dashboard">
+        <li class="sidebar-item active" data-section="dashboard">
+            <a href="#" class="sidebar-link" data-target="dashboard">
                 <i class="bi bi-speedometer2"></i> Dashboard
             </a>
         </li>
-        <li data-section="applications">
-            <a href="#applications">
+        <li class="sidebar-item" data-section="applications">
+            <a href="#" class="sidebar-link" data-target="applications">
                 <i class="bi bi-file-earmark-text"></i> Applications
             </a>
         </li>
-        <li data-section="reports">
-            <a href="#reports">
+        <li class="sidebar-item" data-section="reports">
+            <a href="#" class="sidebar-link" data-target="reports">
                 <i class="bi bi-graph-up"></i> Reports
             </a>
         </li>
-        <li data-section="uploadAdvt">
-            <a href="#uploadAdvt">
+        <li class="sidebar-item" data-section="uploadAdvt">
+            <a href="#" class="sidebar-link" data-target="uploadAdvt">
                 <i class="bi bi-megaphone"></i> Upload Advertisements
             </a>
         </li>
-        <li data-section="uploadAdmissions">
-            <a href="#uploadAdmissions">
+        <li class="sidebar-item" data-section="uploadAdmissions">
+            <a href="#" class="sidebar-link" data-target="uploadAdmissions">
                 <i class="bi bi-mortarboard"></i> Upload Ongoing Admissions
+            </a>
+        </li>
+        <li class="sidebar-item" data-section="courses">
+            <a href="#" class="sidebar-link" data-target="courses">
+                <i class="bi bi-book"></i> Courses
             </a>
         </li>
     </ul>
 
-    <div class="sidebar-footer" style="position: absolute; bottom: 0; width: 100%; padding: 20px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
-        <a href="/login" class="d-flex align-items-center text-white text-decoration-none" style="padding: 10px 20px; border-radius: 5px; transition: background-color 0.3s;">
-            <i class="bi bi-box-arrow-right me-3"></i>
+    <div class="sidebar-footer">
+        <a href="/login" class="logout-btn">
+            <i class="bi bi-box-arrow-right me-2"></i>
             <span>Logout</span>
         </a>
     </div>
 </div>
 
-<!-- Main Content -->
 <!-- Main Content -->
 <div class="main-content">
     <!-- Dashboard Section -->
@@ -326,6 +73,9 @@
                 <h3>Welcome, <span id="welcomeName">Admin</span></h3>
                 <small class="text-muted" id="currentDate"></small>
             </div>
+
+
+<!--            not working-->
 
             <!-- Stats Cards -->
             <div class="row">
@@ -383,7 +133,7 @@
                 </div>
             </div>
 
-            <!-- Recent Activity -->
+            <!-- Recent Activity need to fix this -->
             <div class="card mt-4">
                 <div class="card-header">
                     <h5><i class="bi bi-clock-history me-2"></i>Recent Activity</h5>
@@ -404,18 +154,19 @@
 
             <!-- Application Stats Cards (Same as dashboard but smaller) -->
             <div class="row mb-4">
-                <div class="col-md-4">
-                    <div class="card stats-card text-white bg-primary" id="filterTotalApplications">
-                        <div class="card-body py-2">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="card-title mb-0">Total</h6>
-                                    <h4 class="card-value mb-0" id="filterTotalCount">0</h4>
-                                </div>
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Filter by Course</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row" id="courseFilters">
+                                <!-- Course filter buttons will be loaded here -->
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
                 <div class="col-md-4">
                     <div class="card stats-card text-white bg-success" id="filterAcceptedApplications">
                         <div class="card-body py-2">
@@ -442,35 +193,25 @@
                 </div>
             </div>
 
+
             <!-- Applications Table -->
             <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">All Applications</h5>
-                    <div class="input-group" style="width: 300px;">
-                        <input type="text" class="form-control" placeholder="Search applications..." id="applicationSearch">
-                        <button class="btn btn-outline-secondary" type="button">
-                            <i class="bi bi-search"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="application-table table">
-                            <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Applicant Name</th>
-                                <th>Email</th>
-                                <th>Status</th>
-                                <th>Applied Date</th>
-                                <th>Actions</th>
-                            </tr>
-                            </thead>
-                            <tbody id="applicationsTableBody">
-                            <!-- Applications will be loaded here -->
-                            </tbody>
-                        </table>
-                    </div>
+                <table class="application-table table">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Applicant Name</th>
+                        <th>Email</th>
+                        <th>Course</th>
+                        <th>Status</th>
+                        <th>Applied Date</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody id="applicationsTableBody"></tbody>
+                </table>
+
+
 
                     <!-- Pagination -->
                     <nav class="mt-3">
@@ -479,11 +220,10 @@
                         </ul>
                     </nav>
                 </div>
-            </div>
-        </div>
-    </div>
+</div>
 
-    <!-- Reports Section -->
+
+    <!-- Reports Section have to work in this -->
     <div class="content-section" id="reports-section">
         <div class="container-fluid">
             <h3 class="mb-4"><i class="bi bi-graph-up me-2"></i>Reports</h3>
@@ -497,7 +237,7 @@
         </div>
     </div>
 
-    <!-- Upload Advertisement Section -->
+    <!-- Upload Advertisement Section make it work-->
     <div class="content-section" id="uploadAdvt-section">
         <div class="container-fluid">
             <h3 class="mb-4"><i class="bi bi-megaphone me-2"></i>Upload Advertisement</h3>
@@ -520,6 +260,13 @@
                     <div class="mb-3">
                         <label for="advtDescription" class="form-label">Description</label>
                         <textarea class="form-control" id="advtDescription" rows="3" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="courseSelect" class="form-label">Select Course (Optional)</label>
+                        <select class="form-select" id="courseSelect">
+                            <option value="">-- No specific course --</option>
+                            <!-- Courses will be loaded dynamically -->
+                        </select>
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-6">
@@ -544,7 +291,7 @@
         </div>
     </div>
 
-    <!-- Upload Ongoing Admissions Section -->
+    <!-- Upload Ongoing Admissions Section make it work -->
     <div class="content-section" id="uploadAdmissions-section">
         <div class="container-fluid">
             <h3 class="mb-4"><i class="bi bi-mortarboard me-2"></i>Upload Ongoing Admissions</h3>
@@ -568,6 +315,13 @@
                         <label for="admissionDescription" class="form-label">Description</label>
                         <textarea class="form-control" id="admissionDescription" rows="3" required></textarea>
                     </div>
+                    <div class="mb-3">
+                        <label for="admissionCourseSelect" class="form-label">Select Course</label>
+                        <select class="form-select" id="admissionCourseSelect" required>
+                            <option value="">-- Select a course --</option>
+                            <!-- Courses will be loaded dynamically -->
+                        </select>
+                    </div>
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label for="admissionOpenDate" class="form-label">Open Date</label>
@@ -590,7 +344,7 @@
             </div>
         </div>
     </div>
-</div>
+<!--couse section need to fix the ui-->
 <div class="content-section" id="courses-section">
     <div class="container-fluid">
         <h3 class="mb-4"><i class="bi bi-book me-2"></i>Manage Courses</h3>
@@ -611,7 +365,22 @@
                             <input type="text" class="form-control" id="instituteName" required>
                         </div>
                     </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="courseDuration" class="form-label">Duration (years)</label>
+                            <input type="number" class="form-control" id="courseDuration" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="courseSeats" class="form-label">Total Seats</label>
+                            <input type="number" class="form-control" id="courseSeats" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="courseDescription" class="form-label">Description</label>
+                        <textarea class="form-control" id="courseDescription" rows="3"></textarea>
+                    </div>
                     <div class="d-flex justify-content-end">
+                        <button type="reset" class="btn btn-outline-secondary me-2">Reset</button>
                         <button type="submit" class="btn btn-primary">Add Course</button>
                     </div>
                 </form>
@@ -619,8 +388,14 @@
         </div>
 
         <div class="card">
-            <div class="card-header">
-                <h5>All Courses</h5>
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">All Courses</h5>
+                <div class="input-group" style="width: 300px;">
+                    <input type="text" class="form-control" placeholder="Search courses..." id="courseSearch">
+                    <button class="btn btn-outline-secondary" type="button">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </div>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
@@ -630,6 +405,8 @@
                             <th>ID</th>
                             <th>Course Name</th>
                             <th>Institute</th>
+                            <th>Duration</th>
+                            <th>Seats</th>
                             <th>Actions</th>
                         </tr>
                         </thead>
@@ -638,11 +415,20 @@
                         </tbody>
                     </table>
                 </div>
+
+                <!-- Pagination -->
+                <nav class="mt-3">
+                    <ul class="pagination justify-content-center" id="coursesPagination">
+                        <!-- Pagination will be loaded here -->
+                    </ul>
+                </nav>
             </div>
         </div>
     </div>
 </div>
 </div>
+
+
 
 <!-- Application Preview Modal -->
 <div class="modal fade" id="previewModal" tabindex="-1" aria-hidden="true">
@@ -681,12 +467,17 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     // Global variables
-    let currentAdmin = {};
+   let currentAdmin = {};
     let applications = [];
     let currentApplicationPage = 1;
     const applicationsPerPage = 10;
+    let courses = [];
+    let currentCoursePage = 1;
+    const coursesPerPage = 5;
+    let currentCourseFilter = 'all';
+    let applicationsByCourse = {};
 
-    // DOM Content Loaded
+    // DOM Content Loaded - Fixed initialization sequence
     document.addEventListener('DOMContentLoaded', function() {
         // Check admin role
         const userRole = sessionStorage.getItem('userRole');
@@ -697,21 +488,40 @@
 
         // Initialize admin data
         loadAdminData();
-
-        // Initialize date
         updateCurrentDate();
-
-        // Initialize sidebar navigation
         setupSidebar();
-
-        // Initialize forms
         setupForms();
-
-       // Load initial data
-        loadApplications();
-        loadCourses();
-        loadActivities();
         setupModalEvents();
+
+        // Proper promise chain for initial data loading
+        loadCourses()
+            .then(() => {
+                return Promise.all([
+                    loadApplications(),
+                    loadCourseApplicationStats(),
+                    loadActivities()
+                ]);
+            })
+            .catch(error => {
+                console.error('Initialization error:', error);
+                // Show error to user if needed
+            });
+
+        // Make Total Courses card clickable
+        document.getElementById('totalCoursesCard').addEventListener('click', function() {
+            // Hide all sections
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+
+            // Show courses section
+            document.getElementById('courses-section').classList.add('active');
+
+            // Update sidebar active state
+            document.querySelectorAll('.sidebar-menu li').forEach(item => {
+                item.classList.remove('active');
+            });
+        });
     });
 
     // Load admin data
@@ -742,34 +552,51 @@
 
     // Setup sidebar navigation
     function setupSidebar() {
-        // Toggle sidebar on mobile
-        document.getElementById('toggleSidebar').addEventListener('click', function() {
-            document.getElementById('sidebar').classList.toggle('active');
-        });
+    // Toggle sidebar on mobile
+    document.getElementById('toggleSidebar').addEventListener('click', function() {
+        document.getElementById('sidebar').classList.toggle('active');
+        document.querySelector('.main-content').classList.toggle('sidebar-collapsed');
+    });
 
-        // Handle sidebar menu clicks
-        const menuItems = document.querySelectorAll('.sidebar-menu li');
-        menuItems.forEach(item => {
-            item.addEventListener('click', function() {
-                // Update active state
-                menuItems.forEach(i => i.classList.remove('active'));
-                this.classList.add('active');
+    // Handle sidebar menu clicks
+    const menuItems = document.querySelectorAll('.sidebar-item');
+    const sidebarLinks = document.querySelectorAll('.sidebar-link');
 
-                // Show corresponding section
-                const sectionId = this.getAttribute('data-section');
-                document.querySelectorAll('.content-section').forEach(section => {
-                    section.classList.remove('active');
-                });
-                document.getElementById(`${sectionId}-section`).classList.add('active');
+    sidebarLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const targetSection = this.getAttribute('data-target');
+
+            // Update active state
+            menuItems.forEach(item => item.classList.remove('active'));
+            this.parentElement.classList.add('active');
+
+            // Show corresponding section
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
             });
+
+            const targetElement = document.getElementById(`${targetSection}-section`);
+            if (targetElement) {
+                targetElement.classList.add('active');
+
+                // Load data if needed
+                if (targetSection === 'applications') {
+                    loadApplications();
+                } else if (targetSection === 'courses') {
+                    loadCourses();
+                }
+            }
         });
-    }
-    // Add confirmation to sidebar logout
-document.querySelector('.sidebar-footer a').addEventListener('click', function(e) {
-    if (!confirm('Are you sure you want to logout?')) {
-        e.preventDefault();
-    }
-});
+    });
+
+    // Handle logout confirmation
+    document.querySelector('.logout-btn').addEventListener('click', function(e) {
+        if (!confirm('Are you sure you want to logout?')) {
+            e.preventDefault();
+        }
+    });
+}
 
     // Setup forms
     function setupForms() {
@@ -786,63 +613,518 @@ document.querySelector('.sidebar-footer a').addEventListener('click', function(e
         });
 
         // Course form
-        document.getElementById('courseForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            addCourse();
-        });
+    document.getElementById('courseForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        addCourse();
+    });
     }
 
     // Load applications from API
-    function loadApplications(page = 1) {
-        currentApplicationPage = page;
+function loadApplications(page = 1, courseId = 'all') {
+    currentApplicationPage = page;
+    currentCourseFilter = courseId;
 
-        // Fetch applications from your API
-        fetch('/application/applications')
-            .then(response => response.json())
-            .then(data => {
-                applications = data;
-                updateApplicationStats();
-                renderApplicationsTable();
-                renderApplicationsPagination();
-            })
-            .catch(error => {
-                console.error('Error loading applications:', error);
-                // Fallback to mock data if API fails
-                applications = generateMockApplications(45);
-                updateApplicationStats();
-                renderApplicationsTable();
-                renderApplicationsPagination();
-            });
+    let url = '/application/applications';
+    if (courseId !== 'all') {
+        url = `/application/applications?courseId=${courseId}`;
     }
 
-    // Load courses from API
-    function loadCourses() {
-        fetch('/courses', {  // Changed from '/api/courses' to '/courses'
-        credentials: 'include'  // Important for session cookies
+    return fetch(url, {
+        credentials: 'include' ,
+         redirect: 'manual'// Important for session cookies
     })
-            .then(response => response.json())
-            .then(data => {
-                courses = data;
-                updateCourseStats();
-                renderCoursesTable();
-            })
-            .catch(error => {
-                console.error('Error loading courses:', error);
-                // Fallback to mock data if API fails
-                courses = generateMockCourses();
-                updateCourseStats();
-                renderCoursesTable();
-            });
+    .then(response => {
+        if (response.status === 401) {
+            window.location.href = '/login';
+            throw new Error('Unauthorized');
+        }
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        return response.json();
+    })
+    .then(data => {
+        applications = data;
+        updateApplicationStats();
+        renderApplicationsTable();
+        renderApplicationsPagination();
+        return applications;
+    })
+    .catch(error => {
+        console.error('Error loading applications:', error);
+        if (error.message !== 'Unauthorized') {
+            showAlert(`Failed to load applications: ${error.message}`, 'danger');
+        }
+        return [];
+    });
+}
+function renderApplicationsPagination() {
+    const paginationContainer = document.getElementById('applicationsPagination');
+    if (!paginationContainer) {
+        console.error('Pagination container not found');
+        return;
     }
 
-    // Generate mock courses (fallback)
-    function generateMockCourses() {
-        return [
-            { id: 1, name: "MBBS", institute: "AIIMS Delhi" },
-            { id: 2, name: "BDS", institute: "Maulana Azad Dental College" },
-            { id: 3, name: "B.Sc Nursing", institute: "CMC Vellore" }
-        ];
+    paginationContainer.innerHTML = '';
+
+    const totalPages = Math.ceil(applications.length / applicationsPerPage);
+    if (totalPages <= 1) return; // Don't show pagination if only one page
+
+    // Previous Button
+    const prevLi = document.createElement('li');
+    prevLi.className = `page-item ${currentApplicationPage === 1 ? 'disabled' : ''}`;
+    prevLi.innerHTML = `<a class="page-link" href="#" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                       </a>`;
+    prevLi.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (currentApplicationPage > 1) {
+            loadApplications(currentApplicationPage - 1, currentCourseFilter);
+        }
+    });
+    paginationContainer.appendChild(prevLi);
+
+    // Page Numbers
+    const maxVisiblePages = 5; // Show up to 5 page numbers
+    let startPage, endPage;
+
+    if (totalPages <= maxVisiblePages) {
+        startPage = 1;
+        endPage = totalPages;
+    } else {
+        const maxPagesBeforeCurrent = Math.floor(maxVisiblePages / 2);
+        const maxPagesAfterCurrent = Math.ceil(maxVisiblePages / 2) - 1;
+
+        if (currentApplicationPage <= maxPagesBeforeCurrent) {
+            startPage = 1;
+            endPage = maxVisiblePages;
+        } else if (currentApplicationPage + maxPagesAfterCurrent >= totalPages) {
+            startPage = totalPages - maxVisiblePages + 1;
+            endPage = totalPages;
+        } else {
+            startPage = currentApplicationPage - maxPagesBeforeCurrent;
+            endPage = currentApplicationPage + maxPagesAfterCurrent;
+        }
     }
+
+    // Add page number buttons
+    for (let i = startPage; i <= endPage; i++) {
+        const pageLi = document.createElement('li');
+        pageLi.className = `page-item ${i === currentApplicationPage ? 'active' : ''}`;
+        pageLi.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+        pageLi.addEventListener('click', (e) => {
+            e.preventDefault();
+            loadApplications(i, currentCourseFilter);
+        });
+        paginationContainer.appendChild(pageLi);
+    }
+
+    // Next Button
+    const nextLi = document.createElement('li');
+    nextLi.className = `page-item ${currentApplicationPage === totalPages ? 'disabled' : ''}`;
+    nextLi.innerHTML = `<a class="page-link" href="#" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                       </a>`;
+    nextLi.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (currentApplicationPage < totalPages) {
+            loadApplications(currentApplicationPage + 1, currentCourseFilter);
+        }
+    });
+    paginationContainer.appendChild(nextLi);
+}
+
+
+// Add this new function to load course statistics
+function loadCourseApplicationStats() {
+        return fetch('/application/applications/course-stats', {  // Note the return
+            credentials: 'include'
+        })
+        .then(response => response.json())
+        .then(data => {
+            applicationsByCourse = data;
+            renderCourseFilters();
+            return data; // Return for chaining
+        })
+        .catch(error => {
+            console.error('Error loading course stats:', error);
+            // Fallback to mock data
+            applicationsByCourse = {
+                'all': { total: 45, accepted: 15, rejected: 5 },
+                '1': { total: 20, accepted: 10, rejected: 2 },
+                '2': { total: 15, accepted: 3, rejected: 2 },
+                '3': { total: 10, accepted: 2, rejected: 1 }
+            };
+            renderCourseFilters();
+            return applicationsByCourse; // Return even in error case
+        });
+    }
+
+// Add this function to render course filter buttons
+function renderCourseFilters() {
+    const container = document.getElementById('courseFilters');
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    // Add "All Courses" button
+    const allCard = document.createElement('div');
+    allCard.className = `col-md-3 mb-3 course-filter ${currentCourseFilter === 'all' ? 'active' : ''}`;
+    allCard.innerHTML = `
+        <div class="card stats-card text-white bg-primary" data-course="all">
+            <div class="card-body">
+                <h5 class="card-title">All Courses</h5>
+                <div class="d-flex justify-content-between">
+                    <span>Total: ${applicationsByCourse['all']?.total || 0}</span>
+                    <span class="text-success">✓ ${applicationsByCourse['all']?.accepted || 0}</span>
+                    <span class="text-danger">✗ ${applicationsByCourse['all']?.rejected || 0}</span>
+                </div>
+            </div>
+        </div>
+    `;
+    allCard.addEventListener('click', () => {
+        currentCourseFilter = 'all';
+        loadApplications(1, 'all');
+    });
+    container.appendChild(allCard);
+
+    // Add buttons for each course
+    courses.forEach(course => {
+        if (!course || course.courseid == null) {
+            console.warn('Invalid course found:', course);
+            return;
+        }
+
+        const courseId = String(course.courseid);
+        const stats = applicationsByCourse[courseId] || { total: 0, accepted: 0, rejected: 0 };
+        const courseName = course.coursename || 'Unnamed Course';
+        const instituteName = course.institute || 'Unknown Institute';
+
+        const card = document.createElement('div');
+        card.className = `col-md-3 mb-3 course-filter ${currentCourseFilter === courseId ? 'active' : ''}`;
+        card.innerHTML = `
+            <div class="card stats-card text-white"
+                 style="background-color: ${getCourseColor(courseId)}"
+                 data-course="${courseId}">
+                <div class="card-body">
+                    <h5 class="card-title">${courseName}</h5>
+                    <p class="card-subtitle mb-2 text-white-50">${instituteName}</p>
+                    <div class="d-flex justify-content-between">
+                        <span>Total: ${stats.total}</span>
+                        <span class="text-success">✓ ${stats.accepted}</span>
+                        <span class="text-danger">✗ ${stats.rejected}</span>
+                    </div>
+                </div>
+            </div>
+        `;
+        card.addEventListener('click', () => {
+            currentCourseFilter = courseId;
+            loadApplications(1, courseId);
+        });
+        container.appendChild(card);
+    });
+}
+// Helper function for course colors
+function getCourseColor(courseId) {
+    const colors = ['#6c757d', '#28a745', '#17a2b8', '#ffc107', '#dc3545'];
+    return colors[courseId % colors.length];
+}
+
+   // Load courses from API
+// Fixed loadCourses function to always return a Promise
+    function loadCourses(page = 1) {
+        currentCoursePage = page;
+
+        return fetch('/courses', {  // Note the return statement
+            credentials: 'include'
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Ensure data is an array
+            courses = Array.isArray(data) ? data : [];
+            console.log('Courses data:', courses); // Debug log
+
+            updateCourseStats();
+            renderCoursesTable();
+            renderCoursesPagination();
+            return courses; // Return data for chaining
+        })
+        .catch(error => {
+            console.error('Error loading courses:', error);
+            // Fallback to mock data
+            courses = generateMockCourses();
+            updateCourseStats();
+            renderCoursesTable();
+            renderCoursesPagination();
+            return courses; // Still return data even in error case
+        });
+    }
+// Generate mock courses (fallback)
+function generateMockCourses() {
+    return [
+        { id: 1, name: "MBBS", institute: "AIIMS Delhi", duration: 5, seats: 100 },
+        { id: 2, name: "BDS", institute: "Maulana Azad Dental College", duration: 4, seats: 50 },
+        { id: 3, name: "B.Sc Nursing", institute: "CMC Vellore", duration: 3, seats: 60 }
+    ];
+    }
+
+    // Update course stats
+function updateCourseStats() {
+    document.getElementById('totalCourses').textContent = courses.length;
+}
+
+// Render courses table
+function renderCoursesTable() {
+    const tableBody = document.getElementById('coursesTableBody');
+    tableBody.innerHTML = '';
+
+    // Ensure courses is an array
+    if (!Array.isArray(courses)) {
+        console.error('Courses is not an array:', courses);
+        courses = []; // Reset to empty array
+        return; // Exit early
+    }
+
+    // Calculate pagination
+    const startIndex = (currentCoursePage - 1) * coursesPerPage;
+    const endIndex = Math.min(startIndex + coursesPerPage, courses.length);
+    const pageCourses = courses.slice(startIndex, endIndex);
+
+    pageCourses.forEach(course => {
+        // Add null checks for course properties
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${course?.id || ''}</td>
+            <td>${course?.name || ''}</td>
+            <td>${course?.institute || ''}</td>
+            <td>${course?.duration || 'N/A'} years</td>
+            <td>${course?.seats || 'N/A'}</td>
+            <td>
+                <button class="btn btn-sm btn-outline-primary me-1 edit-course" data-id="${course?.id || ''}">
+                    <i class="bi bi-pencil"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-danger delete-course" data-id="${course?.id || ''}">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </td>
+        `;
+        tableBody.appendChild(row);
+    });
+
+    // Add event listeners
+    document.querySelectorAll('.edit-course').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const courseId = parseInt(this.getAttribute('data-id'));
+            editCourse(courseId);
+        });
+    });
+
+    document.querySelectorAll('.delete-course').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const courseId = parseInt(this.getAttribute('data-id'));
+            deleteCourse(courseId);
+        });
+    });
+}
+
+// Render courses pagination
+function renderCoursesPagination() {
+    const totalPages = Math.ceil(courses.length / coursesPerPage);
+    const pagination = document.getElementById('coursesPagination');
+    pagination.innerHTML = '';
+
+    // Previous button
+    const prevLi = document.createElement('li');
+    prevLi.className = `page-item ${currentCoursePage === 1 ? 'disabled' : ''}`;
+    prevLi.innerHTML = `<a class="page-link" href="#">Previous</a>`;
+    prevLi.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (currentCoursePage > 1) {
+            loadCourses(currentCoursePage - 1);
+        }
+    });
+    pagination.appendChild(prevLi);
+
+    // Page numbers
+    for (let i = 1; i <= totalPages; i++) {
+        const pageLi = document.createElement('li');
+        pageLi.className = `page-item ${i === currentCoursePage ? 'active' : ''}`;
+        pageLi.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+        pageLi.addEventListener('click', (e) => {
+            e.preventDefault();
+            loadCourses(i);
+        });
+        pagination.appendChild(pageLi);
+    }
+
+    // Next button
+    const nextLi = document.createElement('li');
+    nextLi.className = `page-item ${currentCoursePage === totalPages ? 'disabled' : ''}`;
+    nextLi.innerHTML = `<a class="page-link" href="#">Next</a>`;
+    nextLi.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (currentCoursePage < totalPages) {
+            loadCourses(currentCoursePage + 1);
+        }
+    });
+    pagination.appendChild(nextLi);
+}
+
+// Add new course
+function addCourse() {
+    const courseData = {
+        name: document.getElementById('courseName').value,
+        institute: document.getElementById('instituteName').value,
+        duration: parseInt(document.getElementById('courseDuration').value),
+        seats: parseInt(document.getElementById('courseSeats').value),
+        description: document.getElementById('courseDescription').value
+    };
+
+    fetch('/api/courses', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(courseData)
+    })
+    .then(response => response.json())
+    .then(newCourse => {
+        courses.unshift(newCourse); // Add to beginning
+        updateCourseStats();
+        renderCoursesTable();
+        renderCoursesPagination();
+        document.getElementById('courseForm').reset();
+        addActivity(`Added new course: ${newCourse.name}`);
+    })
+    .catch(error => {
+        console.error('Error adding course:', error);
+        // Fallback to client-side
+        const newCourse = {
+            id: courses.length > 0 ? Math.max(...courses.map(c => c.id)) + 1 : 1,
+            ...courseData
+        };
+        courses.unshift(newCourse);
+        updateCourseStats();
+        renderCoursesTable();
+        renderCoursesPagination();
+        document.getElementById('courseForm').reset();
+        addActivity(`Added new course: ${newCourse.name}`);
+    });
+}
+
+// Edit course
+function editCourse(courseId) {
+    const course = courses.find(c => c.id === courseId);
+    if (course) {
+        document.getElementById('courseName').value = course.name;
+        document.getElementById('instituteName').value = course.institute;
+        document.getElementById('courseDuration').value = course.duration;
+        document.getElementById('courseSeats').value = course.seats;
+        document.getElementById('courseDescription').value = course.description || '';
+
+        const form = document.getElementById('courseForm');
+        const submitBtn = form.querySelector('button[type="submit"]');
+        submitBtn.textContent = 'Update Course';
+
+        // Remove previous event listeners
+        form.onsubmit = null;
+
+        // Add update handler
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            updateCourse(courseId);
+        });
+    }
+}
+
+// Update course
+function updateCourse(courseId) {
+    const courseData = {
+        name: document.getElementById('courseName').value,
+        institute: document.getElementById('instituteName').value,
+        duration: parseInt(document.getElementById('courseDuration').value),
+        seats: parseInt(document.getElementById('courseSeats').value),
+        description: document.getElementById('courseDescription').value
+    };
+
+    fetch(`/api/courses/${courseId}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(courseData)
+    })
+    .then(response => {
+        if (response.ok) {
+            const index = courses.findIndex(c => c.id === courseId);
+            if (index !== -1) {
+                courses[index] = { id: courseId, ...courseData };
+                renderCoursesTable();
+                resetCourseForm();
+                addActivity(`Updated course: ${courseData.name}`);
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error updating course:', error);
+        // Fallback to client-side
+        const index = courses.findIndex(c => c.id === courseId);
+        if (index !== -1) {
+            courses[index] = { id: courseId, ...courseData };
+            renderCoursesTable();
+            resetCourseForm();
+            addActivity(`Updated course: ${courseData.name}`);
+        }
+    });
+}
+
+// Delete course
+function deleteCourse(courseId) {
+    if (confirm('Are you sure you want to delete this course?')) {
+        fetch(`/api/courses/${courseId}`, {
+            method: 'DELETE'
+        })
+        .then(response => {
+            if (response.ok) {
+                courses = courses.filter(c => c.id !== courseId);
+                updateCourseStats();
+                renderCoursesTable();
+                renderCoursesPagination();
+                addActivity(`Deleted course ID: ${courseId}`);
+            }
+        })
+        .catch(error => {
+            console.error('Error deleting course:', error);
+            // Fallback to client-side
+            courses = courses.filter(c => c.id !== courseId);
+            updateCourseStats();
+            renderCoursesTable();
+            renderCoursesPagination();
+            addActivity(`Deleted course ID: ${courseId}`);
+        });
+    }
+}
+
+// Reset course form
+function resetCourseForm() {
+    document.getElementById('courseForm').reset();
+    const form = document.getElementById('courseForm');
+    const submitBtn = form.querySelector('button[type="submit"]');
+    submitBtn.textContent = 'Add Course';
+
+    // Remove previous event listeners
+    form.onsubmit = null;
+
+    // Add submit handler
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        addCourse();
+    });
+}
+
 
     // Update application stats
     function updateApplicationStats() {
@@ -855,207 +1137,46 @@ document.querySelector('.sidebar-footer a').addEventListener('click', function(e
         document.getElementById('rejectedApplications').textContent = rejected;
     }
 
-    // Update course stats
-    function updateCourseStats() {
-        document.getElementById('totalCourses').textContent = courses.length;
-    }
-
-    // Update renderCoursesTable to match your entity structure
-function renderCoursesTable() {
-    const tableBody = document.getElementById('coursesTableBody');
-    tableBody.innerHTML = '';
-
-    courses.forEach(course => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${course.id}</td>
-            <td>${course.coursename}</td>  <!-- Changed from course.name -->
-            <td>${course.institute}</td>
-            <td>
-                <button class="btn btn-sm btn-outline-primary me-1 edit-course" data-id="${course.id}">
-                    <i class="bi bi-pencil"></i>
-                </button>
-                <button class="btn btn-sm btn-outline-danger delete-course" data-id="${course.id}">
-                    <i class="bi bi-trash"></i>
-                </button>
-            </td>
-        `;
-        tableBody.appendChild(row);
-    });
-
-        // Add event listeners for course actions
-        document.querySelectorAll('.edit-course').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const courseId = parseInt(this.getAttribute('data-id'));
-                editCourse(courseId);
-            });
-        });
-
-        document.querySelectorAll('.delete-course').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const courseId = parseInt(this.getAttribute('data-id'));
-                deleteCourse(courseId);
-            });
-        });
-    }
-
-    // Add new course
-    function addCourse() {
-        const courseName = document.getElementById('courseName').value;
-        const instituteName = document.getElementById('instituteName').value;
-
-        // In a real app, you would send this to your API
-        fetch('/api/courses', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                name: courseName,
-                institute: instituteName
-            })
-        })
-        .then(response => response.json())
-        .then(newCourse => {
-            courses.push(newCourse);
-            updateCourseStats();
-            renderCoursesTable();
-            document.getElementById('courseForm').reset();
-            addActivity(`Added new course: ${courseName}`);
-        })
-        .catch(error => {
-            console.error('Error adding course:', error);
-            // Fallback to client-side addition if API fails
-            const newCourse = {
-                id: courses.length + 1,
-                name: courseName,
-                institute: instituteName
-            };
-            courses.push(newCourse);
-            updateCourseStats();
-            renderCoursesTable();
-            document.getElementById('courseForm').reset();
-            addActivity(`Added new course: ${courseName}`);
-        });
-    }
-
-    // Edit course
-    function editCourse(courseId) {
-        const course = courses.find(c => c.id === courseId);
-        if (course) {
-            document.getElementById('courseName').value = course.name;
-            document.getElementById('instituteName').value = course.institute;
-
-            // Change form to update mode
-            const form = document.getElementById('courseForm');
-            form.querySelector('button[type="submit"]').textContent = 'Update Course';
-            form.onsubmit = function(e) {
-                e.preventDefault();
-                updateCourse(courseId);
-            };
-        }
-    }
-
-    // Update course
-    function updateCourse(courseId) {
-        const courseName = document.getElementById('courseName').value;
-        const instituteName = document.getElementById('instituteName').value;
-
-        // In a real app, you would send this to your API
-        fetch(`/api/courses/${courseId}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                name: courseName,
-                institute: instituteName
-            })
-        })
-        .then(response => {
-            if (response.ok) {
-                const index = courses.findIndex(c => c.id === courseId);
-                if (index !== -1) {
-                    courses[index] = { id: courseId, name: courseName, institute: instituteName };
-                    renderCoursesTable();
-                    resetCourseForm();
-                    addActivity(`Updated course: ${courseName}`);
-                }
-            }
-        })
-        .catch(error => {
-            console.error('Error updating course:', error);
-            // Fallback to client-side update if API fails
-            const index = courses.findIndex(c => c.id === courseId);
-            if (index !== -1) {
-                courses[index] = { id: courseId, name: courseName, institute: instituteName };
-                renderCoursesTable();
-                resetCourseForm();
-                addActivity(`Updated course: ${courseName}`);
-            }
-        });
-    }
-
-    // Delete course
-    function deleteCourse(courseId) {
-        if (confirm('Are you sure you want to delete this course?')) {
-            // In a real app, you would call your API
-            fetch(`/api/courses/${courseId}`, {
-                method: 'DELETE'
-            })
-            .then(response => {
-                if (response.ok) {
-                    courses = courses.filter(c => c.id !== courseId);
-                    updateCourseStats();
-                    renderCoursesTable();
-                    addActivity(`Deleted course ID: ${courseId}`);
-                }
-            })
-            .catch(error => {
-                console.error('Error deleting course:', error);
-                // Fallback to client-side deletion if API fails
-                courses = courses.filter(c => c.id !== courseId);
-                updateCourseStats();
-                renderCoursesTable();
-                addActivity(`Deleted course ID: ${courseId}`);
-            });
-        }
-    }
-
-    // Reset course form
-    function resetCourseForm() {
-        document.getElementById('courseForm').reset();
-        const form = document.getElementById('courseForm');
-        form.querySelector('button[type="submit"]').textContent = 'Add Course';
-        form.onsubmit = function(e) {
-            e.preventDefault();
-            addCourse();
-        };
-    }
-
-
     function renderApplicationsTable() {
     const tableBody = document.getElementById('applicationsTableBody');
+    if (!tableBody) return;
+
     tableBody.innerHTML = '';
 
-    // Calculate pagination
+    if (!applications.length) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="7" class="text-center">
+                    No applications found ${currentCourseFilter !== 'all' ? 'for this course' : ''}
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
     const startIndex = (currentApplicationPage - 1) * applicationsPerPage;
     const endIndex = Math.min(startIndex + applicationsPerPage, applications.length);
     const pageApplications = applications.slice(startIndex, endIndex);
 
-    // Render each application
     pageApplications.forEach(app => {
         const row = document.createElement('tr');
-        // Handle null status
-        const status = app.status || 'pending'; // default to 'pending' if null
+        const status = app.status || 'pending';
         const statusDisplay = status.charAt(0).toUpperCase() + status.slice(1);
 
+        // Find course name - check both direct property and from courses array
+        let courseName = app.courseName;
+        if (!courseName && app.courseId) {
+            const course = courses.find(c => c.courseid == app.courseId || c.id == app.courseId);
+            courseName = course?.coursename || course?.name || 'Unknown Course';
+        }
+
         row.innerHTML = `
-            <td>${app.id}</td>
-            <td>${app.applicantName}</td>
-            <td>${app.email}</td>
+            <td>${app.id || 'N/A'}</td>
+            <td>${app.applicantName || 'N/A'}</td>
+            <td>${app.email || 'N/A'}</td>
+            <td>${courseName || 'N/A'}</td>
             <td><span class="status-badge status-${status}">${statusDisplay}</span></td>
-            <td>${app.appliedDate ? new Date(app.appliedDate).toLocaleDateString() : ''}</td>
+            <td>${app.appliedDate ? new Date(app.appliedDate).toLocaleDateString() : 'N/A'}</td>
             <td>
                 <button class="btn btn-sm btn-success me-1 accept-btn" data-id="${app.id}">
                     <i class="bi bi-check-lg"></i>
@@ -1070,6 +1191,9 @@ function renderCoursesTable() {
         `;
         tableBody.appendChild(row);
     });
+
+    // Add event delegation for buttons
+    tableBody.addEventListener('click', handleTableButtonClick);
 
 
         // Add event listeners to action buttons
@@ -1095,7 +1219,7 @@ function renderCoursesTable() {
         });
 
         // Add click events to stats cards for filtering
-        document.getElementById('filterTotalApplications').addEventListener('click', () => filterApplications('all'));
+        document.getElementById('filterTotalApplications').addEventListener('click', () => filterApplications('all')); // 1082
         document.getElementById('filterAcceptedApplications').addEventListener('click', () => filterApplications('accepted'));
         document.getElementById('filterRejectedApplications').addEventListener('click', () => filterApplications('rejected'));
     }
@@ -1119,80 +1243,173 @@ function renderCoursesTable() {
     }
 
     // Render applications pagination
-    function renderApplicationsPagination() {
-        const totalPages = Math.ceil(applications.length / applicationsPerPage);
-        const pagination = document.getElementById('applicationsPagination');
-        pagination.innerHTML = '';
+   function renderApplicationsTable() {
+    const tableBody = document.getElementById('applicationsTableBody');
+    if (!tableBody) return;
 
-        // Previous button
-        const prevLi = document.createElement('li');
-        prevLi.className = `page-item ${currentApplicationPage === 1 ? 'disabled' : ''}`;
-        prevLi.innerHTML = `<a class="page-link" href="#">Previous</a>`;
-        prevLi.addEventListener('click', (e) => {
-            e.preventDefault();
-            if (currentApplicationPage > 1) {
-                loadApplications(currentApplicationPage - 1);
-            }
-        });
-        pagination.appendChild(prevLi);
+    tableBody.innerHTML = '';
 
-        // Page numbers
-        for (let i = 1; i <= totalPages; i++) {
-            const pageLi = document.createElement('li');
-            pageLi.className = `page-item ${i === currentApplicationPage ? 'active' : ''}`;
-            pageLi.innerHTML = `<a class="page-link" href="#">${i}</a>`;
-            pageLi.addEventListener('click', (e) => {
-                e.preventDefault();
-                loadApplications(i);
-            });
-            pagination.appendChild(pageLi);
-        }
-
-        // Next button
-        const nextLi = document.createElement('li');
-        nextLi.className = `page-item ${currentApplicationPage === totalPages ? 'disabled' : ''}`;
-        nextLi.innerHTML = `<a class="page-link" href="#">Next</a>`;
-        nextLi.addEventListener('click', (e) => {
-            e.preventDefault();
-            if (currentApplicationPage < totalPages) {
-                loadApplications(currentApplicationPage + 1);
-            }
-        });
-        pagination.appendChild(nextLi);
+    if (!applications.length) {
+        tableBody.innerHTML = '<tr><td colspan="7" class="text-center">No applications found</td></tr>';
+        return;
     }
 
+    const startIndex = (currentApplicationPage - 1) * applicationsPerPage;
+    const endIndex = Math.min(startIndex + applicationsPerPage, applications.length);
+    const pageApplications = applications.slice(startIndex, endIndex);
+
+    pageApplications.forEach(app => {
+        const row = document.createElement('tr');
+        const status = app.status || 'pending';
+        const statusDisplay = status.charAt(0).toUpperCase() + status.slice(1);
+
+        row.innerHTML = `
+            <td>${app.id || 'N/A'}</td>
+            <td>${app.applicantName || 'N/A'}</td>
+            <td>${app.email || 'N/A'}</td>
+            <td>${app.courseName || 'N/A'}</td>
+            <td><span class="status-badge status-${status}">${statusDisplay}</span></td>
+            <td>${app.appliedDate ? new Date(app.appliedDate).toLocaleDateString() : 'N/A'}</td>
+            <td>
+                <button class="btn btn-sm btn-success me-1 accept-btn" data-id="${app.id}">
+                    <i class="bi bi-check-lg"></i>
+                </button>
+                <button class="btn btn-sm btn-danger me-1 reject-btn" data-id="${app.id}">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+                <button class="btn btn-sm btn-primary preview-btn" data-id="${app.id}">
+                    <i class="bi bi-eye"></i>
+                </button>
+            </td>
+        `;
+        tableBody.appendChild(row);
+    });
+
+    // Add event delegation for buttons
+    tableBody.addEventListener('click', handleTableButtonClick);
+}
+
+function handleTableButtonClick(event) {
+    const target = event.target;
+
+    // Handle Accept button
+    if (target.closest('.accept-btn')) {
+        const appId = parseInt(target.closest('.accept-btn').getAttribute('data-id'));
+        updateApplicationStatus(appId, 'accepted');
+    }
+
+    // Handle Reject button
+    if (target.closest('.reject-btn')) {
+        const appId = parseInt(target.closest('.reject-btn').getAttribute('data-id'));
+        updateApplicationStatus(appId, 'rejected');
+    }
+
+    // Handle Preview button
+    if (target.closest('.preview-btn')) {
+        const appId = parseInt(target.closest('.preview-btn').getAttribute('data-id'));
+        previewApplication(appId);
+    }
+}
+
     // Update application status
-    function updateApplicationStatus(appId, newStatus) {
-        // In a real app, you would make an API call to update the status
+  function updateApplicationStatus(appId, newStatus) {
+    if (!confirm(`Are you sure you want to ${newStatus} this application?`)) {
+        return;
+    }
+
+    fetch(`/application/applications/${appId}/status`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: newStatus }),
+        credentials: 'include' // Important for session cookies
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Failed to update status');
+        return response.json();
+    })
+    .then(updatedApp => {
+        // Update local state
         const appIndex = applications.findIndex(app => app.id === appId);
         if (appIndex !== -1) {
             applications[appIndex].status = newStatus;
-
-            // Update UI
-            updateApplicationStats();
-            renderApplicationsTable();
-
-            // Add to activity log
-            addActivity(`Application #${appId} status changed to ${newStatus}`);
         }
-    }
+
+        // Update UI
+        updateApplicationStats();
+        renderApplicationsTable();
+
+        // Show success
+        showAlert(`Status updated to ${newStatus}`, 'success');
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showAlert('Failed to update status', 'danger');
+    });
+}
+
+function showAlert(message, type) {
+    // Create alert element
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.role = 'alert';
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+
+    // Try multiple possible container locations
+    const container = document.getElementById('alertContainer') ||
+                     document.querySelector('.form-container') ||
+                     document.querySelector('.main-content > .container-fluid') ||
+                     document.body;
+
+    // Clear existing alerts
+    const existingAlerts = container.querySelectorAll('.alert');
+    existingAlerts.forEach(alert => alert.remove());
+
+    // Add new alert
+    container.insertAdjacentElement('afterbegin', alertDiv);
+
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.remove();
+        }
+    }, 5000);
+}
 
     // Preview application
-    function previewApplication(appId) {
-        const app = applications.find(a => a.id === appId);
-        if (app) {
-            const previewFrame = document.getElementById('applicationPreviewFrame');
-            previewFrame.src = app.documentUrl;
+    function previewApplication(appId, isAdmin = false) {
+    // Create a more robust form submission
+    const form = document.createElement('form');
+    form.method = 'GET';
+    form.action = `/application/application-details`;
 
-            const previewModal = new bootstrap.Modal(document.getElementById('previewModal'));
-            previewModal.show();
-
-            // Set the current application ID for the modal buttons
-            document.getElementById('acceptFromPreview').setAttribute('data-id', appId);
-            document.getElementById('rejectFromPreview').setAttribute('data-id', appId);
-        }
+    // For admin preview, add a special parameter
+    if (isAdmin) {
+        form.action += '?adminPreview=true';
     }
 
+    form.target = '_blank';
+
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'id';
+    input.value = appId;
+
+    form.appendChild(input);
+    document.body.appendChild(form);
+
+    // Submit the form
+    form.submit();
+
+    // Clean up
+    setTimeout(() => {
+        document.body.removeChild(form);
+    }, 1000);
+}
     // Setup modal events
     function setupModalEvents() {
         document.getElementById('acceptFromPreview').addEventListener('click', function() {
@@ -1208,35 +1425,164 @@ function renderCoursesTable() {
         });
     }
 
-    // Upload advertisement
-    function uploadAdvertisement() {
-        // In a real app, you would upload the file to your server
-        const advtNo = document.getElementById('advtNo').value;
+    async function loadCoursesForDropdown() {
+    try {
+        const response = await fetch('/courses', {
+            headers: {
+                'Authorization': `Bearer ${sessionStorage.getItem('token')}`
+            }
+        });
 
-        // Add to activity log
-        addActivity(`New advertisement uploaded: ${advtNo}`);
+        if (!response.ok) throw new Error('Failed to load courses');
 
-        // Reset form
-        document.getElementById('advtForm').reset();
+        const courses = await response.json();
+        const select = document.getElementById('courseSelect');
 
-        // Show success message
-        alert('Advertisement uploaded successfully!');
+        courses.forEach(course => {
+            const option = document.createElement('option');
+            option.value = course.courseid || course.id;
+            option.textContent = `${course.coursename || course.name} - ${course.institute}`;
+            select.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Error loading courses:', error);
+        showAlert('Failed to load course list', 'warning');
+    }
+}
+
+// Modified uploadAdvertisement function
+// Upload admission function with duplicate prevention
+let isUploading = false; // Track upload state
+
+function uploadAdmission() {
+    if (isUploading) return; // Prevent multiple submissions
+
+    const formData = new FormData();
+    const admissionNo = document.getElementById('admissionNo').value;
+    const admissionDate = document.getElementById('admissionDate').value;
+    const admissionDescription = document.getElementById('admissionDescription').value;
+    const admissionOpenDate = document.getElementById('admissionOpenDate').value;
+    const admissionEndDate = document.getElementById('admissionEndDate').value;
+    const admissionFile = document.getElementById('admissionFile').files[0];
+    const courseId = document.getElementById('admissionCourseSelect').value;
+
+    // Validate required fields
+    if (!admissionNo || !admissionDate || !admissionDescription ||
+        !admissionOpenDate || !admissionEndDate || !admissionFile || !courseId) {
+        showAlert('Please fill all required fields and select a file and course', 'danger');
+        return;
     }
 
-    // Upload admission
-    function uploadAdmission() {
-        // In a real app, you would upload the file to your server
-        const admissionNo = document.getElementById('admissionNo').value;
+    // Add form data
+    formData.append('dtype', 'NOTIFICATION');
+    formData.append('dNo', admissionNo);
+    formData.append('dDate', admissionDate);
+    formData.append('dDesc', admissionDescription);
+    formData.append('opendate', admissionOpenDate);
+    formData.append('enddate', admissionEndDate);
+    formData.append('file', admissionFile);
+    formData.append('courseid', courseId);
 
-        // Add to activity log
-        addActivity(`New admission notice uploaded: ${admissionNo}`);
+    // Show loading state
+    const submitBtn = document.querySelector('#admissionForm button[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Uploading...';
 
+    isUploading = true; // Set uploading flag
+
+    // Send to server
+    fetch('/api/documents/upload', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'Authorization': `Bearer ${sessionStorage.getItem('token')}`
+        }
+    })
+    .then(response => {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Upload Admission Notice';
+        isUploading = false; // Reset uploading flag
+
+        if (!response.ok) {
+            return response.text().then(text => { throw new Error(text || 'Upload failed'); });
+        }
+        return response.json();
+    })
+    .then(data => {
         // Reset form
         document.getElementById('admissionForm').reset();
+        document.getElementById('admissionCourseSelect').value = '';
 
         // Show success message
-        alert('Admission notice uploaded successfully!');
+        showAlert('Admission notice uploaded successfully!', 'success');
+
+        // Add to activity log
+        addActivity(`New admission notice uploaded for course ID ${courseId}: ${admissionNo}`);
+    })
+    .catch(error => {
+        console.error('Upload error:', error);
+        showAlert(`Upload failed: ${error.message}`, 'danger');
+        isUploading = false; // Reset uploading flag on error
+    });
+}
+
+// Initialize admission form - ensure this runs only once
+function initAdmissionForm() {
+    // Remove any existing event listeners first
+    const form = document.getElementById('admissionForm');
+    const newForm = form.cloneNode(true);
+    form.parentNode.replaceChild(newForm, form);
+
+    // Add new event listener
+    document.getElementById('admissionForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        uploadAdmission();
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Load courses for both dropdowns
+    loadCoursesForDropdown('courseSelect'); // For advertisements
+    loadCoursesForDropdown('admissionCourseSelect'); // For admissions
+
+    // Initialize form
+    initAdmissionForm();
+});
+// Modified course loading function
+async function loadCoursesForDropdown(selectId) {
+    try {
+        const response = await fetch('/courses', {
+            headers: {
+                'Authorization': `Bearer ${sessionStorage.getItem('token')}`
+            }
+        });
+
+        if (!response.ok) throw new Error('Failed to load courses');
+
+        const courses = await response.json();
+        const select = document.getElementById(selectId);
+
+        // Clear existing options except the first one
+        while (select.options.length > 1) {
+            select.remove(1);
+        }
+
+        courses.forEach(course => {
+            const option = document.createElement('option');
+            option.value = course.courseid;
+            option.textContent = `${course.coursename} - ${course.institute}`;
+            select.appendChild(option);
+        });
+
+        // Enable the select if it was disabled
+        select.disabled = false;
+
+    } catch (error) {
+        console.error('Error loading courses:', error);
+        showAlert('Failed to load course list. Please try again later.', 'warning');
+        document.getElementById(selectId).disabled = true;
     }
+}
 
     // Load activities
     function loadActivities() {

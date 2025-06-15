@@ -4,9 +4,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.health.healthdemo.Base64ToByteArrayDeserializer;
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDate;
-
+import java.time.LocalDateTime;
 
 
 @Entity
@@ -153,6 +154,18 @@ public class TApplication {
 //    public TApplication() {
 //        this.Disability = false; // by default false
 //    }
+@Column(name = "created_date", updatable = false)
+@CreationTimestamp
+private LocalDateTime createdDate;
+
+    // Add getter and setter
+    public LocalDateTime getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(LocalDateTime createdDate) {
+        this.createdDate = createdDate;
+    }
 
     public Long getA_id() {
         return A_id;
@@ -411,6 +424,11 @@ public class TApplication {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    // Helper method to get course ID
+    public Long getCourseid() {
+        return mCourse != null ? mCourse.getCourseid() : null;
     }
 }
 

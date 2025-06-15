@@ -7,7 +7,35 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
   <link rel="stylesheet" type="text/css" href="/css/styles.css">
+
+  <style>
+    .scroll-container {
+      height: 180px; /* Fixed height for scrolling */
+      overflow-y: hidden; /* Hide scrollbar */
+      position: relative;
+    }
+
+    .scroll-content {
+      position: absolute;
+      width: 100%;
+      animation: scroll 30s linear infinite;
+    }
+
+    .scroll-container:hover .scroll-content {
+      animation-play-state: paused;
+    }
+
+    @keyframes scroll {
+      0% {
+        top: 0;
+      }
+      100% {
+        top: -100%; /* Adjust this value based on content height */
+      }
+    }
+  </style>
 </head>
+
 <body class="min-vh-100 bg-light">
 <!-- Header Section -->
 <header class="shadow-sm" style="background-color: darkblue;">
@@ -61,18 +89,21 @@
     <div class="col-md-6">
       <div class="bg-white p-4 rounded shadow-sm w-100">
         <h2 class="fs-5 fw-semibold text-dark mb-4 justify-content-center">ONGOING ADMISSIONS</h2>
-        <div id="ongoing-admissions" class="d-flex flex-column gap-3">
-          <!-- Dynamic content will be inserted here -->
+        <div class="scroll-container">
+          <div id="ongoing-admissions" class="scroll-content d-flex flex-column gap-3">
+            <!-- Dynamic content will be inserted here -->
+          </div>
         </div>
       </div>
     </div>
-
     <!-- Notifications Section -->
     <div class="col-md-6">
       <div class="bg-white p-4 rounded shadow-sm w-100">
         <h2 class="fs-5 fw-semibold text-dark mb-4">NOTIFICATIONS</h2>
-        <div id="notifications" class="d-flex flex-column gap-3">
-          <!-- Dynamic content will be inserted here -->
+        <div class="scroll-container">
+          <div id="notifications" class="scroll-content d-flex flex-column gap-3">
+            <!-- Dynamic content will be inserted here -->
+          </div>
         </div>
       </div>
     </div>
@@ -81,49 +112,117 @@
 
 <script>
   async function fetchAndDisplayDocuments(dtype) {
-   try {
-     const response = await fetch(`/api/documents/${dtype}`);
-     if (!response.ok) {
-       throw new Error("Failed to fetch documents");
-     }
-     const documents = await response.json();
+    try {
+        // Convert to uppercase to match backend expectation
+        const apiDtype = dtype.toUpperCase();
+        const response = await fetch(`/api/documents/${apiDtype}`);
 
-     const container = document.getElementById(dtype === 'Advertisement' ? 'ongoing-admissions' : 'notifications');
-     container.innerHTML = '';
+        if (!response.ok) {
+            throw new Error("Failed to fetch documents");
+        }
 
-     documents.forEach(doc => {
-       const docNumber = doc.dno || "N/A";
-       const docDesc = doc.ddesc || "No description available";
-       const docDate = doc.ddate ? new Date(doc.ddate).toLocaleDateString() : "Invalid Date";
+        const documents = await response.json();
+        const container = document.getElementById(
+            dtype.toLowerCase() === 'advertisement' ? 'ongoing-admissions' : 'notifications'
+        );
+        container.innerHTML = '';
 
-       // Remove extra double quotes from the file path
-       const docFile = doc.dfile ? doc.dfile.replace(/^"|"$/g, '') : "#";
+        if (!documents || documents.length === 0) {
+            container.innerHTML = `<div class="text-muted">No ${dtype.toLowerCase()} available</div>`;
+            return;
+        }
 
-       // Conditionally render the "Apply Now" button only for admissions
-       const applyButton = dtype === 'Advertisement' ? `
-         <button class="btn btn-primary btn-sm" onclick="location.href='/login'">Apply Now</button>
-       ` : '';
+        documents.forEach(doc => {
+            // Ensure properties match what backend sends
+            const docNumber = doc.dno || doc.DNo || "N/A";
+            const docDesc = doc.ddesc || doc.DDesc || "No description available";
+            const docDate = (doc.ddate || doc.DDate) ? new Date(doc.ddate || doc.DDate).toLocaleDateString() : "Date not available";
 
-       const docElement = `
-         <div class="border-start border-4 border-primary ps-3 mb-2">
-           <p class="mb-1">No. ${docNumber} - ${docDesc} <br>
-             <a href="${docFile}" target="_blank" class="text-primary fw-semibold">View ${dtype}</a>,
-             <br><small class="text-secondary">Dated on: ${docDate}</small>
-           </p>
-           ${applyButton}
-         </div>
-       `;
-       container.insertAdjacentHTML('beforeend', docElement);
-     });
-   } catch (error) {
-     console.error('Error fetching documents:', error);
-   }
- }
+            // Handle file path - check both property naming conventions
+            let docFile = doc.dfile || doc.DFile || "#";
+            if (!docFile.startsWith('http') && !docFile.startsWith('/')) {
+                docFile = `/uploads/${docFile}`;
+            }
 
- document.addEventListener("DOMContentLoaded", () => {
-   fetchAndDisplayDocuments('Advertisement');
-   fetchAndDisplayDocuments('Notification');
- });
+            const docElement = `
+                <div class="document-item border-start border-4 border-primary ps-3 mb-3">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="mb-1">${docNumber}</h6>
+                            <p class="mb-1">${docDesc}</p>
+                            <small class="text-muted">Dated: ${docDate}</small>
+                        </div>
+                        <div>
+                            <a href="${docFile}" target="_blank"
+                               class="btn btn-outline-primary btn-sm me-2">
+                               View ${dtype}
+                            </a>
+                            ${dtype.toLowerCase() === 'advertisement' ? `
+                            <button class="btn btn-primary btn-sm" onclick="location.href='/login'">
+                                Apply Now
+                            </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', docElement);
+        });
+    } catch (error) {
+        console.error('Error fetching documents:', error);
+        const container = document.getElementById(
+            dtype.toLowerCase() === 'advertisement' ? 'ongoing-admissions' : 'notifications'
+        );
+        container.innerHTML = `
+            <div class="alert alert-danger">
+                Failed to load ${dtype.toLowerCase()}s. Please try again later.
+                <br>${error.message}
+            </div>
+        `;
+    }
+}
+
+// Call with consistent case
+document.addEventListener("DOMContentLoaded", () => {
+    fetchAndDisplayDocuments('ADVERTISEMENT');
+    fetchAndDisplayDocuments('NOTIFICATION');
+});
+
+  // Adjust scroll animation after content loads
+function adjustScrollAnimation() {
+  const containers = document.querySelectorAll('.scroll-container');
+  containers.forEach(container => {
+    const content = container.querySelector('.scroll-content');
+    if (content) {
+      // Calculate the total height difference
+      const scrollDistance = content.scrollHeight - container.clientHeight;
+      if (scrollDistance > 0) {
+        // Update the keyframes dynamically
+        const style = document.createElement('style');
+        style.innerHTML = `
+          @keyframes scroll {
+            0% { top: 0; }
+            100% { top: -${scrollDistance}px; }
+          }
+        `;
+        document.head.appendChild(style);
+      } else {
+        // If content doesn't overflow, remove animation
+        content.style.animation = 'none';
+        content.style.position = 'relative';
+      }
+    }
+  });
+}
+
+// Call this after content is loaded
+document.addEventListener("DOMContentLoaded", () => {
+  fetchAndDisplayDocuments('ADVERTISEMENT');
+  fetchAndDisplayDocuments('NOTIFICATION');
+
+  // Wait a bit for content to load then adjust animation
+  setTimeout(adjustScrollAnimation, 1000);
+});
 </script>
 
 

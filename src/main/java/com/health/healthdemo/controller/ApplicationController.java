@@ -3,13 +3,15 @@ package com.health.healthdemo.controller;
 import com.health.healthdemo.entity.MPostalAddress;
 import com.health.healthdemo.entity.MUsers;
 import com.health.healthdemo.entity.TApplication;
-import com.health.healthdemo.repository.MCategoryRepository;
-import com.health.healthdemo.repository.MPostalAddressRepository;
-import com.health.healthdemo.repository.MUsersRepository;
-import com.health.healthdemo.repository.TApplicationRepository;
+import com.health.healthdemo.repository.*;
 import com.health.healthdemo.services.ApplicationService;
 import com.health.healthdemo.services.UsersService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -20,11 +22,14 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.ModelAndView;
 
+import java.io.ByteArrayOutputStream;
 import java.util.*;
 
 
 import java.security.Principal;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/application")
@@ -45,6 +50,8 @@ public class ApplicationController {
  private MCategoryRepository  mCategoryRepository;
  @Autowired
  MPostalAddressRepository mPostalAddressRepository;
+ @Autowired
+ private MCourseRepository courseRepository;
 
  // ✅ 1. API endpoint for frontend (fetch user details)
  @GetMapping("/api/user")
@@ -309,7 +316,72 @@ public class ApplicationController {
   }
  }
 
+ // Add this to your ApplicationController
+ @GetMapping("/applications/course-stats")
+ public ResponseEntity<Map<String, Map<String, Long>>> getApplicationStatsByCourse() {
+  Map<String, Map<String, Long>> stats = new HashMap<>();
 
+  // Get stats for all courses
+  Map<String, Long> allStats = new HashMap<>();
+  allStats.put("total", tApplicationRepository.count());
+  allStats.put("accepted", tApplicationRepository.countByStatus("accepted"));
+  allStats.put("rejected", tApplicationRepository.countByStatus("rejected"));
+  stats.put("all", allStats);
+
+  // Get stats for each course
+  courseRepository.findAll().forEach(course -> {
+   Map<String, Long> courseStats = new HashMap<>();
+   courseStats.put("total", tApplicationRepository.countApplicationsByCourseId(course.getCourseid()));
+   courseStats.put("accepted", tApplicationRepository.countApplicationsByCourseIdAndStatus(course.getCourseid(), "accepted"));
+   courseStats.put("rejected", tApplicationRepository.countApplicationsByCourseIdAndStatus(course.getCourseid(), "rejected"));
+   stats.put(course.getCourseid().toString(), courseStats);
+  });
+
+  return ResponseEntity.ok(stats);
+ }
+
+ @GetMapping("/applications")
+ public ResponseEntity<List<Map<String, Object>>> getApplications(
+         @RequestParam(required = false) Long courseId) {
+
+  List<TApplication> applications;
+  if (courseId != null) {
+   applications = tApplicationRepository.findApplicationsByCourseId(courseId);
+  } else {
+   applications = tApplicationRepository.findAll();
+  }
+
+  // Transform the data to match frontend expectations
+  List<Map<String, Object>> response = applications.stream().map(app -> {
+   Map<String, Object> appData = new HashMap<>();
+   appData.put("id", app.getA_id());
+
+   // Get user details
+   if (app.getUser() != null) {
+    appData.put("applicantName", app.getUser().getName());
+    appData.put("email", app.getUser().getEmail());
+   } else {
+    appData.put("applicantName", "N/A");
+    appData.put("email", "N/A");
+   }
+
+   // Get course details
+   if (app.getmCourse() != null) {
+    appData.put("courseId", app.getmCourse().getCourseid());
+    appData.put("courseName", app.getmCourse().getCoursename());
+   } else {
+    appData.put("courseId", null);
+    appData.put("courseName", "N/A");
+   }
+
+   appData.put("status", app.getStatus() != null ? app.getStatus() : "pending");
+   appData.put("appliedDate", app.getCreatedDate()); // Make sure you have this field in TApplication
+
+   return appData;
+  }).collect(Collectors.toList());
+
+  return ResponseEntity.ok(response);
+ }
 
 
 
@@ -441,11 +513,7 @@ public class ApplicationController {
   return "application_success"; // This should match your HTML file name (application_success.html)
  }
 
- @GetMapping("/applications")
- public ResponseEntity<List<TApplication>> getAllApplications() {
-  List<TApplication> applications = tApplicationRepository.findAll();
-  return ResponseEntity.ok(applications);
- }
+
 
  @PatchMapping("/applications/{id}/status")
  public ResponseEntity<TApplication> updateApplicationStatus(
@@ -463,6 +531,331 @@ public class ApplicationController {
 
   return ResponseEntity.ok(application);
  }
+
+
+ @GetMapping("/applications/{id}/documents/{documentType}")
+ public ResponseEntity<byte[]> getDocument(
+         @PathVariable Long id,
+         @PathVariable String documentType) {
+
+  Optional<TApplication> optionalApp = tApplicationRepository.findById(id);
+  if (optionalApp.isEmpty()) {
+   return ResponseEntity.notFound().build();
+  }
+
+  TApplication application = optionalApp.get();
+  byte[] document;
+  MediaType contentType;
+
+  switch (documentType) {
+   case "passportPhoto":
+    document = application.getPassportPhoto();
+    contentType = MediaType.IMAGE_JPEG;
+    break;
+   case "ageProof":
+    document = application.getAgeProof();
+    contentType = MediaType.APPLICATION_PDF;
+    break;
+   case "marksheet":
+    document = application.getClass10and12Marksheet();
+    contentType = MediaType.APPLICATION_PDF;
+    break;
+   // Add cases for all other document types...
+   case "certificate":
+    document = application.getClass10and12certificate();
+    contentType = MediaType.APPLICATION_PDF;
+   case "castecertificate":
+    document = application.getCaste_Certificate();
+    contentType = MediaType.IMAGE_JPEG;
+   case "charactercertificate":
+    document = application.getCharacter_Certificate();
+    contentType = MediaType.IMAGE_JPEG;
+   case "neetresults":
+    document = application.getNeet_Results();
+    contentType = MediaType.IMAGE_JPEG;
+   case "prc":
+    document = application.getPrc();
+    contentType = MediaType.IMAGE_JPEG;
+   case "pwd":
+    document = application.getPWD_Certificate();
+    contentType = MediaType.IMAGE_JPEG;
+   default:
+    return ResponseEntity.badRequest().build();
+  }
+
+  if (document == null || document.length == 0) {
+   return ResponseEntity.notFound().build();
+  }
+
+  return ResponseEntity.ok()
+          .contentType(contentType)
+          .header("Content-Disposition", "inline")
+          .body(document);
+ }
+
+ @GetMapping("/applications/{id}/full")
+ @ResponseBody
+ public ResponseEntity<Map<String, Object>> getFullApplicationDetails(
+         @PathVariable Long id,
+         Authentication authentication) {
+
+  // Check authentication
+  if (authentication == null) {
+   return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+  }
+
+  // Get the application
+  Optional<TApplication> optionalApp = tApplicationRepository.findById(id);
+  if (optionalApp.isEmpty()) {
+   return ResponseEntity.notFound().build();
+  }
+
+  TApplication application = optionalApp.get();
+
+  // Verify the application belongs to the current user
+  String currentUserEmail = authentication.getName();
+  if (!application.getUser().getEmail().equals(currentUserEmail)) {
+   return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+  }
+
+  // Build the response
+  Map<String, Object> response = new HashMap<>();
+
+  // 1. Basic application info
+  response.put("id", application.getA_id());
+  response.put("status", application.getStatus() != null ? application.getStatus() : "pending");
+  response.put("createdDate", application.getCreatedDate());
+  response.put("dob", application.getDOB());
+  response.put("gender", application.getGender());
+  response.put("nationality", application.getNationality());
+  response.put("religion", application.getReligion());
+
+  // 2. Academic info
+  response.put("physicsScore", application.getPhysicsScore());
+  response.put("chemistryScore", application.getChemistryScore());
+  response.put("biologyBiotechScore", application.getBiologyBiotechScore());
+  response.put("neetScore", application.getNeetScore());
+  response.put("subjectChoice", application.getSubjectChoice());
+
+  // 3. User info
+  Map<String, Object> userInfo = new HashMap<>();
+  userInfo.put("name", application.getUser().getName());
+  userInfo.put("email", application.getUser().getEmail());
+  userInfo.put("phone", application.getUser().getPhone());
+  response.put("user", userInfo);
+
+  // 4. Course info
+  if (application.getmCourse() != null) {
+   Map<String, Object> courseInfo = new HashMap<>();
+   courseInfo.put("courseId", application.getmCourse().getCourseid());
+   courseInfo.put("courseName", application.getmCourse().getCoursename());
+   courseInfo.put("institute", application.getmCourse().getInstitute());
+   response.put("course", courseInfo);
+  }
+
+  // 5. Address info
+  if (application.getPermanentAddress() != null) {
+   response.put("permanentAddress", mapAddress(application.getPermanentAddress()));
+  }
+  if (application.getCorrespondenceAddress() != null) {
+   response.put("correspondenceAddress", mapAddress(application.getCorrespondenceAddress()));
+  }
+
+  // 6. Document URLs
+  Map<String, String> documentUrls = new HashMap<>();
+  documentUrls.put("passportPhoto", "/application/applications/" + id + "/documents/passportPhoto");
+  documentUrls.put("ageProof", "/application/applications/" + id + "/documents/ageProof");
+  documentUrls.put("marksheet", "/application/applications/" + id + "/documents/marksheet");
+  documentUrls.put("certificate", "/application/applications/" + id + "/documents/certificate");
+
+  if (application.getCaste_Certificate() != null) {
+   documentUrls.put("casteCertificate", "/application/applications/" + id + "/documents/casteCertificate");
+  }
+  if (application.getPWD_Certificate() != null) {
+   documentUrls.put("pwdCertificate", "/application/applications/" + id + "/documents/pwdCertificate");
+  }
+  if (application.getPrc() != null) {
+   documentUrls.put("prc", "/application/applications/" + id + "/documents/prc");
+  }
+
+  documentUrls.put("neetResults", "/application/applications/" + id + "/documents/neetResults");
+  documentUrls.put("characterCertificate", "/application/applications/" + id + "/documents/characterCertificate");
+
+  response.put("documentUrls", documentUrls);
+
+  return ResponseEntity.ok(response);
+ }
+
+ @GetMapping("/applications/{id}/download")
+ public ResponseEntity<byte[]> downloadApplicationPdf(
+         @PathVariable Long id,
+         Authentication authentication) throws Exception {
+
+  // Check authentication
+  if (authentication == null) {
+   return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+  }
+
+  // Get the application
+  Optional<TApplication> optionalApp = tApplicationRepository.findById(id);
+  if (optionalApp.isEmpty()) {
+   return ResponseEntity.notFound().build();
+  }
+
+  TApplication application = optionalApp.get();
+
+  // Verify the application belongs to the current user
+  String currentUserEmail = authentication.getName();
+  if (!application.getUser().getEmail().equals(currentUserEmail)) {
+   return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+  }
+
+  // Generate PDF
+  byte[] pdfBytes = generateApplicationPdf(application);
+
+  return ResponseEntity.ok()
+          .contentType(MediaType.APPLICATION_PDF)
+          .header("Content-Disposition", "attachment; filename=application_" + id + ".pdf")
+          .body(pdfBytes);
+ }
+
+ private byte[] generateApplicationPdf(TApplication application) throws Exception {
+  try (PDDocument document = new PDDocument()) {
+   PDPage page = new PDPage();
+   document.addPage(page);
+
+   try (PDPageContentStream contentStream = new PDPageContentStream(document, page)) {
+    // Set up fonts
+    contentStream.setFont(PDType1Font.HELVETICA_BOLD, 16);
+
+    // Add title
+    contentStream.beginText();
+    contentStream.newLineAtOffset(100, 750);
+    contentStream.showText("Application Details");
+    contentStream.endText();
+
+    // Set smaller font for content
+    contentStream.setFont(PDType1Font.HELVETICA, 12);
+
+    // Add application details
+    contentStream.beginText();
+    contentStream.newLineAtOffset(100, 700);
+    contentStream.showText("Application ID: " + application.getA_id());
+    contentStream.newLineAtOffset(0, -20);
+    contentStream.showText("Status: " + (application.getStatus() != null ? application.getStatus() : "pending"));
+    contentStream.newLineAtOffset(0, -20);
+    contentStream.showText("Submitted Date: " +
+            (application.getCreatedDate() != null ? application.getCreatedDate().toString() : "N/A"));
+
+    // User information
+    contentStream.newLineAtOffset(0, -40);
+    contentStream.setFont(PDType1Font.HELVETICA_BOLD, 14);
+    contentStream.showText("Applicant Information");
+    contentStream.setFont(PDType1Font.HELVETICA, 12);
+    contentStream.newLineAtOffset(0, -20);
+    contentStream.showText("Name: " + application.getUser().getName());
+    contentStream.newLineAtOffset(0, -20);
+    contentStream.showText("Email: " + application.getUser().getEmail());
+    contentStream.newLineAtOffset(0, -20);
+    contentStream.showText("Phone: " + application.getUser().getPhone());
+
+    // Course information
+    if (application.getmCourse() != null) {
+     contentStream.newLineAtOffset(0, -40);
+     contentStream.setFont(PDType1Font.HELVETICA_BOLD, 14);
+     contentStream.showText("Course Information");
+     contentStream.setFont(PDType1Font.HELVETICA, 12);
+     contentStream.newLineAtOffset(0, -20);
+     contentStream.showText("Course: " + application.getmCourse().getCoursename());
+     contentStream.newLineAtOffset(0, -20);
+     contentStream.showText("Institute: " + application.getmCourse().getInstitute());
+    }
+
+    // Academic details
+    contentStream.newLineAtOffset(0, -40);
+    contentStream.setFont(PDType1Font.HELVETICA_BOLD, 14);
+    contentStream.showText("Academic Details");
+    contentStream.setFont(PDType1Font.HELVETICA, 12);
+    contentStream.newLineAtOffset(0, -20);
+    contentStream.showText("Physics Score: " + application.getPhysicsScore());
+    contentStream.newLineAtOffset(0, -20);
+    contentStream.showText("Chemistry Score: " + application.getChemistryScore());
+    contentStream.newLineAtOffset(0, -20);
+    contentStream.showText("Biology/Biotech Score: " + application.getBiologyBiotechScore());
+    contentStream.newLineAtOffset(0, -20);
+    contentStream.showText("NEET Score: " + application.getNeetScore());
+
+    contentStream.endText();
+   }
+
+   ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+   document.save(byteArrayOutputStream);
+   return byteArrayOutputStream.toByteArray();
+  }
+ }
+
+ private Map<String, Object> mapAddress(MPostalAddress address) {
+  Map<String, Object> addressMap = new HashMap<>();
+  addressMap.put("addressLine1", address.getAddressLine1());
+  addressMap.put("addressLine2", address.getAddressLine2());
+  addressMap.put("district", address.getDistrict());
+  addressMap.put("state", address.getState());
+  addressMap.put("pincode", address.getPincode());
+  return addressMap;
+ }
+// @GetMapping("/application-details")
+// public ModelAndView applicationDetails(@RequestParam Long id, HttpSession session) {
+//  // Check if user is authenticated (either admin or regular user)
+//  String role = (String) session.getAttribute("userRole");
+//  Long sessionUserId = (Long) session.getAttribute("userId");
+//
+//  // Get the application to check ownership
+//  TApplication tApplication = applicationService.getApplicationById(id);
+//
+//  if (role == null) {
+//   // Not logged in - store requested ID and redirect to login
+//   session.setAttribute("redirectAppId", id);
+//   return new ModelAndView("redirect:/login");
+//  }
+
+//  // Check if user is admin OR owner of the application
+//  if ("admin".equals(role) || (sessionUserId != null && sessionUserId.equals(tApplication.getUser().getUid()))) {
+//   ModelAndView mav = new ModelAndView("application-details");
+//   mav.addObject("application", tApplication); // Pass the full application object
+//   return mav;
+//  }
+//
+//  // Not authorized
+//  return new ModelAndView("redirect:/access-denied");
+// }
+// @GetMapping("/admin/application-preview")
+// public ModelAndView adminApplicationPreview(@RequestParam Long id, HttpSession session) {
+//  String role = (String) session.getAttribute("userRole");
+//  if (!"admin".equals(role)) {
+//   return new ModelAndView("redirect:/admin/login");
+//  }
+//
+//  TApplication tApplication = ApplicationService.getApplicationById(id);
+//  ModelAndView mav = new ModelAndView("admin-application-preview");
+//  mav.addObject("application", application);
+//  mav.addObject("isAdmin", true);
+//  return mav;
+// }
+//
+// @PostMapping("/admin/application/{id}/status")
+// public ResponseEntity<?> updateApplicationStatus(
+//         @PathVariable Long id,
+//         @RequestBody StatusUpdateRequest request,
+//         HttpSession session) {
+//
+//  String role = (String) session.getAttribute("userRole");
+//  if (!"admin".equals(role)) {
+//   return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+//  }
+//
+//  applicationService.updateApplicationStatus(id, request.getStatus(), request.getComments());
+//  return ResponseEntity.ok().build();
+// }
 
 }
 

@@ -40,7 +40,8 @@ public class WebSecurityConfig {
                                 "/api/getUserLoginDetails", "/api/get-loginuser-details", "/api/logout",
                                 "api/documents/with-course/{dtype}", "api/categories/fetched_categories", "/fileupload",
                                 "/quota", "/preview", "/previewApplication", "/forgotpassword", "/application/submitAll","/application/applicationsuccess","/application_success", "/admin-dashboard","/application/applications"
-                        , "/application/applications/{id}/status","/courses")
+                        , "/application/applications/{id}/status","/courses","/application/applications/course-stats","/application/preview/{id}","/application-details","/application//applications/{id}/documents/{documentType}",
+                                "/application/application-details","/myapplications","/application/applications/{id}/download","/application/applications/{id}/full")
                         .permitAll() // Allow these endpoints for everyone
 
                         // Authenticate all other requests (requires login)
@@ -59,7 +60,8 @@ public class WebSecurityConfig {
                 // Form login configuration
                 .formLogin(login -> login
                         .loginPage("/login")  // Custom login page URL
-                        .defaultSuccessUrl("/home", true) // Redirect to home page after successful login
+                        .defaultSuccessUrl("/home", true)
+                        .defaultSuccessUrl("/admin")// Redirect to home page after successful login
                         .permitAll()  // Allow access to login page without authentication
                 )
 

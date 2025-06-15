@@ -328,3 +328,20 @@ footer {
 
 
  }
+ /* Status badges */
+ .badge {
+   padding: 0.35em 0.65em;
+   font-size: 0.75em;
+   font-weight: 700;
+   border-radius: 0.25rem;
+ }
+
+ /* Application list items */
+ .list-group-item {
+   transition: all 0.2s ease;
+ }
+
+ .list-group-item:hover {
+   transform: translateY(-2px);
+   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+ }
