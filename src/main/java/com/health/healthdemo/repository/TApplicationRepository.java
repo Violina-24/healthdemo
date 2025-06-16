@@ -32,4 +32,10 @@
 
   // 5. Count by status - can remain as derived query
   Long countByStatus(String status);
+
+  @Query("SELECT a.mCourse.Courseid, COUNT(a), " +
+          "SUM(CASE WHEN a.status = 'accepted' THEN 1 ELSE 0 END), " +
+          "SUM(CASE WHEN a.status = 'rejected' THEN 1 ELSE 0 END) " +
+          "FROM TApplication a GROUP BY a.mCourse.Courseid")
+  List<Object[]> countApplicationsByCourse();
  }

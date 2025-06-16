@@ -152,8 +152,23 @@
         <div class="container-fluid">
             <h3 class="mb-4"><i class="bi bi-file-earmark-text me-2"></i>Applications</h3>
 
-            <!-- Application Stats Cards (Same as dashboard but smaller) -->
+            <!-- Application Stats Cards -->
             <div class="row mb-4">
+                <!-- Total Applications Card -->
+                <div class="col-md-4 mb-3">
+                    <div class="card stats-card text-white bg-primary" id="totalApplicationsCard">
+                        <div class="card-body">
+                            <h5 class="card-title">Total Applications</h5>
+                            <div class="d-flex justify-content-between">
+                                <span>Total: <span id="totalApplicationsCount">0</span></span>
+                                <span class="text-success">✓ <span id="totalAcceptedCount">0</span></span>
+                                <span class="text-danger">✗ <span id="totalRejectedCount">0</span></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Course Filter Cards will be loaded here -->
                 <div class="col-md-12">
                     <div class="card">
                         <div class="card-header">
@@ -167,35 +182,12 @@
                     </div>
                 </div>
             </div>
-                <div class="col-md-4">
-                    <div class="card stats-card text-white bg-success" id="filterAcceptedApplications">
-                        <div class="card-body py-2">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="card-title mb-0">Accepted</h6>
-                                    <h4 class="card-value mb-0" id="filterAcceptedCount">0</h4>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card stats-card text-white bg-danger" id="filterRejectedApplications">
-                        <div class="card-body py-2">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="card-title mb-0">Rejected</h6>
-                                    <h4 class="card-value mb-0" id="filterRejectedCount">0</h4>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
 
             <!-- Applications Table -->
             <div class="card">
+                <div class="card-header">
+                    <h5 id="applicationsTableTitle">All Applications</h5>
+                </div>
                 <table class="application-table table">
                     <thead>
                     <tr>
@@ -211,16 +203,15 @@
                     <tbody id="applicationsTableBody"></tbody>
                 </table>
 
-
-
-                    <!-- Pagination -->
-                    <nav class="mt-3">
-                        <ul class="pagination justify-content-center" id="applicationsPagination">
-                            <!-- Pagination will be loaded here -->
-                        </ul>
-                    </nav>
-                </div>
-</div>
+                <!-- Pagination -->
+                <nav class="mt-3">
+                    <ul class="pagination justify-content-center" id="applicationsPagination">
+                        <!-- Pagination will be loaded here -->
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
 
 
     <!-- Reports Section have to work in this -->
@@ -630,8 +621,7 @@ function loadApplications(page = 1, courseId = 'all') {
     }
 
     return fetch(url, {
-        credentials: 'include' ,
-         redirect: 'manual'// Important for session cookies
+        credentials: 'include'
     })
     .then(response => {
         if (response.status === 401) {
@@ -643,7 +633,6 @@ function loadApplications(page = 1, courseId = 'all') {
     })
     .then(data => {
         applications = data;
-        updateApplicationStats();
         renderApplicationsTable();
         renderApplicationsPagination();
         return applications;
@@ -656,6 +645,19 @@ function loadApplications(page = 1, courseId = 'all') {
         return [];
     });
 }
+
+// Add event listener for the Total Applications card
+document.addEventListener('DOMContentLoaded', function() {
+    // ... existing code ...
+
+    // Make Total Applications card clickable
+    document.getElementById('totalApplicationsCard').addEventListener('click', function() {
+        currentCourseFilter = 'all';
+        document.getElementById('applicationsTableTitle').textContent = 'All Applications';
+        loadApplications(1, 'all');
+    });
+});
+
 function renderApplicationsPagination() {
     const paginationContainer = document.getElementById('applicationsPagination');
     if (!paginationContainer) {
@@ -735,27 +737,84 @@ function renderApplicationsPagination() {
 
 // Add this new function to load course statistics
 function loadCourseApplicationStats() {
-        return fetch('/application/applications/course-stats', {  // Note the return
-            credentials: 'include'
-        })
-        .then(response => response.json())
-        .then(data => {
-            applicationsByCourse = data;
-            renderCourseFilters();
-            return data; // Return for chaining
-        })
-        .catch(error => {
-            console.error('Error loading course stats:', error);
-            // Fallback to mock data
-            applicationsByCourse = {
-                'all': { total: 45, accepted: 15, rejected: 5 },
-                '1': { total: 20, accepted: 10, rejected: 2 },
-                '2': { total: 15, accepted: 3, rejected: 2 },
-                '3': { total: 10, accepted: 2, rejected: 1 }
-            };
-            renderCourseFilters();
-            return applicationsByCourse; // Return even in error case
+    return fetch('/application/applications/course-stats', {
+        credentials: 'include'
+    })
+    .then(response => response.json())
+    .then(data => {
+        applicationsByCourse = data;
+
+        // Update total counts
+        document.getElementById('totalApplicationsCount').textContent = data.all?.total || 0;
+        document.getElementById('totalAcceptedCount').textContent = data.all?.accepted || 0;
+        document.getElementById('totalRejectedCount').textContent = data.all?.rejected || 0;
+
+        renderCourseFilters();
+        return data;
+    })
+    .catch(error => {
+        console.error('Error loading course stats:', error);
+        // Fallback to mock data
+        applicationsByCourse = {
+            'all': { total: 45, accepted: 15, rejected: 5 },
+            '1': { total: 20, accepted: 10, rejected: 2 },
+            '2': { total: 15, accepted: 3, rejected: 2 },
+            '3': { total: 10, accepted: 2, rejected: 1 }
+        };
+
+        // Update total counts with mock data
+        document.getElementById('totalApplicationsCount').textContent = applicationsByCourse.all.total;
+        document.getElementById('totalAcceptedCount').textContent = applicationsByCourse.all.accepted;
+        document.getElementById('totalRejectedCount').textContent = applicationsByCourse.all.rejected;
+
+        renderCourseFilters();
+        return applicationsByCourse;
+    });
+}
+
+// Update the renderCourseFilters function
+function renderCourseFilters() {
+    const container = document.getElementById('courseFilters');
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    // Add buttons for each course
+    courses.forEach(course => {
+        if (!course || course.courseid == null) {
+            console.warn('Invalid course found:', course);
+            return;
+        }
+
+        const courseId = String(course.courseid);
+        const stats = applicationsByCourse[courseId] || { total: 0, accepted: 0, rejected: 0 };
+        const courseName = course.coursename || 'Unnamed Course';
+        const instituteName = course.institute || 'Unknown Institute';
+
+        const card = document.createElement('div');
+        card.className = `col-md-3 mb-3 course-filter ${currentCourseFilter === courseId ? 'active' : ''}`;
+        card.innerHTML = `
+            <div class="card stats-card text-white"
+                 style="background-color: ${getCourseColor(courseId)}"
+                 data-course="${courseId}">
+                <div class="card-body">
+                    <h5 class="card-title">${courseName}</h5>
+                    <p class="card-subtitle mb-2 text-white-50">${instituteName}</p>
+                    <div class="d-flex justify-content-between">
+                        <span>Total: ${stats.total}</span>
+                        <span class="text-success">✓ ${stats.accepted}</span>
+                        <span class="text-danger">✗ ${stats.rejected}</span>
+                    </div>
+                </div>
+            </div>
+        `;
+        card.addEventListener('click', () => {
+            currentCourseFilter = courseId;
+            document.getElementById('applicationsTableTitle').textContent = `Applications for ${courseName}`;
+            loadApplications(1, courseId);
         });
+        container.appendChild(card);
+    });
     }
 
 // Add this function to render course filter buttons

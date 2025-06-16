@@ -41,7 +41,7 @@ public class WebSecurityConfig {
                                 "api/documents/with-course/{dtype}", "api/categories/fetched_categories", "/fileupload",
                                 "/quota", "/preview", "/previewApplication", "/forgotpassword", "/application/submitAll","/application/applicationsuccess","/application_success", "/admin-dashboard","/application/applications"
                         , "/application/applications/{id}/status","/courses","/application/applications/course-stats","/application/preview/{id}","/application-details","/application//applications/{id}/documents/{documentType}",
-                                "/application/application-details","/myapplications","/application/applications/{id}/download","/application/applications/{id}/full")
+                                "/application/application-details","/myapplications","/application/applications/{id}/download","/application/applications/{id}/full","/application/application-stats")
                         .permitAll() // Allow these endpoints for everyone
 
                         // Authenticate all other requests (requires login)
