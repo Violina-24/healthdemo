@@ -5,6 +5,44 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="/css/admin.css">
+    <style>
+        .course-card {
+            transition: transform 0.2s;
+            cursor: pointer;
+        }
+        .course-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .stats-card {
+            min-height: 120px;
+        }
+        .status-badge {
+            padding: 3px 8px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        .status-pending {
+            background-color: #ffc107;
+            color: #000;
+        }
+        .status-accepted {
+            background-color: #28a745;
+            color: #fff;
+        }
+        .status-rejected {
+            background-color: #dc3545;
+            color: #fff;
+        }
+        .application-list {
+            display: none;
+            margin-top: 20px;
+        }
+        .course-card.active + .application-list {
+            display: block;
+        }
+    </style>
 </head>
 <body>
 <!-- Admin Header -->
@@ -75,7 +113,7 @@
             </div>
 
 
-<!--            not working-->
+            <!--            not working-->
 
             <!-- Stats Cards -->
             <div class="row">
@@ -154,61 +192,85 @@
 
             <!-- Application Stats Cards -->
             <div class="row mb-4">
-                <!-- Total Applications Card -->
-                <div class="col-md-4 mb-3">
-                    <div class="card stats-card text-white bg-primary" id="totalApplicationsCard">
+                <div class="col-md-4">
+                    <div class="card stats-card text-white bg-primary">
                         <div class="card-body">
-                            <h5 class="card-title">Total Applications</h5>
-                            <div class="d-flex justify-content-between">
-                                <span>Total: <span id="totalApplicationsCount">0</span></span>
-                                <span class="text-success">✓ <span id="totalAcceptedCount">0</span></span>
-                                <span class="text-danger">✗ <span id="totalRejectedCount">0</span></span>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="card-title">Total Applications</h5>
+                                    <h2 class="card-value" id="totalApplicationsCount">0</h2>
+                                </div>
+                                <i class="bi bi-file-earmark-text fs-1"></i>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <!-- Course Filter Cards will be loaded here -->
-                <div class="col-md-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5>Filter by Course</h5>
-                        </div>
+                <div class="col-md-4">
+                    <div class="card stats-card text-white bg-success">
                         <div class="card-body">
-                            <div class="row" id="courseFilters">
-                                <!-- Course filter buttons will be loaded here -->
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="card-title">Accepted</h5>
+                                    <h2 class="card-value" id="totalAcceptedCount">0</h2>
+                                </div>
+                                <i class="bi bi-check-circle fs-1"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card stats-card text-white bg-danger">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="card-title">Rejected</h5>
+                                    <h2 class="card-value" id="totalRejectedCount">0</h2>
+                                </div>
+                                <i class="bi bi-x-circle fs-1"></i>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Applications Table -->
-            <div class="card">
-                <div class="card-header">
-                    <h5 id="applicationsTableTitle">All Applications</h5>
-                </div>
-                <table class="application-table table">
-                    <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Applicant Name</th>
-                        <th>Email</th>
-                        <th>Course</th>
-                        <th>Status</th>
-                        <th>Applied Date</th>
-                        <th>Actions</th>
-                    </tr>
-                    </thead>
-                    <tbody id="applicationsTableBody"></tbody>
-                </table>
+            <!-- Course Cards -->
+            <div class="row mb-4" id="courseCardsContainer">
+                <!-- Course cards will be loaded here -->
+            </div>
 
-                <!-- Pagination -->
-                <nav class="mt-3">
-                    <ul class="pagination justify-content-center" id="applicationsPagination">
-                        <!-- Pagination will be loaded here -->
-                    </ul>
-                </nav>
+            <!-- Applications Table (shown by default for first course) -->
+            <div class="card mt-4" id="applicationsTableContainer">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 id="applicationsTableTitle">Applications</h5>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" id="filterAll">All</button>
+                        <button type="button" class="btn btn-sm btn-outline-success" id="filterAccepted">Accepted</button>
+                        <button type="button" class="btn btn-sm btn-outline-danger" id="filterRejected">Rejected</button>
+                        <button type="button" class="btn btn-sm btn-outline-warning" id="filterPending">Pending</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Applicant Name</th>
+                                <th>Email</th>
+                                <th>Status</th>
+                                <th>Applied Date</th>
+                                <th>Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody id="applicationsTableBody"></tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    <nav class="mt-3">
+                        <ul class="pagination justify-content-center" id="applicationsPagination"></ul>
+                    </nav>
+                </div>
             </div>
         </div>
     </div>
@@ -335,88 +397,88 @@
             </div>
         </div>
     </div>
-<!--couse section need to fix the ui-->
-<div class="content-section" id="courses-section">
-    <div class="container-fluid">
-        <h3 class="mb-4"><i class="bi bi-book me-2"></i>Manage Courses</h3>
+    <!--couse section need to fix the ui-->
+    <div class="content-section" id="courses-section">
+        <div class="container-fluid">
+            <h3 class="mb-4"><i class="bi bi-book me-2"></i>Manage Courses</h3>
 
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5>Add New Course</h5>
-            </div>
-            <div class="card-body">
-                <form id="courseForm" class="course-form">
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label for="courseName" class="form-label">Course Name</label>
-                            <input type="text" class="form-control" id="courseName" required>
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Add New Course</h5>
+                </div>
+                <div class="card-body">
+                    <form id="courseForm" class="course-form">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="courseName" class="form-label">Course Name</label>
+                                <input type="text" class="form-control" id="courseName" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="instituteName" class="form-label">Institute</label>
+                                <input type="text" class="form-control" id="instituteName" required>
+                            </div>
                         </div>
-                        <div class="col-md-6">
-                            <label for="instituteName" class="form-label">Institute</label>
-                            <input type="text" class="form-control" id="instituteName" required>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="courseDuration" class="form-label">Duration (years)</label>
+                                <input type="number" class="form-control" id="courseDuration" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="courseSeats" class="form-label">Total Seats</label>
+                                <input type="number" class="form-control" id="courseSeats" required>
+                            </div>
                         </div>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label for="courseDuration" class="form-label">Duration (years)</label>
-                            <input type="number" class="form-control" id="courseDuration" required>
+                        <div class="mb-3">
+                            <label for="courseDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="courseDescription" rows="3"></textarea>
                         </div>
-                        <div class="col-md-6">
-                            <label for="courseSeats" class="form-label">Total Seats</label>
-                            <input type="number" class="form-control" id="courseSeats" required>
+                        <div class="d-flex justify-content-end">
+                            <button type="reset" class="btn btn-outline-secondary me-2">Reset</button>
+                            <button type="submit" class="btn btn-primary">Add Course</button>
                         </div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="courseDescription" class="form-label">Description</label>
-                        <textarea class="form-control" id="courseDescription" rows="3"></textarea>
-                    </div>
-                    <div class="d-flex justify-content-end">
-                        <button type="reset" class="btn btn-outline-secondary me-2">Reset</button>
-                        <button type="submit" class="btn btn-primary">Add Course</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">All Courses</h5>
-                <div class="input-group" style="width: 300px;">
-                    <input type="text" class="form-control" placeholder="Search courses..." id="courseSearch">
-                    <button class="btn btn-outline-secondary" type="button">
-                        <i class="bi bi-search"></i>
-                    </button>
+                    </form>
                 </div>
             </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table course-table">
-                        <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Course Name</th>
-                            <th>Institute</th>
-                            <th>Duration</th>
-                            <th>Seats</th>
-                            <th>Actions</th>
-                        </tr>
-                        </thead>
-                        <tbody id="coursesTableBody">
-                        <!-- Courses will be loaded here -->
-                        </tbody>
-                    </table>
-                </div>
 
-                <!-- Pagination -->
-                <nav class="mt-3">
-                    <ul class="pagination justify-content-center" id="coursesPagination">
-                        <!-- Pagination will be loaded here -->
-                    </ul>
-                </nav>
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">All Courses</h5>
+                    <div class="input-group" style="width: 300px;">
+                        <input type="text" class="form-control" placeholder="Search courses..." id="courseSearch">
+                        <button class="btn btn-outline-secondary" type="button">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table course-table">
+                            <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Course Name</th>
+                                <th>Institute</th>
+                                <th>Duration</th>
+                                <th>Seats</th>
+                                <th>Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody id="coursesTableBody">
+                            <!-- Courses will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    <nav class="mt-3">
+                        <ul class="pagination justify-content-center" id="coursesPagination">
+                            <!-- Pagination will be loaded here -->
+                        </ul>
+                    </nav>
+                </div>
             </div>
         </div>
     </div>
-</div>
 </div>
 
 
@@ -458,7 +520,7 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     // Global variables
-   let currentAdmin = {};
+    let currentAdmin = {};
     let applications = [];
     let currentApplicationPage = 1;
     const applicationsPerPage = 10;
@@ -467,6 +529,7 @@
     const coursesPerPage = 5;
     let currentCourseFilter = 'all';
     let applicationsByCourse = {};
+    let currentlySelectedCourse = null;
 
     // DOM Content Loaded - Fixed initialization sequence
     document.addEventListener('DOMContentLoaded', function() {
@@ -484,7 +547,7 @@
         setupForms();
         setupModalEvents();
 
-        // Proper promise chain for initial data loading
+        // Load initial data
         loadCourses()
             .then(() => {
                 return Promise.all([
@@ -495,8 +558,17 @@
             })
             .catch(error => {
                 console.error('Initialization error:', error);
-                // Show error to user if needed
             });
+
+             // Close applications table button
+        document.getElementById('closeApplicationsTable').addEventListener('click', function() {
+            document.getElementById('applicationsTableContainer').classList.remove('active');
+            document.querySelectorAll('.course-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            currentlySelectedCourse = null;
+        });
+    });
 
         // Make Total Courses card clickable
         document.getElementById('totalCoursesCard').addEventListener('click', function() {
@@ -513,7 +585,6 @@
                 item.classList.remove('active');
             });
         });
-    });
 
     // Load admin data
     function loadAdminData() {
@@ -611,12 +682,19 @@
     }
 
     // Load applications from API
-function loadApplications(page = 1, courseId = 'all') {
+ function loadApplications(page = 1, courseId = null) {
     currentApplicationPage = page;
-    currentCourseFilter = courseId;
+
+    // If no courseId provided and we have courses, use the first one
+    if (!courseId && courses.length > 0) {
+        courseId = courses[0].courseid || courses[0].id;
+        currentlySelectedCourse = courseId;
+    } else if (courseId) {
+        currentlySelectedCourse = courseId;
+    }
 
     let url = '/application/applications';
-    if (courseId !== 'all') {
+    if (courseId && courseId !== 'all') {
         url = `/application/applications?courseId=${courseId}`;
     }
 
@@ -635,6 +713,18 @@ function loadApplications(page = 1, courseId = 'all') {
         applications = data;
         renderApplicationsTable();
         renderApplicationsPagination();
+
+        // Update the table title with course name if applicable
+        if (courseId && courseId !== 'all') {
+            const course = courses.find(c => (c.courseid || c.id) == courseId);
+            if (course) {
+                document.getElementById('applicationsTableTitle').textContent =
+                    `Applications for ${course.coursename || course.name}`;
+            }
+        } else {
+            document.getElementById('applicationsTableTitle').textContent = 'All Applications';
+        }
+
         return applications;
     })
     .catch(error => {
@@ -645,18 +735,6 @@ function loadApplications(page = 1, courseId = 'all') {
         return [];
     });
 }
-
-// Add event listener for the Total Applications card
-document.addEventListener('DOMContentLoaded', function() {
-    // ... existing code ...
-
-    // Make Total Applications card clickable
-    document.getElementById('totalApplicationsCard').addEventListener('click', function() {
-        currentCourseFilter = 'all';
-        document.getElementById('applicationsTableTitle').textContent = 'All Applications';
-        loadApplications(1, 'all');
-    });
-});
 
 function renderApplicationsPagination() {
     const paginationContainer = document.getElementById('applicationsPagination');
@@ -737,40 +815,132 @@ function renderApplicationsPagination() {
 
 // Add this new function to load course statistics
 function loadCourseApplicationStats() {
-    return fetch('/application/applications/course-stats', {
-        credentials: 'include'
-    })
-    .then(response => response.json())
-    .then(data => {
-        applicationsByCourse = data;
+        return fetch('/application/applications/course-stats', {
+            credentials: 'include'
+        })
+        .then(response => response.json())
+        .then(data => {
+            applicationsByCourse = data;
 
-        // Update total counts
-        document.getElementById('totalApplicationsCount').textContent = data.all?.total || 0;
-        document.getElementById('totalAcceptedCount').textContent = data.all?.accepted || 0;
-        document.getElementById('totalRejectedCount').textContent = data.all?.rejected || 0;
+            // Update total counts
+            document.getElementById('totalApplicationsCount').textContent = data.all?.total || 0;
+            document.getElementById('totalAcceptedCount').textContent = data.all?.accepted || 0;
+            document.getElementById('totalRejectedCount').textContent = data.all?.rejected || 0;
 
-        renderCourseFilters();
-        return data;
-    })
-    .catch(error => {
-        console.error('Error loading course stats:', error);
-        // Fallback to mock data
-        applicationsByCourse = {
-            'all': { total: 45, accepted: 15, rejected: 5 },
-            '1': { total: 20, accepted: 10, rejected: 2 },
-            '2': { total: 15, accepted: 3, rejected: 2 },
-            '3': { total: 10, accepted: 2, rejected: 1 }
-        };
+            renderCourseCards();
+            return data;
+        })
+        .catch(error => {
+            console.error('Error loading course stats:', error);
+            // Fallback to mock data
+            applicationsByCourse = {
+                'all': { total: 45, accepted: 15, rejected: 5 },
+                '1': { total: 20, accepted: 10, rejected: 2 },
+                '2': { total: 15, accepted: 3, rejected: 2 },
+                '3': { total: 10, accepted: 2, rejected: 1 }
+            };
 
-        // Update total counts with mock data
-        document.getElementById('totalApplicationsCount').textContent = applicationsByCourse.all.total;
-        document.getElementById('totalAcceptedCount').textContent = applicationsByCourse.all.accepted;
-        document.getElementById('totalRejectedCount').textContent = applicationsByCourse.all.rejected;
+            // Update total counts with mock data
+            document.getElementById('totalApplicationsCount').textContent = applicationsByCourse.all.total;
+            document.getElementById('totalAcceptedCount').textContent = applicationsByCourse.all.accepted;
+            document.getElementById('totalRejectedCount').textContent = applicationsByCourse.all.rejected;
 
-        renderCourseFilters();
-        return applicationsByCourse;
+            renderCourseCards();
+            return applicationsByCourse;
+        });
+    }
+    function renderCourseCards() {
+    const container = document.getElementById('courseCardsContainer');
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    // Add cards for each course
+    courses.forEach((course, index) => {
+        if (!course || (course.courseid == null && course.id == null)) {
+            console.warn('Invalid course found:', course);
+            return;
+        }
+
+        const courseId = String(course.courseid || course.id);
+        const stats = applicationsByCourse[courseId] || { total: 0, accepted: 0, rejected: 0 };
+        const courseName = course.coursename || course.name || 'Unnamed Course';
+        const instituteName = course.institute || 'Unknown Institute';
+
+        const card = document.createElement('div');
+        card.className = `col-md-4 mb-4 course-card ${currentlySelectedCourse === courseId ? 'active' : ''}`;
+        card.dataset.courseId = courseId;
+        card.innerHTML = `
+            <div class="card h-100" style="border-left: 5px solid ${getCourseColor(courseId)}">
+                <div class="card-body">
+                    <h5 class="card-title">${courseName}</h5>
+                    <p class="card-subtitle text-muted mb-3">${instituteName}</p>
+
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <div class="text-primary">
+                                <div class="h4 mb-0">${stats.total}</div>
+                                <small>Total</small>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="text-success">
+                                <div class="h4 mb-0">${stats.accepted}</div>
+                                <small>Accepted</small>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="text-danger">
+                                <div class="h4 mb-0">${stats.rejected}</div>
+                                <small>Rejected</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent">
+                    <small class="text-muted">Click to view applications</small>
+                </div>
+            </div>
+        `;
+
+        card.addEventListener('click', () => {
+            // Set current course filter
+            currentlySelectedCourse = courseId;
+
+            // Load applications for this course
+            loadApplications(1, courseId);
+
+            // Update active state
+            document.querySelectorAll('.course-card').forEach(c => {
+                c.classList.remove('active');
+            });
+            card.classList.add('active');
+        });
+
+        // If this is the first course and no course is selected, make it active
+        if (index === 0 && !currentlySelectedCourse) {
+            card.classList.add('active');
+            currentlySelectedCourse = courseId;
+            loadApplications(1, courseId);
+        }
+
+        container.appendChild(card);
     });
 }
+
+// Add filter event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('filterAll').addEventListener('click', () => filterApplications('all'));
+    document.getElementById('filterAccepted').addEventListener('click', () => filterApplications('accepted'));
+    document.getElementById('filterRejected').addEventListener('click', () => filterApplications('rejected'));
+    document.getElementById('filterPending').addEventListener('click', () => filterApplications('pending'));
+});
+
+            // Helper function for course colors
+    function getCourseColor(courseId) {
+        const colors = ['#6c757d', '#28a745', '#17a2b8', '#ffc107', '#dc3545'];
+        return colors[courseId % colors.length];
+    }
 
 // Update the renderCourseFilters function
 function renderCourseFilters() {
@@ -816,7 +986,7 @@ function renderCourseFilters() {
         container.appendChild(card);
     });
     }
-
+debugger;
 // Add this function to render course filter buttons
 function renderCourseFilters() {
     const container = document.getElementById('courseFilters');
@@ -839,8 +1009,10 @@ function renderCourseFilters() {
             </div>
         </div>
     `;
-    allCard.addEventListener('click', () => {
+    allCard.addEventListener('click', function(e) {
+        e.preventDefault(); // Prevent default behavior
         currentCourseFilter = 'all';
+        document.getElementById('applicationsTableTitle').textContent = 'All Applications';
         loadApplications(1, 'all');
     });
     container.appendChild(allCard);
@@ -874,8 +1046,10 @@ function renderCourseFilters() {
                 </div>
             </div>
         `;
-        card.addEventListener('click', () => {
+        card.addEventListener('click', function(e) {
+            e.preventDefault(); // Prevent default behavior
             currentCourseFilter = courseId;
+            document.getElementById('applicationsTableTitle').textContent = `Applications for ${courseName}`;
             loadApplications(1, courseId);
         });
         container.appendChild(card);
@@ -1038,8 +1212,7 @@ function addCourse() {
         name: document.getElementById('courseName').value,
         institute: document.getElementById('instituteName').value,
         duration: parseInt(document.getElementById('courseDuration').value),
-        seats: parseInt(document.getElementById('courseSeats').value),
-        description: document.getElementById('courseDescription').value
+        seats: parseInt(document.getElementById('courseSeats').value)
     };
 
     fetch('/api/courses', {
@@ -1082,7 +1255,7 @@ function editCourse(courseId) {
         document.getElementById('instituteName').value = course.institute;
         document.getElementById('courseDuration').value = course.duration;
         document.getElementById('courseSeats').value = course.seats;
-        document.getElementById('courseDescription').value = course.description || '';
+
 
         const form = document.getElementById('courseForm');
         const submitBtn = form.querySelector('button[type="submit"]');
@@ -1186,227 +1359,153 @@ function resetCourseForm() {
 
 
     // Update application stats
-    function updateApplicationStats() {
-        const total = applications.length;
-        const accepted = applications.filter(app => app.status === 'accepted').length;
-        const rejected = applications.filter(app => app.status === 'rejected').length;
-
-        document.getElementById('totalApplications').textContent = total;
-        document.getElementById('acceptedApplications').textContent = accepted;
-        document.getElementById('rejectedApplications').textContent = rejected;
-    }
-
     function renderApplicationsTable() {
-    const tableBody = document.getElementById('applicationsTableBody');
-    if (!tableBody) return;
+        const tableBody = document.getElementById('applicationsTableBody');
+        if (!tableBody) return;
 
-    tableBody.innerHTML = '';
+        tableBody.innerHTML = '';
 
-    if (!applications.length) {
-        tableBody.innerHTML = `
-            <tr>
-                <td colspan="7" class="text-center">
-                    No applications found ${currentCourseFilter !== 'all' ? 'for this course' : ''}
-                </td>
-            </tr>
-        `;
-        return;
-    }
-
-    const startIndex = (currentApplicationPage - 1) * applicationsPerPage;
-    const endIndex = Math.min(startIndex + applicationsPerPage, applications.length);
-    const pageApplications = applications.slice(startIndex, endIndex);
-
-    pageApplications.forEach(app => {
-        const row = document.createElement('tr');
-        const status = app.status || 'pending';
-        const statusDisplay = status.charAt(0).toUpperCase() + status.slice(1);
-
-        // Find course name - check both direct property and from courses array
-        let courseName = app.courseName;
-        if (!courseName && app.courseId) {
-            const course = courses.find(c => c.courseid == app.courseId || c.id == app.courseId);
-            courseName = course?.coursename || course?.name || 'Unknown Course';
+        if (!applications.length) {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="text-center">
+                        No applications found ${currentCourseFilter !== 'all' ? 'for this course' : ''}
+                    </td>
+                </tr>
+            `;
+            return;
         }
 
-        row.innerHTML = `
-            <td>${app.id || 'N/A'}</td>
-            <td>${app.applicantName || 'N/A'}</td>
-            <td>${app.email || 'N/A'}</td>
-            <td>${courseName || 'N/A'}</td>
-            <td><span class="status-badge status-${status}">${statusDisplay}</span></td>
-            <td>${app.appliedDate ? new Date(app.appliedDate).toLocaleDateString() : 'N/A'}</td>
-            <td>
-                <button class="btn btn-sm btn-success me-1 accept-btn" data-id="${app.id}">
-                    <i class="bi bi-check-lg"></i>
-                </button>
-                <button class="btn btn-sm btn-danger me-1 reject-btn" data-id="${app.id}">
-                    <i class="bi bi-x-lg"></i>
-                </button>
-                <button class="btn btn-sm btn-primary preview-btn" data-id="${app.id}">
-                    <i class="bi bi-eye"></i>
-                </button>
-            </td>
-        `;
-        tableBody.appendChild(row);
-    });
+        const startIndex = (currentApplicationPage - 1) * applicationsPerPage;
+        const endIndex = Math.min(startIndex + applicationsPerPage, applications.length);
+        const pageApplications = applications.slice(startIndex, endIndex);
 
-    // Add event delegation for buttons
-    tableBody.addEventListener('click', handleTableButtonClick);
+        pageApplications.forEach(app => {
+            const row = document.createElement('tr');
+            const status = app.status || 'pending';
+            const statusDisplay = status.charAt(0).toUpperCase() + status.slice(1);
 
-
-        // Add event listeners to action buttons
-        document.querySelectorAll('.accept-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const appId = parseInt(this.getAttribute('data-id'));
-                updateApplicationStatus(appId, 'accepted');
-            });
+            row.innerHTML = `
+                <td>${app.id || 'N/A'}</td>
+                <td>${app.applicantName || 'N/A'}</td>
+                <td>${app.email || 'N/A'}</td>
+                <td><span class="status-badge status-${status}">${statusDisplay}</span></td>
+                <td>${app.appliedDate ? new Date(app.appliedDate).toLocaleDateString() : 'N/A'}</td>
+                <td>
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn btn-outline-success accept-btn" data-id="${app.id}">
+                            <i class="bi bi-check-lg"></i> Accept
+                        </button>
+                        <button class="btn btn-outline-danger reject-btn" data-id="${app.id}">
+                            <i class="bi bi-x-lg"></i> Reject
+                        </button>
+                        <button class="btn btn-outline-primary preview-btn" data-id="${app.id}">
+                            <i class="bi bi-eye"></i> View
+                        </button>
+                    </div>
+                </td>
+            `;
+            tableBody.appendChild(row);
         });
 
-        document.querySelectorAll('.reject-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const appId = parseInt(this.getAttribute('data-id'));
-                updateApplicationStatus(appId, 'rejected');
-            });
-        });
-
-        document.querySelectorAll('.preview-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const appId = parseInt(this.getAttribute('data-id'));
-                previewApplication(appId);
-            });
-        });
-
-        // Add click events to stats cards for filtering
-        document.getElementById('filterTotalApplications').addEventListener('click', () => filterApplications('all')); // 1082
-        document.getElementById('filterAcceptedApplications').addEventListener('click', () => filterApplications('accepted'));
-        document.getElementById('filterRejectedApplications').addEventListener('click', () => filterApplications('rejected'));
+        // Add event delegation for buttons
+        tableBody.addEventListener('click', handleTableButtonClick);
     }
+
+    function handleTableButtonClick(event) {
+        const target = event.target;
+
+        // Handle Accept button
+        if (target.closest('.accept-btn')) {
+            const appId = parseInt(target.closest('.accept-btn').getAttribute('data-id'));
+            updateApplicationStatus(appId, 'accepted');
+        }
+
+        // Handle Reject button
+        if (target.closest('.reject-btn')) {
+            const appId = parseInt(target.closest('.reject-btn').getAttribute('data-id'));
+            updateApplicationStatus(appId, 'rejected');
+        }
+
+        // Handle Preview button
+        if (target.closest('.preview-btn')) {
+            const appId = parseInt(target.closest('.preview-btn').getAttribute('data-id'));
+            previewApplication(appId);
+        }
+    }
+
 
     // Filter applications
-    function filterApplications(status) {
-        // In a real app, you would fetch filtered data from the server
-        // For demo, we'll just highlight the filtered rows
-        const rows = document.querySelectorAll('#applicationsTableBody tr');
+   function filterApplications(status) {
+    const rows = document.querySelectorAll('#applicationsTableBody tr');
+    let visibleCount = 0;
 
-        rows.forEach(row => {
-            const statusBadge = row.querySelector('.status-badge');
-            const appStatus = statusBadge.textContent.toLowerCase();
+    rows.forEach(row => {
+        const statusBadge = row.querySelector('.status-badge');
+        if (!statusBadge) return;
 
-            if (status === 'all' || appStatus === status) {
-                row.style.display = '';
-            } else {
-                row.style.display = 'none';
-            }
-        });
-    }
+        const appStatus = statusBadge.textContent.toLowerCase().trim();
+        const statusClass = Array.from(statusBadge.classList).find(cls => cls.startsWith('status-'));
 
-    // Render applications pagination
-   function renderApplicationsTable() {
-    const tableBody = document.getElementById('applicationsTableBody');
-    if (!tableBody) return;
-
-    tableBody.innerHTML = '';
-
-    if (!applications.length) {
-        tableBody.innerHTML = '<tr><td colspan="7" class="text-center">No applications found</td></tr>';
-        return;
-    }
-
-    const startIndex = (currentApplicationPage - 1) * applicationsPerPage;
-    const endIndex = Math.min(startIndex + applicationsPerPage, applications.length);
-    const pageApplications = applications.slice(startIndex, endIndex);
-
-    pageApplications.forEach(app => {
-        const row = document.createElement('tr');
-        const status = app.status || 'pending';
-        const statusDisplay = status.charAt(0).toUpperCase() + status.slice(1);
-
-        row.innerHTML = `
-            <td>${app.id || 'N/A'}</td>
-            <td>${app.applicantName || 'N/A'}</td>
-            <td>${app.email || 'N/A'}</td>
-            <td>${app.courseName || 'N/A'}</td>
-            <td><span class="status-badge status-${status}">${statusDisplay}</span></td>
-            <td>${app.appliedDate ? new Date(app.appliedDate).toLocaleDateString() : 'N/A'}</td>
-            <td>
-                <button class="btn btn-sm btn-success me-1 accept-btn" data-id="${app.id}">
-                    <i class="bi bi-check-lg"></i>
-                </button>
-                <button class="btn btn-sm btn-danger me-1 reject-btn" data-id="${app.id}">
-                    <i class="bi bi-x-lg"></i>
-                </button>
-                <button class="btn btn-sm btn-primary preview-btn" data-id="${app.id}">
-                    <i class="bi bi-eye"></i>
-                </button>
-            </td>
-        `;
-        tableBody.appendChild(row);
+        if (status === 'all' || appStatus === status) {
+            row.style.display = '';
+            visibleCount++;
+        } else {
+            row.style.display = 'none';
+        }
     });
 
-    // Add event delegation for buttons
-    tableBody.addEventListener('click', handleTableButtonClick);
-}
+    // Show message if no applications match the filter
+    const noResultsRow = document.querySelector('#applicationsTableBody tr.no-results');
+    if (noResultsRow) noResultsRow.remove();
 
-function handleTableButtonClick(event) {
-    const target = event.target;
-
-    // Handle Accept button
-    if (target.closest('.accept-btn')) {
-        const appId = parseInt(target.closest('.accept-btn').getAttribute('data-id'));
-        updateApplicationStatus(appId, 'accepted');
-    }
-
-    // Handle Reject button
-    if (target.closest('.reject-btn')) {
-        const appId = parseInt(target.closest('.reject-btn').getAttribute('data-id'));
-        updateApplicationStatus(appId, 'rejected');
-    }
-
-    // Handle Preview button
-    if (target.closest('.preview-btn')) {
-        const appId = parseInt(target.closest('.preview-btn').getAttribute('data-id'));
-        previewApplication(appId);
+    if (visibleCount === 0) {
+        const tbody = document.getElementById('applicationsTableBody');
+        const tr = document.createElement('tr');
+        tr.className = 'no-results';
+        tr.innerHTML = `<td colspan="6" class="text-center py-4">No ${status} applications found</td>`;
+        tbody.appendChild(tr);
     }
 }
 
-    // Update application status
-  function updateApplicationStatus(appId, newStatus) {
-    if (!confirm(`Are you sure you want to ${newStatus} this application?`)) {
-        return;
-    }
 
-    fetch(`/application/applications/${appId}/status`, {
-        method: 'PATCH',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ status: newStatus }),
-        credentials: 'include' // Important for session cookies
-    })
-    .then(response => {
-        if (!response.ok) throw new Error('Failed to update status');
-        return response.json();
-    })
-    .then(updatedApp => {
-        // Update local state
-        const appIndex = applications.findIndex(app => app.id === appId);
-        if (appIndex !== -1) {
-            applications[appIndex].status = newStatus;
+// Update application status
+    function updateApplicationStatus(appId, newStatus) {
+        if (!confirm(`Are you sure you want to ${newStatus} this application?`)) {
+            return;
         }
 
-        // Update UI
-        updateApplicationStats();
-        renderApplicationsTable();
+        fetch(`/application/applications/${appId}/status`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ status: newStatus }),
+            credentials: 'include'
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Failed to update status');
+            return response.json();
+        })
+        .then(updatedApp => {
+            // Update local state
+            const appIndex = applications.findIndex(app => app.id === appId);
+            if (appIndex !== -1) {
+                applications[appIndex].status = newStatus;
+            }
 
-        // Show success
-        showAlert(`Status updated to ${newStatus}`, 'success');
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        showAlert('Failed to update status', 'danger');
-    });
-}
+            // Reload applications to reflect changes
+            loadApplications(currentApplicationPage, currentCourseFilter);
+            loadCourseApplicationStats(); // Refresh stats
+
+            // Show success
+            showAlert(`Status updated to ${newStatus}`, 'success');
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert('Failed to update status', 'danger');
+        });
+    }
 
 function showAlert(message, type) {
     // Create alert element

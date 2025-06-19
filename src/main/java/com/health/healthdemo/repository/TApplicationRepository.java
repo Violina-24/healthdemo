@@ -7,6 +7,7 @@
  import org.springframework.data.jpa.repository.Query;
  import org.springframework.data.repository.query.Param;
  import org.springframework.stereotype.Repository;
+ import org.springframework.transaction.annotation.Transactional;
 
  import java.util.List;
  import java.util.Optional;
@@ -19,6 +20,7 @@
   Optional<TApplication> findByUser(MUsers user);
 
   // 2. Find applications by course ID - using explicit JPQL
+  @Transactional
   @Query("SELECT a FROM TApplication a WHERE a.mCourse.Courseid = :courseId")
   List<TApplication> findApplicationsByCourseId(@Param("courseId") Long courseId);
 
