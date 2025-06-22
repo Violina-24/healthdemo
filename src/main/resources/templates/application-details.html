@@ -356,40 +356,64 @@
       controls.style.display = controls.style.display === 'none' ? 'block' : 'none';
   }
 
-  function updateApplicationStatus() {
-      const status = document.getElementById('statusSelect').value;
-      const comments = document.getElementById('adminComments').value;
+  function updateApplicationStatus(appId, newStatus) {
+    if (!confirm(`Are you sure you want to ${newStatus} this application?`)) {
+        return;
+    }
 
-      fetch(`/admin/application/${currentApplication.id}/status`, {
-          method: 'POST',
-          headers: {
-              'Content-Type': 'application/json'
-          },
-          credentials: 'include',
-          body: JSON.stringify({
-              status: status,
-              comments: comments
-          })
-      })
-      .then(response => {
-          if (!response.ok) throw new Error('Failed to update status');
-          return response.json();
-      })
-      .then(updatedApp => {
-          currentApplication = updatedApp;
-          // Update status badge
-          document.querySelector('.badge').className = `badge bg-${getStatusColor(updatedApp.status)}`;
-          document.querySelector('.badge').textContent = updatedApp.status;
-          // Reload status history
-          loadStatusHistory(currentApplication.id);
-          // Show success message
-          alert('Status updated successfully');
-      })
-      .catch(error => {
-          console.error('Error:', error);
-          alert('Failed to update status');
-      });
-  }
+    fetch(`/application/applications/${appId}/status`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: newStatus }),
+        credentials: 'include'
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Failed to update status');
+        return response.json();
+    })
+    .then(updatedApp => {
+        // Update local state
+        const appIndex = applications.findIndex(app => app.id === appId);
+        if (appIndex !== -1) {
+            applications[appIndex].status = newStatus;
+        }
+// Reload applications to reflect changes
+        filterApplications(currentFilterStatus); // Reload with current filter
+        loadCourseApplicationStats(); // Refresh stats
+
+        // Show success
+        showAlert(`Status updated to ${newStatus}`, 'success');
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showAlert('Failed to update status', 'danger');
+    });
+}
+
+// Add a variable to track current filter status
+let currentFilterStatus = 'all';
+
+// Update your filter button event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('filterAll').addEventListener('click', () => {
+        currentFilterStatus = 'all';
+        filterApplications('all');
+    });
+    document.getElementById('filterAccepted').addEventListener('click', () => {
+        currentFilterStatus = 'accepted';
+        filterApplications('accepted');
+    });
+    document.getElementById('filterRejected').addEventListener('click', () => {
+        currentFilterStatus = 'rejected';
+        filterApplications('rejected');
+    });
+    document.getElementById('filterPending').addEventListener('click', () => {
+        currentFilterStatus = 'pending';
+        filterApplications('pending');
+    });
+});
 
   function loadStatusHistory(applicationId) {
       fetch(`/admin/application/${applicationId}/status-history`, {

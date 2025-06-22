@@ -5,6 +5,10 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="/css/admin.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <style>
         .course-card {
             transition: transform 0.2s;
@@ -237,6 +241,12 @@
             <div class="row mb-4" id="courseCardsContainer">
                 <!-- Course cards will be loaded here -->
             </div>
+            <!-- Add this right before the applications table in your applications-section -->
+            <div class="d-flex justify-content-end mb-3">
+                <button id="closeApplicationsTable" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-x-lg me-1"></i> Close Table
+                </button>
+            </div>
 
             <!-- Applications Table (shown by default for first course) -->
             <div class="card mt-4" id="applicationsTableContainer">
@@ -280,16 +290,70 @@
     <div class="content-section" id="reports-section">
         <div class="container-fluid">
             <h3 class="mb-4"><i class="bi bi-graph-up me-2"></i>Reports</h3>
+
+            <!-- Course Selection Card -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-list-check me-2"></i>Generate Merit Lists</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Course Selection -->
+                        <div class="col-md-6 mb-3">
+                            <label for="reportCourseSelect" class="form-label">Select Course</label>
+                            <select class="form-select" id="reportCourseSelect">
+                                <option value="">-- Select Course --</option>
+                                <!-- Will be populated by JavaScript -->
+                            </select>
+                        </div>
+
+                        <!-- Institute Selection -->
+                        <div class="col-md-6 mb-3">
+                            <label for="reportInstituteSelect" class="form-label">Select Institute</label>
+                            <select class="form-select" id="reportInstituteSelect" disabled>
+                                <option value="">-- Select Institute --</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Generate Button -->
+                    <div class="text-center mt-3">
+                        <button id="generateMeritListBtn" class="btn btn-primary" disabled>
+                            <i class="bi bi-file-earmark-text me-2"></i>Generate Merit List
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Reports Card -->
             <div class="card">
-                <div class="card-body text-center py-5">
-                    <i class="bi bi-graph-up fs-1 text-muted mb-3"></i>
-                    <h4>Reports Section</h4>
-                    <p class="text-muted">Reports functionality will be implemented here</p>
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Recent Reports</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                            <tr>
+                                <th>Report Date</th>
+                                <th>Course</th>
+                                <th>Institute</th>
+                                <th>Type</th>
+                                <th>Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody id="recentReportsTable">
+                            <!-- Will be populated by JavaScript -->
+                            <tr>
+                                <td colspan="5" class="text-center py-4">No reports generated yet</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-
     <!-- Upload Advertisement Section make it work-->
     <div class="content-section" id="uploadAdvt-section">
         <div class="container-fluid">
@@ -531,44 +595,71 @@
     let applicationsByCourse = {};
     let currentlySelectedCourse = null;
 
-    // DOM Content Loaded - Fixed initialization sequence
-    document.addEventListener('DOMContentLoaded', function() {
-        // Check admin role
-        const userRole = sessionStorage.getItem('userRole');
-        if (userRole !== 'admin') {
-            window.location.href = '/login';
-            return;
-        }
+ // Replace the entire DOMContentLoaded event listener with this:
+document.addEventListener('DOMContentLoaded', function() {
+    // Check admin role
+    const userRole = sessionStorage.getItem('userRole');
+    if (userRole !== 'admin') {
+        window.location.href = '/login';
+        return;
+    }
 
-        // Initialize admin data
-        loadAdminData();
-        updateCurrentDate();
-        setupSidebar();
-        setupForms();
-        setupModalEvents();
+    // Initialize admin data
+    loadAdminData();
+    updateCurrentDate();
+    setupSidebar();
+    setupForms();
+    setupModalEvents();
 
-        // Load initial data
-        loadCourses()
-            .then(() => {
-                return Promise.all([
-                    loadApplications(),
-                    loadCourseApplicationStats(),
-                    loadActivities()
-                ]);
-            })
-            .catch(error => {
-                console.error('Initialization error:', error);
-            });
-
-             // Close applications table button
-        document.getElementById('closeApplicationsTable').addEventListener('click', function() {
+    // Safe event listener for close button
+    const closeBtn = document.getElementById('closeApplicationsTable');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', function() {
             document.getElementById('applicationsTableContainer').classList.remove('active');
             document.querySelectorAll('.course-card').forEach(card => {
                 card.classList.remove('active');
             });
             currentlySelectedCourse = null;
         });
-    });
+    } else {
+        console.warn('Close applications table button not found');
+    }
+
+    // Make Total Courses card clickable (with null check)
+    const totalCoursesCard = document.getElementById('totalCoursesCard');
+    if (totalCoursesCard) {
+        totalCoursesCard.addEventListener('click', function() {
+            // Hide all sections
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+
+            // Show courses section
+            document.getElementById('courses-section').classList.add('active');
+
+            // Update sidebar active state
+            document.querySelectorAll('.sidebar-menu li').forEach(item => {
+                item.classList.remove('active');
+            });
+        });
+    }
+
+    // Load initial data
+    loadCourses()
+        .then(() => {
+            initReportsSection();
+            return Promise.all([
+                loadApplications(),
+                loadCourseApplicationStats(),
+                loadActivities()
+            ]);
+        })
+        .catch(error => {
+            console.error('Initialization error:', error);
+            // Try to initialize reports section anyway
+            initReportsSection();
+        });
+});
 
         // Make Total Courses card clickable
         document.getElementById('totalCoursesCard').addEventListener('click', function() {
@@ -930,7 +1021,10 @@ function loadCourseApplicationStats() {
 
 // Add filter event listeners
 document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('filterAll').addEventListener('click', () => filterApplications('all'));
+    document.getElementById('filterAll').addEventListener('click', () => {
+        // Just reload normally with pagination
+        loadApplications(1, currentlySelectedCourse);
+    });
     document.getElementById('filterAccepted').addEventListener('click', () => filterApplications('accepted'));
     document.getElementById('filterRejected').addEventListener('click', () => filterApplications('rejected'));
     document.getElementById('filterPending').addEventListener('click', () => filterApplications('pending'));
@@ -1064,45 +1158,56 @@ function getCourseColor(courseId) {
    // Load courses from API
 // Fixed loadCourses function to always return a Promise
     function loadCourses(page = 1) {
-        currentCoursePage = page;
+    currentCoursePage = page;
 
-        return fetch('/courses', {  // Note the return statement
-            credentials: 'include'
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(data => {
-            // Ensure data is an array
-            courses = Array.isArray(data) ? data : [];
-            console.log('Courses data:', courses); // Debug log
+    return fetch('/courses', {
+        credentials: 'include'
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Network response was not ok');
+        return response.json();
+    })
+    .then(data => {
+        // Ensure data is an array and has expected properties
+        courses = Array.isArray(data) ? data.map(course => {
+            // Normalize course properties
+            return {
+                id: course.id || course.courseid,
+                courseid: course.courseid || course.id,
+                name: course.name || course.coursename,
+                coursename: course.coursename || course.name,
+                institute: course.institute || 'Unknown Institute',
+                // Include any other necessary properties
+                ...course
+            };
+        }) : [];
 
-            updateCourseStats();
-            renderCoursesTable();
-            renderCoursesPagination();
-            return courses; // Return data for chaining
-        })
-        .catch(error => {
-            console.error('Error loading courses:', error);
-            // Fallback to mock data
-            courses = generateMockCourses();
-            updateCourseStats();
-            renderCoursesTable();
-            renderCoursesPagination();
-            return courses; // Still return data even in error case
-        });
-    }
+        console.log('Courses loaded:', courses); // Debug log
+        updateCourseStats();
+        renderCoursesTable();
+        renderCoursesPagination();
+        return courses;
+    })
+    .catch(error => {
+        console.error('Error loading courses:', error);
+        // Fallback to mock data
+        courses = generateMockCourses();
+        updateCourseStats();
+        renderCoursesTable();
+        renderCoursesPagination();
+        return courses;
+    });
+}
 // Generate mock courses (fallback)
 function generateMockCourses() {
-    return [
-        { id: 1, name: "MBBS", institute: "AIIMS Delhi", duration: 5, seats: 100 },
-        { id: 2, name: "BDS", institute: "Maulana Azad Dental College", duration: 4, seats: 50 },
-        { id: 3, name: "B.Sc Nursing", institute: "CMC Vellore", duration: 3, seats: 60 }
+    const mockCourses = [
+        { id: 1, courseid: 1, name: "MBBS", coursename: "MBBS", institute: "SMC" },
+        { id: 2, courseid: 2, name: "BDS", coursename: "BDS", institute: "Dental College" },
+        { id: 3, courseid: 3, name: "BAMS", coursename: "BAMS", institute: "PIMC" }
     ];
-    }
+    console.log('Using mock courses:', mockCourses); // Debug log
+    return mockCourses;
+}
 
     // Update course stats
 function updateCourseStats() {
@@ -1357,60 +1462,70 @@ function resetCourseForm() {
     });
 }
 
-
-    // Update application stats
-    function renderApplicationsTable() {
-        const tableBody = document.getElementById('applicationsTableBody');
-        if (!tableBody) return;
-
-        tableBody.innerHTML = '';
-
-        if (!applications.length) {
-            tableBody.innerHTML = `
-                <tr>
-                    <td colspan="6" class="text-center">
-                        No applications found ${currentCourseFilter !== 'all' ? 'for this course' : ''}
-                    </td>
-                </tr>
-            `;
-            return;
-        }
-
-        const startIndex = (currentApplicationPage - 1) * applicationsPerPage;
-        const endIndex = Math.min(startIndex + applicationsPerPage, applications.length);
-        const pageApplications = applications.slice(startIndex, endIndex);
-
-        pageApplications.forEach(app => {
-            const row = document.createElement('tr');
-            const status = app.status || 'pending';
-            const statusDisplay = status.charAt(0).toUpperCase() + status.slice(1);
-
-            row.innerHTML = `
-                <td>${app.id || 'N/A'}</td>
-                <td>${app.applicantName || 'N/A'}</td>
-                <td>${app.email || 'N/A'}</td>
-                <td><span class="status-badge status-${status}">${statusDisplay}</span></td>
-                <td>${app.appliedDate ? new Date(app.appliedDate).toLocaleDateString() : 'N/A'}</td>
-                <td>
-                    <div class="btn-group btn-group-sm">
-                        <button class="btn btn-outline-success accept-btn" data-id="${app.id}">
-                            <i class="bi bi-check-lg"></i> Accept
-                        </button>
-                        <button class="btn btn-outline-danger reject-btn" data-id="${app.id}">
-                            <i class="bi bi-x-lg"></i> Reject
-                        </button>
-                        <button class="btn btn-outline-primary preview-btn" data-id="${app.id}">
-                            <i class="bi bi-eye"></i> View
-                        </button>
-                    </div>
-                </td>
-            `;
-            tableBody.appendChild(row);
-        });
-
-        // Add event delegation for buttons
-        tableBody.addEventListener('click', handleTableButtonClick);
+function safeAddEventListener(elementId, eventType, handler) {
+    const element = document.getElementById(elementId);
+    if (element) {
+        element.addEventListener(eventType, handler);
+    } else {
+        console.warn(`Element with ID ${elementId} not found for event listener`);
     }
+}
+    // Update application stats
+function renderApplicationsTable() {
+    const tableBody = document.getElementById('applicationsTableBody');
+    if (!tableBody) return;
+
+    tableBody.innerHTML = '';
+
+    if (!applications.length) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="9" class="text-center">
+                    No applications found ${currentCourseFilter !== 'all' ? 'for this course' : ''}
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    const startIndex = (currentApplicationPage - 1) * applicationsPerPage;
+    const endIndex = Math.min(startIndex + applicationsPerPage, applications.length);
+    const pageApplications = applications.slice(startIndex, endIndex);
+
+    pageApplications.forEach(app => {
+        const row = document.createElement('tr');
+        const status = app.status || 'pending';
+        const statusDisplay = status.charAt(0).toUpperCase() + status.slice(1);
+
+        row.innerHTML = `
+            <td>${app.id || 'N/A'}</td>
+            <td>${app.applicantName || 'N/A'}</td>
+            <td>${app.email || 'N/A'}</td>
+            <td>${app.category || 'N/A'}</td>
+            <td>${app.neetScore || 'N/A'}</td>
+            <td>${app.quota || (app.managementQuota ? 'Management' : 'Regular')}</td>
+            <td><span class="status-badge status-${status}">${statusDisplay}</span></td>
+            <td>${app.appliedDate ? new Date(app.appliedDate).toLocaleDateString() : 'N/A'}</td>
+            <td>
+                <div class="btn-group btn-group-sm">
+                    <button class="btn btn-outline-success accept-btn" data-id="${app.id}">
+                        <i class="bi bi-check-lg"></i> Accept
+                    </button>
+                    <button class="btn btn-outline-danger reject-btn" data-id="${app.id}">
+                        <i class="bi bi-x-lg"></i> Reject
+                    </button>
+                    <button class="btn btn-outline-primary preview-btn" data-id="${app.id}">
+                        <i class="bi bi-eye"></i> View
+                    </button>
+                </div>
+            </td>
+        `;
+        tableBody.appendChild(row);
+    });
+
+    // Add event delegation for buttons
+    tableBody.addEventListener('click', handleTableButtonClick);
+}
 
     function handleTableButtonClick(event) {
         const target = event.target;
@@ -1436,37 +1551,115 @@ function resetCourseForm() {
 
 
     // Filter applications
-   function filterApplications(status) {
-    const rows = document.querySelectorAll('#applicationsTableBody tr');
-    let visibleCount = 0;
+  function filterApplications(status) {
+    // Show loading state
+    const tableBody = document.getElementById('applicationsTableBody');
+    tableBody.innerHTML = '<tr><td colspan="6" class="text-center py-4">Loading applications...</td></tr>';
 
-    rows.forEach(row => {
-        const statusBadge = row.querySelector('.status-badge');
-        if (!statusBadge) return;
+    // Get all applications (without pagination)
+    let url = '/application/applications';
+    if (currentlySelectedCourse && currentlySelectedCourse !== 'all') {
+        url += `?courseId=${currentlySelectedCourse}`;
+    }
 
-        const appStatus = statusBadge.textContent.toLowerCase().trim();
-        const statusClass = Array.from(statusBadge.classList).find(cls => cls.startsWith('status-'));
-
-        if (status === 'all' || appStatus === status) {
-            row.style.display = '';
-            visibleCount++;
-        } else {
-            row.style.display = 'none';
+    fetch(url, {
+        credentials: 'include'
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Failed to fetch applications');
+        return response.json();
+    })
+    .then(allApplications => {
+        // Filter applications based on status
+        let filteredApplications = allApplications;
+        if (status !== 'all') {
+            filteredApplications = allApplications.filter(app =>
+                (app.status || 'pending').toLowerCase() === status.toLowerCase()
+            );
         }
+
+        // Render all filtered applications at once (without pagination)
+        renderFilteredApplications(filteredApplications, status);
+    })
+    .catch(error => {
+        console.error('Error filtering applications:', error);
+        tableBody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-danger">Error loading applications: ${error.message}</td></tr>`;
+    });
+}
+
+function renderFilteredApplications(filteredApplications, status) {
+    const tableBody = document.getElementById('applicationsTableBody');
+    if (!tableBody) return;
+
+    tableBody.innerHTML = '';
+
+    if (!filteredApplications.length) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="6" class="text-center py-4">
+                    No ${status} applications found
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    filteredApplications.forEach(app => {
+        const row = document.createElement('tr');
+        const statusText = app.status || 'pending';
+        const statusDisplay = statusText.charAt(0).toUpperCase() + statusText.slice(1);
+
+        row.innerHTML = `
+            <td>${app.id || 'N/A'}</td>
+            <td>${app.applicantName || 'N/A'}</td>
+            <td>${app.email || 'N/A'}</td>
+            <td><span class="status-badge status-${statusText}">${statusDisplay}</span></td>
+            <td>${app.appliedDate ? new Date(app.appliedDate).toLocaleDateString() : 'N/A'}</td>
+            <td>
+                <div class="btn-group btn-group-sm">
+                    <button class="btn btn-outline-success accept-btn" data-id="${app.id}">
+                        <i class="bi bi-check-lg"></i> Accept
+                    </button>
+                    <button class="btn btn-outline-danger reject-btn" data-id="${app.id}">
+                        <i class="bi bi-x-lg"></i> Reject
+                    </button>
+                    <button class="btn btn-outline-primary preview-btn" data-id="${app.id}">
+                        <i class="bi bi-eye"></i> View
+                    </button>
+                </div>
+            </td>
+        `;
+        tableBody.appendChild(row);
     });
 
-    // Show message if no applications match the filter
-    const noResultsRow = document.querySelector('#applicationsTableBody tr.no-results');
-    if (noResultsRow) noResultsRow.remove();
-
-    if (visibleCount === 0) {
-        const tbody = document.getElementById('applicationsTableBody');
-        const tr = document.createElement('tr');
-        tr.className = 'no-results';
-        tr.innerHTML = `<td colspan="6" class="text-center py-4">No ${status} applications found</td>`;
-        tbody.appendChild(tr);
+    // Hide pagination when filtering
+    const paginationContainer = document.getElementById('applicationsPagination');
+    if (paginationContainer) {
+        paginationContainer.style.display = 'none';
     }
+
+    // Add a "Back to all" button
+    const actionsRow = document.createElement('tr');
+    actionsRow.innerHTML = `
+        <td colspan="6" class="text-center">
+            <button class="btn btn-outline-secondary" id="resetFilterBtn">
+                <i class="bi bi-arrow-left"></i> Back to all applications
+            </button>
+        </td>
+    `;
+    tableBody.appendChild(actionsRow);
+
+    // Add event listener for the reset button
+    document.getElementById('resetFilterBtn').addEventListener('click', () => {
+        // Show pagination again
+        if (paginationContainer) {
+            paginationContainer.style.display = '';
+        }
+        // Reload applications with pagination
+        loadApplications(1, currentlySelectedCourse);
+    });
 }
+
 
 
 // Update application status
@@ -1538,35 +1731,315 @@ function showAlert(message, type) {
     }, 5000);
 }
 
-    // Preview application
-    function previewApplication(appId, isAdmin = false) {
-    // Create a more robust form submission
-    const form = document.createElement('form');
-    form.method = 'GET';
-    form.action = `/application/application-details`;
+  // Updated previewApplication function
+// Updated previewApplication function
+function previewApplication(appId, isAdmin = false) {
+    const endpoint = isAdmin ?
+        `/application/admin/applications/${appId}/full` :
+        `/application/applications/${appId}/full`;
 
-    // For admin preview, add a special parameter
-    if (isAdmin) {
-        form.action += '?adminPreview=true';
+    fetch(endpoint, {
+        credentials: 'include' // Keep this for consistency
+    })
+    .then(response => {
+        if (!response.ok) {
+            // Handle 404 (not found) differently from server errors
+            if (response.status === 404) {
+                throw new Error('Application not found');
+            }
+            throw new Error(`Server returned ${response.status} status`);
+        }
+        return response.json();
+    })
+    .then(application => {
+        // Create or get modal
+        let modal = document.getElementById('applicationPreviewModal');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.className = 'modal fade';
+            modal.id = 'applicationPreviewModal';
+            modal.innerHTML = `
+                <div class="modal-dialog modal-xl modal-dialog-scrollable">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Application Details - ID: ${application.id || application.A_id}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body" id="applicationPreviewContent">
+                            <!-- Content will be loaded here -->
+                        </div>
+                        <div class="modal-footer">
+                            ${isAdmin ? `
+                            <button type="button" class="btn btn-success" id="acceptFromPreview" data-id="${appId}">
+                                <i class="bi bi-check-lg"></i> Accept
+                            </button>
+                            <button type="button" class="btn btn-danger" id="rejectFromPreview" data-id="${appId}">
+                                <i class="bi bi-x-lg"></i> Reject
+                            </button>
+                            ` : ''}
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        // Format dates
+        const formatDate = (dateString) => {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-IN');
+        };
+
+        // Set the modal content
+        const content = document.getElementById('applicationPreviewContent');
+        content.innerHTML = `
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Personal Information</h5>
+                    <table class="table table-bordered">
+                        <tr><th>Name</th><td>${application.user?.name || 'N/A'}</td></tr>
+                        <tr><th>Email</th><td>${application.user?.email || 'N/A'}</td></tr>
+                        <tr><th>Phone</th><td>${application.user?.phone || 'N/A'}</td></tr>
+                         <tr><th>Date of Birth</th><td>${formatDate(application.DOB || application.dob)}</td></tr>
+                <tr><th>Age</th><td>${application.age || calculateAge(application.DOB || application.dob) || 'N/A'}</td></tr>
+                        <tr><th>Gender</th><td>${application.gender || 'N/A'}</td></tr>
+                        <tr><th>Nationality</th><td>${application.nationality || 'N/A'}</td></tr>
+                        <tr><th>Religion</th><td>${application.religion || 'N/A'}</td></tr>
+                        <tr><th>Parents/Guardian</th><td>${application.parentsGuardianName || 'N/A'}</td></tr>
+                    </table>
+
+                    <h5 class="mt-4">Address Information</h5>
+                    <h6>Permanent Address</h6>
+                     <table class="table table-bordered">
+                ${renderAddress(application.permanentAddress || application.permanent_Address)}
+            </table>
+                    <h6>Correspondence Address</h6>
+                     <table class="table table-bordered">
+                ${renderAddress(application.correspondenceAddress || application.correspondence_Address)}
+            </table>
+                </div>
+
+                <div class="col-md-6">
+                    <h5>Academic Information</h5>
+                    <table class="table table-bordered">
+                        <tr><th>Course</th><td>${application.course?.courseName || application.mCourse?.coursename || 'N/A'}</td></tr>
+                        <tr><th>Institute</th><td>${application.course?.institute || application.mCourse?.institute || 'N/A'}</td></tr>
+                        <tr><th>Status</th><td><span class="status-badge status-${application.status || 'pending'}">${(application.status || 'pending').charAt(0).toUpperCase() + (application.status || 'pending').slice(1)}</span></td></tr>
+                        <tr><th>Applied Date</th><td>${formatDate(application.createdDate)}</td></tr>
+                        <tr><th>Physics Score</th><td>${application.physicsScore || 'N/A'}</td></tr>
+                        <tr><th>Chemistry Score</th><td>${application.chemistryScore || 'N/A'}</td></tr>
+                        <tr><th>Biology Score</th><td>${application.biologyBiotechScore || 'N/A'}</td></tr>
+                        <tr><th>PCB Total</th><td>${application.pcbMarks || 'N/A'}</td></tr>
+                        <tr><th>NEET Score</th><td>${application.neetScore || 'N/A'}</td></tr>
+                        <tr><th>Subject Choice</th><td>${application.subjectChoice || 'N/A'}</td></tr>
+                    </table>
+
+                    <h5 class="mt-4">Quota Information</h5>
+                    <table class="table table-bordered">
+                        <tr><th>Category</th><td>${application.cid?.categoryName || 'N/A'}</td></tr>
+                        <tr><th>Management Quota</th><td>${application.managementQuota ? 'Yes' : 'No'}</td></tr>
+                        <tr><th>EWS</th><td>${application.ews ? 'Yes' : 'No'}</td></tr>
+                        <tr><th>Physically Challenged</th><td>${application.physicallyChallenged ? 'Yes' : 'No'}</td></tr>
+                    </table>
+
+                    <h5 class="mt-4">Documents</h5>
+                    ${renderDocumentsSection(application)}
+                </div>
+            </div>
+        `;
+
+        // Initialize and show the modal
+        const modalInstance = new bootstrap.Modal(modal);
+        modalInstance.show();
+
+        // Add event listeners for admin actions
+        if (isAdmin) {
+            document.getElementById('acceptFromPreview').addEventListener('click', () => {
+                updateApplicationStatus(appId, 'accepted');
+                modalInstance.hide();
+            });
+
+            document.getElementById('rejectFromPreview').addEventListener('click', () => {
+                updateApplicationStatus(appId, 'rejected');
+                modalInstance.hide();
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Error fetching application details:', error);
+        showAlert('Failed to load application details', 'danger');
+    });
+}
+
+// Helper function to render address
+function renderAddress(address) {
+    if (!address) return '<tr><td colspan="2">No address provided</td></tr>';
+    return `
+        <tr><th>Address Line 1</th><td>${address.addressLine1 || 'N/A'}</td></tr>
+        <tr><th>Address Line 2</th><td>${address.addressLine2 || 'N/A'}</td></tr>
+        <tr><th>District</th><td>${address.district?.D_name || address.district || 'N/A'}</td></tr>
+        <tr><th>State</th><td>${address.state || 'N/A'}</td></tr>
+        <tr><th>Pincode</th><td>${address.pincode || 'N/A'}</td></tr>
+    `;
+}
+
+// Helper function to render documents section
+function renderDocumentsSection(application) {
+    // First check if documents exist in different possible locations
+    const docs = application.documents || application;
+
+    let html = '<div class="document-section">';
+
+    // Define all document fields with their display names and types
+    const documentFields = [
+        { key: 'PassportPhoto', name: 'Passport Photo', type: 'image/jpeg' },
+        { key: 'AgeProof', name: 'Age Proof', type: 'application/pdf' },
+        { key: 'class10and12Marksheet', name: 'Class 10/12 Marksheet', type: 'application/pdf' },
+        { key: 'class10and12certificate', name: 'Class 10/12 Certificate', type: 'application/pdf' },
+        { key: 'Caste_Certificate', name: 'Caste Certificate', type: 'image/jpeg' },
+        { key: 'Prc', name: 'PRC', type: 'image/jpeg' },
+        { key: 'Neet_Results', name: 'NEET Results', type: 'image/jpeg' },
+        { key: 'Character_Certificate', name: 'Character Certificate', type: 'image/jpeg' },
+        { key: 'PWD_Certificate', name: 'PWD Certificate', type: 'image/jpeg' }
+    ];
+
+    // Process each document type
+    documentFields.forEach(doc => {
+        const docData = docs[doc.key];
+        if (docData) {
+            const url = createDocumentUrl(docData, doc.type);
+
+            // Special handling for passport photo (show thumbnail)
+            if (doc.key === 'PassportPhoto') {
+                html += `
+                    <div class="card mb-3">
+                        <div class="card-header">${doc.name}</div>
+                        <div class="card-body">
+                            <img src="${url}" class="img-thumbnail" style="max-height: 150px;">
+                            <div class="mt-2">
+                                <a href="${url}" class="btn btn-sm btn-primary" target="_blank">View</a>
+                                <a href="${url}" class="btn btn-sm btn-secondary" download="${doc.name.replace(/\s+/g, '_').toLowerCase()}.jpg">Download</a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                // Standard document display
+                html += `
+                    <div class="card mb-3">
+                        <div class="card-header">${doc.name}</div>
+                        <div class="card-body">
+                            ${renderDocumentPreview(url, doc.name, doc.type)}
+                        </div>
+                    </div>
+                `;
+            }
+        }
+    });
+
+    // Show message if no documents found
+    if (html === '<div class="document-section">') {
+        html += '<div class="alert alert-info">No documents uploaded</div>';
     }
 
-    form.target = '_blank';
+    html += '</div>';
+    return html;
+}
 
-    const input = document.createElement('input');
-    input.type = 'hidden';
-    input.name = 'id';
-    input.value = appId;
+// Helper function to create document URLs
+function createDocumentUrl(byteArray, contentType = 'application/pdf') {
+    if (!byteArray) return null;
+    if (typeof byteArray === 'string') return byteArray; // Already a URL
 
-    form.appendChild(input);
-    document.body.appendChild(form);
+    // Convert byte array to Blob URL
+    try {
+        const blob = new Blob([new Uint8Array(byteArray)], { type: contentType });
+        return URL.createObjectURL(blob);
+    } catch (e) {
+        console.error('Error creating document URL:', e);
+        return null;
+    }
+}
 
-    // Submit the form
-    form.submit();
+// Helper function to render document previews
+function renderDocumentPreview(url, title, type) {
+    if (!url) return '<div class="text-danger">Document not available</div>';
 
-    // Clean up
-    setTimeout(() => {
-        document.body.removeChild(form);
-    }, 1000);
+    const isImage = type.startsWith('image/');
+    const isPDF = type === 'application/pdf';
+    const fileName = title.replace(/\s+/g, '_').toLowerCase() +
+                     (isPDF ? '.pdf' : isImage ? '.jpg' : '');
+
+    if (isImage) {
+        return `
+            <img src="${url}" class="img-thumbnail" style="max-height: 150px;">
+            <div class="mt-2">
+                <a href="${url}" class="btn btn-sm btn-primary" target="_blank">View</a>
+                <a href="${url}" class="btn btn-sm btn-secondary" download="${fileName}">Download</a>
+            </div>
+        `;
+    } else if (isPDF) {
+        return `
+            <div class="d-flex align-items-center">
+                <i class="bi bi-file-earmark-pdf fs-1 text-danger me-3"></i>
+                <div>
+                    <p class="mb-1">${title}</p>
+                    <a href="${url}" class="btn btn-sm btn-primary me-2" target="_blank">View PDF</a>
+                    <a href="${url}" class="btn btn-sm btn-secondary" download="${fileName}">Download</a>
+                </div>
+            </div>
+        `;
+    } else {
+        return `
+            <div class="d-flex align-items-center">
+                <i class="bi bi-file-earmark fs-1 text-primary me-3"></i>
+                <div>
+                    <p class="mb-1">${title}</p>
+                    <a href="${url}" class="btn btn-sm btn-primary me-2" target="_blank">View Document</a>
+                    <a href="${url}" class="btn btn-sm btn-secondary" download="${fileName}">Download</a>
+                </div>
+            </div>
+        `;
+    }
+}
+
+// Helper function to render different document types
+function renderDocumentPreview(url, title) {
+    if (!url) return '<div class="text-danger">Document not available</div>';
+
+    if (url.startsWith('data:image') || url.startsWith('blob:') || typeof url === 'object') {
+        return `
+            <img src="${url}" class="img-thumbnail" style="max-height: 150px;">
+            <div class="mt-2">
+                <a href="${url}" class="btn btn-sm btn-primary" target="_blank">View</a>
+                <a href="${url}" class="btn btn-sm btn-secondary" download="${title.replace(/\s+/g, '_').toLowerCase()}.jpg">Download</a>
+            </div>
+        `;
+    } else if (url.startsWith('data:application/pdf') || url.startsWith('blob:')) {
+        return `
+            <div class="d-flex align-items-center">
+                <i class="bi bi-file-earmark-pdf fs-1 text-danger me-3"></i>
+                <div>
+                    <p class="mb-1">${title}</p>
+                    <a href="${url}" class="btn btn-sm btn-primary me-2" target="_blank">View PDF</a>
+                    <a href="${url}" class="btn btn-sm btn-secondary" download="${title.replace(/\s+/g, '_').toLowerCase()}.pdf">Download</a>
+                </div>
+            </div>
+        `;
+    } else {
+        return `
+            <div class="d-flex align-items-center">
+                <i class="bi bi-file-earmark fs-1 text-primary me-3"></i>
+                <div>
+                    <p class="mb-1">${title}</p>
+                    <a href="${url}" class="btn btn-sm btn-primary me-2" target="_blank">View Document</a>
+                    <a href="${url}" class="btn btn-sm btn-secondary" download="${title.replace(/\s+/g, '_').toLowerCase()}">Download</a>
+                </div>
+            </div>
+        `;
+    }
 }
     // Setup modal events
     function setupModalEvents() {
@@ -1805,6 +2278,541 @@ async function loadCoursesForDropdown(selectId) {
         const days = Math.floor(hours / 24);
         return `${days} day${days === 1 ? '' : 's'} ago`;
     }
+
+let generatedReports = []; // Track all generated reports
+
+function initReportsSection() {
+    console.log('Initializing reports section...');
+
+    // First ensure courses are loaded
+    if (!courses || courses.length === 0) {
+        loadCourses().then(() => {
+            populateReportCourseDropdown();
+            setupReportEventListeners();
+        });
+    } else {
+        populateReportCourseDropdown();
+        setupReportEventListeners();
+    }
+}
+
+function populateReportCourseDropdown() {
+    const select = document.getElementById('reportCourseSelect');
+    if (!select) {
+        console.error('reportCourseSelect element not found!');
+        return;
+    }
+
+    select.innerHTML = '<option value="">-- Select Course --</option>';
+
+    if (!courses || courses.length === 0) {
+        console.warn('No courses available to populate dropdown');
+        const option = document.createElement('option');
+        option.textContent = 'No courses available - please refresh';
+        option.disabled = true;
+        select.appendChild(option);
+        return;
+    }
+
+    courses.forEach(course => {
+        const option = document.createElement('option');
+        option.value = course.courseid || course.id;
+        option.textContent = course.coursename || course.name;
+        select.appendChild(option);
+    });
+}
+
+function setupReportEventListeners() {
+    const courseSelect = document.getElementById('reportCourseSelect');
+    const instituteSelect = document.getElementById('reportInstituteSelect');
+    const generateBtn = document.getElementById('generateMeritListBtn');
+
+    if (!courseSelect || !instituteSelect || !generateBtn) return;
+
+    courseSelect.addEventListener('change', function() {
+        const course = courses.find(c => (c.courseid || c.id) == this.value);
+        instituteSelect.innerHTML = '<option value="">-- Select Institute --</option>';
+
+        if (course) {
+            const option = document.createElement('option');
+            option.value = course.institute || '';
+            option.textContent = course.institute || 'Unknown Institute';
+            instituteSelect.appendChild(option);
+        }
+
+        instituteSelect.disabled = !this.value;
+        generateBtn.disabled = true;
+    });
+
+    instituteSelect.addEventListener('change', function() {
+        generateBtn.disabled = !this.value;
+    });
+
+    generateBtn.addEventListener('click', function() {
+        const courseId = courseSelect.value;
+        if (courseId) generateMeritList(courseId);
+    });
+}
+
+// ==================== MERIT LIST FUNCTIONS ====================
+
+async function generateMeritList(courseId) {
+    const generateBtn = document.getElementById('generateMeritListBtn');
+    const originalText = generateBtn.innerHTML;
+
+    try {
+        // Show loading state
+        generateBtn.disabled = true;
+        generateBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Generating...';
+
+        // Get course details
+        const course = courses.find(c => (c.courseid || c.id) == courseId);
+        if (!course) {
+            throw new Error('Course not found');
+        }
+
+        // Get ALL applications first
+        const allAppsResponse = await fetch(`/application/applications?courseId=${courseId}`, {
+            credentials: 'include'
+        });
+        if (!allAppsResponse.ok) throw new Error('Failed to fetch applications');
+        const allApplications = await allAppsResponse.json();
+
+        // Filter to only accepted applications
+        const acceptedApplications = allApplications.filter(app =>
+            (app.status || '').toLowerCase() === 'accepted'
+        );
+
+        if (acceptedApplications.length === 0) {
+            throw new Error('No accepted applications found for this course');
+        }
+
+        // Process applications and generate report
+        const finalMeritList = processApplications(acceptedApplications, course);
+        await showMeritListModal(finalMeritList, course);
+
+        // Add to recent reports
+        const report = {
+            id: Date.now(),
+            date: new Date().toLocaleString(),
+            courseId: courseId,
+            courseName: course.coursename || course.name,
+            institute: course.institute,
+            type: 'Merit List',
+            data: finalMeritList
+        };
+        generatedReports.unshift(report);
+        updateRecentReportsTable();
+
+    } catch (error) {
+        console.error('Error generating merit list:', error);
+        showAlert(`Failed to generate merit list: ${error.message}`, 'danger');
+    } finally {
+        generateBtn.disabled = false;
+        generateBtn.innerHTML = originalText;
+    }
+}
+
+function processApplications(applications, course) {
+    // First, ensure all applications have the required fields
+    const validatedApps = applications.map(app => ({
+        id: app.id,
+        applicantName: app.applicantName || 'Unknown',
+        category: app.category || 'General',
+        neetScore: parseFloat(app.neetScore) || 0,
+        quota: app.quota || (app.managementQuota ? 'Management' : 'Regular'),
+        status: app.status || 'accepted',
+        appliedDate: app.appliedDate
+    }));
+
+    // Sort by NEET score (descending), then by application date (earlier first)
+    validatedApps.sort((a, b) => {
+        if (b.neetScore !== a.neetScore) {
+            return b.neetScore - a.neetScore;
+        }
+        return new Date(a.appliedDate) - new Date(b.appliedDate);
+    });
+
+    // Get quota configuration
+    const quotaConfig = getQuotaConfig(course.coursename || course.name, course.institute);
+
+    // Initialize categories
+    const categorized = {
+        garo: [], khasi_jaintia: [], general_ur: [],
+        osc_ost: [], management: [], nri: [], remaining: []
+    };
+
+    // Categorize applications
+    validatedApps.forEach(app => {
+        if (app.quota.toLowerCase() === 'management') {
+            categorized.management.push(app);
+            return;
+        }
+        if (app.quota.toLowerCase() === 'nri') {
+            categorized.nri.push(app);
+            return;
+        }
+
+        switch ((app.category || '').toLowerCase()) {
+            case 'garo': categorized.garo.push(app); break;
+            case 'khasi':
+            case 'jaintia': categorized.khasi_jaintia.push(app); break;
+            case 'general':
+            case 'ur': categorized.general_ur.push(app); break;
+            case 'osc':
+            case 'ost': categorized.osc_ost.push(app); break;
+            default: categorized.remaining.push(app);
+        }
+    });
+
+    // Select candidates based on quotas
+    const selectedCandidates = [
+        ...categorized.garo.slice(0, quotaConfig.garo),
+        ...categorized.khasi_jaintia.slice(0, quotaConfig.khasi_jaintia),
+        ...categorized.general_ur.slice(0, quotaConfig.general_ur),
+        ...categorized.osc_ost.slice(0, quotaConfig.osc_ost),
+        ...categorized.management.slice(0, quotaConfig.management),
+        ...categorized.nri.slice(0, quotaConfig.nri),
+        ...categorized.remaining.slice(0, quotaConfig.remaining)
+    ];
+
+    // Final sort by NEET score
+    return selectedCandidates.sort((a, b) => b.neetScore - a.neetScore);
+}
+
+function getQuotaConfig(courseName, institute) {
+    const config = {
+        garo: 0, khasi_jaintia: 0, general_ur: 0,
+        osc_ost: 0, management: 0, nri: 0, remaining: 0
+    };
+
+    courseName = (courseName || '').toLowerCase();
+    institute = (institute || '').toLowerCase();
+
+    if (courseName === 'mbbs') {
+        if (institute === 'smc') {
+            config.garo = 17; config.khasi_jaintia = 17; config.general_ur = 6;
+            config.osc_ost = 2; config.management = 63; config.nri = 23; config.remaining = 8;
+        } else if (institute === 'pimc') {
+            config.garo = 26; config.khasi_jaintia = 26; config.general_ur = 9;
+            config.osc_ost = 3; config.management = 63; config.nri = 23;
+        }
+    } else if (courseName === 'bams' && institute === 'pimc') {
+        config.garo = 11; config.khasi_jaintia = 11; config.general_ur = 4;
+        config.osc_ost = 2; config.management = 28; config.nri = 14;
+    }
+
+    return config;
+}
+
+async function showMeritListModal(meritList, course) {
+    return new Promise((resolve) => {
+        try {
+            // Create or get modal
+            let modal = document.getElementById('meritListModal');
+
+            // Remove existing modal if it exists
+            if (modal) {
+                modal.remove();
+            }
+
+            // Create new modal
+            modal = document.createElement('div');
+            modal.className = 'modal fade';
+            modal.id = 'meritListModal';
+            modal.tabIndex = '-1';
+            modal.setAttribute('aria-labelledby', 'meritListModalLabel');
+            modal.innerHTML = `
+                <div class="modal-dialog modal-xl modal-dialog-scrollable">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="meritListModalLabel">
+                                Merit List for ${course.coursename || course.name} - ${course.institute}
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>Rank</th>
+                                            <th>Application ID</th>
+                                            <th>Name</th>
+                                            <th>Category</th>
+                                            <th>NEET Score</th>
+                                            <th>Quota</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="meritListTableBody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary" id="exportMeritListBtn">
+                                <i class="bi bi-download"></i> Export as PDF
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(modal);
+
+            // Populate table
+            const tableBody = modal.querySelector('#meritListTableBody');
+            meritList.forEach((app, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${app.id || 'N/A'}</td>
+                    <td>${app.applicantName || 'N/A'}</td>
+                    <td>${app.category || 'N/A'}</td>
+                    <td>${app.neetScore || 'N/A'}</td>
+                    <td>${app.managementQuota ? 'Management' : app.domicile === 'nri' ? 'NRI' : 'Regular'}</td>
+                    <td><span class="badge bg-success">Selected</span></td>
+                `;
+                tableBody.appendChild(row);
+            });
+
+            // Initialize modal
+            const modalInstance = new bootstrap.Modal(modal, {
+                backdrop: true,
+                keyboard: true,
+                focus: true
+            });
+
+            // Show modal
+            modalInstance.show();
+
+            // Handle export button
+            modal.querySelector('#exportMeritListBtn').addEventListener('click', async () => {
+                await exportMeritListAsPDF(meritList, course);
+            });
+
+            // Handle modal hidden event
+            modal.addEventListener('hidden.bs.modal', () => {
+                modalInstance.dispose();
+                modal.remove();
+                resolve();
+            });
+
+        } catch (error) {
+            console.error('Error displaying merit list:', error);
+            showAlert('Failed to display merit list', 'danger');
+            resolve();
+        }
+    });
+}
+
+async function exportMeritListAsPDF(meritList, course) {
+    try {
+        // Check if jsPDF is available (with fallback)
+        if (typeof window.jspdf !== 'undefined') {
+            const { jsPDF } = window.jspdf;
+            return generatePDFWithJSPDF(jsPDF, meritList, course);
+        } else if (typeof jsPDF !== 'undefined') {
+            return generatePDFWithJSPDF(jsPDF, meritList, course);
+        } else {
+            // Fallback to server-side PDF generation or download as CSV
+            return fallbackExport(meritList, course);
+        }
+    } catch (error) {
+        console.error('Error exporting PDF:', error);
+        showAlert('Failed to export PDF: ' + error.message, 'danger');
+        // Try fallback method
+        return fallbackExport(meritList, course);
+    }
+}
+
+function generatePDFWithJSPDF(jsPDF, meritList, course) {
+    return new Promise((resolve) => {
+        try {
+            // Create PDF document
+            const doc = new jsPDF({
+                orientation: 'landscape'
+            });
+
+            // Add title
+            doc.setFontSize(16);
+            doc.text(`Merit List for ${course.coursename || course.name} - ${course.institute}`, 14, 15);
+
+            // Add generation date
+            doc.setFontSize(10);
+            doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 22);
+
+            // Create table data
+            const headers = [
+                'Rank',
+                'Application ID',
+                'Name',
+                'Category',
+                'NEET Score',
+                'Quota',
+                'Status'
+            ];
+
+            const data = meritList.map((app, index) => [
+                index + 1,
+                app.id || 'N/A',
+                app.applicantName || 'N/A',
+                app.category || 'N/A',
+                app.neetScore || 'N/A',
+                app.managementQuota ? 'Management' : app.domicile === 'nri' ? 'NRI' : 'Regular',
+                'Selected'
+            ]);
+
+            // Add table to PDF
+            doc.autoTable({
+                head: [headers],
+                body: data,
+                startY: 30,
+                styles: {
+                    fontSize: 8,
+                    cellPadding: 2,
+                    overflow: 'linebreak'
+                },
+                columnStyles: {
+                    0: { cellWidth: 10 },
+                    1: { cellWidth: 25 },
+                    2: { cellWidth: 35 },
+                    3: { cellWidth: 25 },
+                    4: { cellWidth: 20 },
+                    5: { cellWidth: 25 },
+                    6: { cellWidth: 20 }
+                }
+            });
+
+            // Save PDF
+            doc.save(`merit-list-${course.coursename || course.name}-${new Date().toISOString().slice(0, 10)}.pdf`);
+            resolve();
+        } catch (error) {
+            console.error('Error generating PDF:', error);
+            showAlert('Failed to generate PDF: ' + error.message, 'danger');
+            resolve();
+        }
+    });
+}
+
+async function fallbackExport(meritList, course) {
+    try {
+        // First try server-side PDF generation
+        const response = await fetch('/api/generate-merit-list-pdf', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                course,
+                meritList
+            }),
+            credentials: 'include'
+        });
+
+        if (response.ok) {
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `merit-list-${course.coursename || course.name}-${new Date().toISOString().slice(0, 10)}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            a.remove();
+            return;
+        }
+
+        // If server-side fails, fall back to CSV
+        showAlert('PDF generation failed. Downloading as CSV instead.', 'warning');
+        exportAsCSV(meritList, course);
+    } catch (error) {
+        console.error('Fallback export failed:', error);
+        showAlert('Failed to generate PDF. Downloading as CSV instead.', 'warning');
+        exportAsCSV(meritList, course);
+    }
+}
+
+function exportAsCSV(meritList, course) {
+    try {
+        // CSV header
+        let csv = 'Rank,Application ID,Name,Category,NEET Score,Quota,Status\n';
+
+        // Add data rows
+        meritList.forEach((app, index) => {
+            csv += `${index + 1},`;
+            csv += `${app.id || 'N/A'},`;
+            csv += `${app.applicantName || 'N/A'},`;
+            csv += `${app.category || 'N/A'},`;
+            csv += `${app.neetScore || 'N/A'},`;
+            csv += `${app.managementQuota ? 'Management' : app.domicile === 'nri' ? 'NRI' : 'Regular'},`;
+            csv += 'Selected\n';
+        });
+
+        // Create download link
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `merit-list-${course.coursename || course.name}-${new Date().toISOString().slice(0, 10)}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    } catch (error) {
+        console.error('Error exporting CSV:', error);
+        showAlert('Failed to export data in any format. Please try again later.', 'danger');
+    }
+}
+
+function updateRecentReportsTable() {
+    const tableBody = document.getElementById('recentReportsTable');
+    if (!tableBody) return;
+
+    tableBody.innerHTML = generatedReports.length ? '' : `
+        <tr><td colspan="5" class="text-center py-4">No reports generated yet</td></tr>
+    `;
+
+    generatedReports.forEach(report => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${report.date}</td>
+            <td>${report.courseName}</td>
+            <td>${report.institute}</td>
+            <td>${report.type}</td>
+            <td>
+                <button class="btn btn-sm btn-outline-primary view-report-btn" data-report-id="${report.id}">
+                    <i class="bi bi-eye"></i> View
+                </button>
+                <button class="btn btn-sm btn-outline-secondary download-report-btn" data-report-id="${report.id}">
+                    <i class="bi bi-download"></i> PDF
+                </button>
+            </td>
+        `;
+        tableBody.appendChild(row);
+    });
+
+    // Add event listeners
+    document.querySelectorAll('.view-report-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const report = generatedReports.find(r => r.id == btn.dataset.reportId);
+            if (report) showMeritListModal(report.data, {
+                coursename: report.courseName,
+                institute: report.institute
+            });
+        });
+    });
+
+    document.querySelectorAll('.download-report-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const report = generatedReports.find(r => r.id == btn.dataset.reportId);
+            if (report) exportMeritListAsPDF(report.data, {
+                coursename: report.courseName,
+                institute: report.institute
+            });
+        });
+    });
+};
 </script>
 </body>
 </html>

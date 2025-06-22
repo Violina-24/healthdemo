@@ -6,6 +6,7 @@ import com.health.healthdemo.Base64ToByteArrayDeserializer;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -149,6 +150,14 @@ public class TApplication {
 
     @Column(name = "status")
     private String status;
+//    @Column
+//    private Integer meritPosition; // Nullable, only set for accepted applications
+//
+//    @Column
+//    private BigDecimal score; // Store the calculated score for ranking
+//
+//    @Column
+//    private LocalDateTime statusUpdatedAt;
 
 //    private boolean Disability = false;
 //    public TApplication() {
@@ -425,6 +434,30 @@ private LocalDateTime createdDate;
     public void setStatus(String status) {
         this.status = status;
     }
+
+//    public Integer getMeritPosition() {
+//        return meritPosition;
+//    }
+//
+//    public void setMeritPosition(Integer meritPosition) {
+//        this.meritPosition = meritPosition;
+//    }
+//
+//    public BigDecimal getScore() {
+//        return score;
+//    }
+//
+//    public void setScore(BigDecimal score) {
+//        this.score = score;
+//    }
+//
+//    public LocalDateTime getStatusUpdatedAt() {
+//        return statusUpdatedAt;
+//    }
+//
+//    public void setStatusUpdatedAt(LocalDateTime statusUpdatedAt) {
+//        this.statusUpdatedAt = statusUpdatedAt;
+//    }
 
     // Helper method to get course ID
     public Long getCourseid() {

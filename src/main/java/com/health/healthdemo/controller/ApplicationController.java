@@ -596,13 +596,77 @@ public class ApplicationController {
  @GetMapping("/applications/{id}/full")
  @ResponseBody
  public ResponseEntity<Map<String, Object>> getFullApplicationDetails(
-         @PathVariable Long id,
-         Authentication authentication) {
+         @PathVariable Long id) {
 
-  // Check authentication
-  if (authentication == null) {
-   return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+  Optional<TApplication> optionalApp = tApplicationRepository.findById(id);
+  if (optionalApp.isEmpty()) {
+   return ResponseEntity.notFound().build();
   }
+
+  TApplication application = optionalApp.get();
+
+  // Build the response with consistent field names
+  Map<String, Object> response = new HashMap<>();
+
+  // Personal Info - using correct field names
+  response.put("DOB", application.getDOB()); // Ensure getDOB() exists
+  response.put("age", application.getAge());
+  response.put("gender", application.getGender());
+  response.put("nationality", application.getNationality());
+  response.put("religion", application.getReligion());
+  response.put("parentsGuardianName", application.getParentsGuardianName());
+
+  // Academic Info
+  response.put("physicsScore", application.getPhysicsScore());
+  response.put("chemistryScore", application.getChemistryScore());
+  response.put("biologyBiotechScore", application.getBiologyBiotechScore());
+  response.put("pcbMarks", application.getPcbMarks()); // Ensure this is calculated/saved
+  response.put("neetScore", application.getNeetScore());
+  response.put("subjectChoice", application.getSubjectChoice());
+
+  // User Info
+  Map<String, Object> userInfo = new HashMap<>();
+  userInfo.put("name", application.getUser().getName());
+  userInfo.put("email", application.getUser().getEmail());
+  userInfo.put("phone", application.getUser().getPhone());
+  response.put("user", userInfo);
+
+  // Address Info - ensure proper structure
+  if (application.getPermanentAddress() != null) {
+   Map<String, Object> permAddress = new HashMap<>();
+   permAddress.put("addressLine1", application.getPermanentAddress().getAddressLine1());
+   permAddress.put("addressLine2", application.getPermanentAddress().getAddressLine2());
+   permAddress.put("district", application.getPermanentAddress().getDistrict());
+   permAddress.put("state", application.getPermanentAddress().getState());
+   permAddress.put("pincode", application.getPermanentAddress().getPincode());
+   response.put("permanentAddress", permAddress);
+  }
+
+  if (application.getCorrespondenceAddress() != null) {
+   Map<String, Object> corrAddress = new HashMap<>();
+   corrAddress.put("addressLine1", application.getCorrespondenceAddress().getAddressLine1());
+   corrAddress.put("addressLine2", application.getCorrespondenceAddress().getAddressLine2());
+   corrAddress.put("district", application.getCorrespondenceAddress().getDistrict());
+   corrAddress.put("state", application.getCorrespondenceAddress().getState());
+   corrAddress.put("pincode", application.getCorrespondenceAddress().getPincode());
+   response.put("correspondenceAddress", corrAddress);
+  }
+
+  // Documents - include all document fields
+  if (application.getPassportPhoto() != null) {
+   response.put("PassportPhoto", application.getPassportPhoto());
+  }
+  if (application.getAgeProof() != null) {
+   response.put("AgeProof", application.getAgeProof());
+  }
+  // Include all other document fields similarly...
+
+  return ResponseEntity.ok(response);
+ }
+ @GetMapping("/admin/applications/{id}/full")
+ @ResponseBody
+ public ResponseEntity<Map<String, Object>> getFullApplicationDetailsForAdmin(
+         @PathVariable Long id) {
 
   // Get the application
   Optional<TApplication> optionalApp = tApplicationRepository.findById(id);
@@ -612,12 +676,6 @@ public class ApplicationController {
 
   TApplication application = optionalApp.get();
 
-  // Verify the application belongs to the current user
-  String currentUserEmail = authentication.getName();
-  if (!application.getUser().getEmail().equals(currentUserEmail)) {
-   return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-  }
-
   // Build the response
   Map<String, Object> response = new HashMap<>();
 
@@ -626,14 +684,17 @@ public class ApplicationController {
   response.put("status", application.getStatus() != null ? application.getStatus() : "pending");
   response.put("createdDate", application.getCreatedDate());
   response.put("dob", application.getDOB());
+  response.put("age", application.getAge());
   response.put("gender", application.getGender());
   response.put("nationality", application.getNationality());
   response.put("religion", application.getReligion());
+  response.put("parentsGuardianName", application.getParentsGuardianName());
 
   // 2. Academic info
   response.put("physicsScore", application.getPhysicsScore());
   response.put("chemistryScore", application.getChemistryScore());
   response.put("biologyBiotechScore", application.getBiologyBiotechScore());
+  response.put("pcbMarks", application.getPcbMarks());
   response.put("neetScore", application.getNeetScore());
   response.put("subjectChoice", application.getSubjectChoice());
 
@@ -647,13 +708,21 @@ public class ApplicationController {
   // 4. Course info
   if (application.getmCourse() != null) {
    Map<String, Object> courseInfo = new HashMap<>();
-   courseInfo.put("courseId", application.getmCourse().getCourseid());
-   courseInfo.put("courseName", application.getmCourse().getCoursename());
+   courseInfo.put("courseid", application.getmCourse().getCourseid());
+   courseInfo.put("coursename", application.getmCourse().getCoursename());
    courseInfo.put("institute", application.getmCourse().getInstitute());
-   response.put("course", courseInfo);
+   response.put("mCourse", courseInfo);
   }
 
-  // 5. Address info
+  // 5. Category info
+  if (application.getCid() != null) {
+   Map<String, Object> categoryInfo = new HashMap<>();
+   categoryInfo.put("cid", application.getCid().getCid());
+   categoryInfo.put("categoryName", application.getCid().getCategoryname());
+   response.put("cid", categoryInfo);
+  }
+
+  // 6. Address info
   if (application.getPermanentAddress() != null) {
    response.put("permanentAddress", mapAddress(application.getPermanentAddress()));
   }
@@ -661,27 +730,39 @@ public class ApplicationController {
    response.put("correspondenceAddress", mapAddress(application.getCorrespondenceAddress()));
   }
 
-  // 6. Document URLs
-  Map<String, String> documentUrls = new HashMap<>();
-  documentUrls.put("passportPhoto", "/application/applications/" + id + "/documents/passportPhoto");
-  documentUrls.put("ageProof", "/application/applications/" + id + "/documents/ageProof");
-  documentUrls.put("marksheet", "/application/applications/" + id + "/documents/marksheet");
-  documentUrls.put("certificate", "/application/applications/" + id + "/documents/certificate");
+  // 7. Quota info
+  response.put("managementQuota", application.getManagementQuota());
+  response.put("physicallyChallenged", application.getPhysicallyChallenged());
+  response.put("ews", application.getEws());
 
-  if (application.getCaste_Certificate() != null) {
-   documentUrls.put("casteCertificate", "/application/applications/" + id + "/documents/casteCertificate");
+  // 8. Document data (include byte arrays for admin view)
+  if (application.getPassportPhoto() != null) {
+   response.put("PassportPhoto", application.getPassportPhoto());
   }
-  if (application.getPWD_Certificate() != null) {
-   documentUrls.put("pwdCertificate", "/application/applications/" + id + "/documents/pwdCertificate");
+  if (application.getAgeProof() != null) {
+   response.put("AgeProof", application.getAgeProof());
+  }
+  if (application.getClass10and12Marksheet() != null) {
+   response.put("class10and12Marksheet", application.getClass10and12Marksheet());
+  }
+  if (application.getClass10and12certificate() != null) {
+   response.put("class10and12certificate", application.getClass10and12certificate());
+  }
+  if (application.getCaste_Certificate() != null) {
+   response.put("Caste_Certificate", application.getCaste_Certificate());
   }
   if (application.getPrc() != null) {
-   documentUrls.put("prc", "/application/applications/" + id + "/documents/prc");
+   response.put("Prc", application.getPrc());
   }
-
-  documentUrls.put("neetResults", "/application/applications/" + id + "/documents/neetResults");
-  documentUrls.put("characterCertificate", "/application/applications/" + id + "/documents/characterCertificate");
-
-  response.put("documentUrls", documentUrls);
+  if (application.getNeet_Results() != null) {
+   response.put("Neet_Results", application.getNeet_Results());
+  }
+  if (application.getCharacter_Certificate() != null) {
+   response.put("Character_Certificate", application.getCharacter_Certificate());
+  }
+  if (application.getPWD_Certificate() != null) {
+   response.put("PWD_Certificate", application.getPWD_Certificate());
+  }
 
   return ResponseEntity.ok(response);
  }

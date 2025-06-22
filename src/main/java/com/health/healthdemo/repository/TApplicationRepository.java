@@ -40,4 +40,9 @@
           "SUM(CASE WHEN a.status = 'rejected' THEN 1 ELSE 0 END) " +
           "FROM TApplication a GROUP BY a.mCourse.Courseid")
   List<Object[]> countApplicationsByCourse();
+  List<TApplication> findByStatus(String status);
+  @Query("SELECT a FROM TApplication a WHERE a.mCourse.Courseid = :courseId AND a.status = :status")
+  List<TApplication> findApplicationsByCourseAndStatus(@Param("courseId") Long courseId,
+                                                       @Param("status") String status);
+
  }
